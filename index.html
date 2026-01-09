@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="icon-192.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWRPG Datapad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Dark Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Custom Shapes */
+        .shape-hex { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+        .shape-rhombus { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); transform: scale(1.15); }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .rank-box { transition: all 0.1s ease; }
+        .rank-box:hover { transform: scale(1.2); z-index: 10; border-color: #fbbf24; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .mini-btn { @apply w-5 h-5 flex items-center justify-center rounded bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold leading-none border border-slate-600 transition cursor-pointer active:scale-95; }
+        .compact-select { @apply bg-slate-900 border-none text-xs font-bold text-yellow-500 focus:ring-0 cursor-pointer hover:bg-slate-800 rounded px-2 py-1 transition w-full sm:w-auto; appearance: none; text-align-last: center; sm:text-align-last: right; }
+
+        /* Section Divider */
+        .section-divider { @apply relative flex py-2 items-center; }
+        .section-divider::before, .section-divider::after { content: ''; @apply flex-grow border-t border-slate-800; }
+        .section-title { @apply mx-2 sm:mx-4 text-[10px] uppercase tracking-widest font-bold text-slate-500 bg-slate-950 px-2 font-mono flex items-center gap-2 whitespace-nowrap; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen flex flex-col selection:bg-yellow-900 selection:text-white">
+
+    <!-- HEADER & CONFIG -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-lg backdrop-blur-md bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+            
+            <!-- Top Row: Logo & Tabs -->
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-1.5 h-5 sm:w-2 sm:h-6 bg-yellow-500 skew-x-[-12deg] shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
+                    <h1 class="text-xs sm:text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-white">
+                        Star Wars <span class="text-yellow-500 opacity-80 block sm:inline text-[9px] sm:text-sm leading-none sm:leading-normal">Datapad</span>
+                    </h1>
+                </div>
+                <div class="flex bg-slate-800 rounded-md p-0.5">
+                    <button onclick="switchTab('generator')" id="btn-generator" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow">Лист</button>
+                    <button onclick="switchTab('editor')" id="btn-editor" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">База</button>
+                </div>
+            </div>
+            
+            <!-- Config Bar (Responsive Grid/Flex) -->
+            <div id="config-bar" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 bg-slate-950/50 p-2 sm:p-1.5 rounded border border-slate-800 text-xs">
+                
+                <!-- Name -->
+                <div class="flex-grow w-full sm:w-auto min-w-[150px] relative group">
+                    <input type="text" id="char-name" value="Имя Персонажа" class="w-full bg-transparent border-none text-white font-bold text-lg px-1 sm:px-2 focus:ring-0 placeholder-slate-600 focus:text-yellow-400 transition-colors text-center sm:text-left">
+                    <div class="absolute bottom-0 left-2 right-2 h-[1px] bg-slate-700 group-hover:bg-slate-500 transition-colors"></div>
+                </div>
+                
+                <!-- Selectors Group (Grid on mobile, Flex on desktop) -->
+                <div class="grid grid-cols-3 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+                    <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 bg-slate-900 rounded px-1 sm:px-2 py-1 border border-slate-800">
+                        <label class="uppercase font-bold text-[8px] sm:text-[9px] text-slate-500">Раса</label>
+                        <select id="gen-race" class="compact-select"></select>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 bg-slate-900 rounded px-1 sm:px-2 py-1 border border-slate-800">
+                        <label class="uppercase font-bold text-[8px] sm:text-[9px] text-slate-500">Карьера</label>
+                        <select id="gen-career" class="compact-select"></select>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 bg-slate-900 rounded px-1 sm:px-2 py-1 border border-slate-800">
+                        <label class="uppercase font-bold text-[8px] sm:text-[9px] text-slate-500">Спец.</label>
+                        <select id="gen-spec" class="compact-select"></select>
+                    </div>
+                </div>
+
+                <!-- Bottom Row on Mobile: Morality & Actions -->
+                <div class="flex items-center justify-between gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                    
+                    <!-- Morality -->
+                    <div class="flex items-center gap-2 bg-slate-900 rounded px-2 py-1 border border-slate-800 flex-grow sm:flex-grow-0 min-w-0">
+                        <div class="flex flex-col gap-0.5 w-full">
+                            <div class="flex justify-between items-end w-full">
+                                <label class="uppercase font-bold text-[8px] sm:text-[9px] text-slate-500 leading-none">Мораль</label>
+                                <span id="morality-status" class="text-[8px] uppercase font-bold text-slate-500 leading-none truncate max-w-[80px]">Равновесие</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="morality-val" value="50" min="1" max="100" class="w-6 sm:w-8 bg-transparent text-xs text-center font-bold outline-none text-white border-b border-slate-700 focus:border-white transition-colors" onchange="updateMorality(this.value)">
+                                <div class="w-full h-1.5 sm:h-2 bg-gradient-to-r from-red-950 via-red-900 to-red-700 rounded-full overflow-hidden border border-slate-700 relative shadow-inner shadow-red-950/50">
+                                    <div class="absolute top-0 bottom-0 w-px bg-white/20 z-10" style="left: 30%"></div>
+                                    <div class="absolute top-0 bottom-0 w-px bg-white/20 z-10" style="left: 70%"></div>
+                                    <div id="morality-bar" class="h-full w-1/2 transition-all duration-500 ease-out bg-gradient-to-r from-blue-100 to-white shadow-[0_0_10px_rgba(255,255,255,0.7)]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-1 border-l border-slate-800 pl-2">
+                         <div class="relative group">
+                            <button onclick="saveCharacter()" class="p-1.5 hover:text-green-400 text-slate-500 transition"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                            <div class="hidden sm:block absolute right-0 top-full mt-1 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] text-slate-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">Сохранить</div>
+                        </div>
+                        <label class="p-1.5 hover:text-blue-400 text-slate-500 transition cursor-pointer flex items-center">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <input type="file" onchange="loadCharacter(this)" class="hidden" accept=".json">
+                        </label>
+                        <button onclick="window.print()" class="p-1.5 hover:text-white text-slate-500 transition" title="Печать">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="flex justify-center sm:justify-between items-center px-1 mt-1">
+                <div id="gen-race-info" class="text-[9px] text-yellow-500/70 truncate max-w-full sm:max-w-md text-center sm:text-left"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-2 sm:p-4 relative space-y-6 sm:space-y-8">
+        
+        <!-- === TAB: GENERATOR === -->
+        <div id="tab-generator" class="fade-in space-y-6 sm:space-y-8">
+
+            <!-- CHARACTERISTICS (Responsive Grid: 2 cols mobile, 3 cols tablet+) -->
+            <div>
+                <div class="section-divider"><span class="section-title">Характеристики</span></div>
+                <div id="gen-stats-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"></div>
+            </div>
+
+            <!-- VITALS & XP -->
+            <div>
+                <div class="section-divider"><span class="section-title">Состояние</span></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <!-- Wounds -->
+                    <div id="card-wounds" class="bg-slate-900 p-3 rounded border border-red-900/30 flex flex-col justify-between h-36 sm:h-40 relative overflow-hidden shadow-lg shadow-black/20"></div>
+                    <!-- Strain -->
+                    <div id="card-strain" class="bg-slate-900 p-3 rounded border border-blue-900/30 flex flex-col justify-between h-36 sm:h-40 relative overflow-hidden shadow-lg shadow-black/20"></div>
+                    <!-- Soak -->
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700 flex flex-col justify-between h-36 sm:h-40 shadow-lg shadow-black/20">
+                        <div class="flex justify-between items-start">
+                            <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Поглощение</div>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div class="flex-grow flex items-center justify-center">
+                             <div class="text-5xl sm:text-6xl font-black text-white" id="val-soak">0</div>
+                        </div>
+                        <div class="text-right">
+                            <label class="text-[8px] uppercase font-bold text-slate-500 block mb-0.5">Броня</label>
+                            <input type="number" id="val-armor" value="0" min="0" class="w-12 bg-slate-950 border border-slate-600 rounded p-0.5 text-center text-sm text-white focus:border-yellow-500 outline-none transition-colors">
+                        </div>
+                    </div>
+                    <!-- XP Block -->
+                    <div class="bg-slate-900 p-3 rounded border border-yellow-500/20 flex flex-col h-36 sm:h-40 relative overflow-hidden group shadow-lg shadow-black/20">
+                        <div class="flex justify-between items-start relative z-10 mb-1">
+                            <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Доступно XP</div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="undoLastXP()" id="btn-xp-undo" class="text-slate-500 hover:text-white transition disabled:opacity-20 flex items-center gap-1 group/undo" disabled title="Отменить">
+                                    <span id="undo-tooltip" class="text-[8px] opacity-0 group-hover/undo:opacity-100 transition-opacity text-slate-400 absolute right-6 whitespace-nowrap bg-slate-950 px-1 rounded border border-slate-800 hidden sm:block"></span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                </button>
+                                <span class="text-[9px] text-slate-600 font-mono bg-slate-950/50 px-1 rounded">ALL: <span id="xp-total-display" class="text-slate-400">0</span></span>
+                            </div>
+                        </div>
+                        <div class="text-3xl sm:text-4xl font-black text-yellow-500 relative z-10 mb-1 sm:mb-2 leading-none" id="xp-avail-display">0</div>
+                        <div class="grid grid-cols-2 gap-2 relative z-10 mb-2">
+                            <div class="bg-slate-950 rounded flex items-center border border-slate-800 focus-within:border-green-500/50"><input type="number" id="xp-add-input" class="w-full bg-transparent p-1 text-[10px] text-center text-green-400 font-bold outline-none" placeholder="+ XP" onkeydown="if(event.key==='Enter') applyXP('add')"><button onclick="applyXP('add')" class="px-1.5 text-green-600 hover:text-green-400 font-bold text-xs leading-none pb-0.5">+</button></div>
+                            <div class="bg-slate-950 rounded flex items-center border border-slate-800 focus-within:border-red-500/50"><input type="number" id="xp-spend-input" class="w-full bg-transparent p-1 text-[10px] text-center text-red-400 font-bold outline-none" placeholder="- XP" onkeydown="if(event.key==='Enter') applyXP('spend')"><button onclick="applyXP('spend')" class="px-1.5 text-red-600 hover:text-red-400 font-bold text-xs leading-none pb-0.5">-</button></div>
+                        </div>
+                        <div class="flex-grow bg-slate-950/50 rounded border border-slate-800/50 p-1 overflow-hidden"><div class="text-[8px] uppercase text-slate-600 font-bold mb-0.5">Журнал</div><ul id="xp-log-list" class="space-y-0.5"><li class="text-[9px] text-slate-600 italic text-center mt-1">Нет записей</li></ul></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SKILLS (Responsive Grid: 1 col mobile, 3 cols desktop) -->
+            <div>
+                <div class="section-divider"><span class="section-title">Навыки <span class="text-[8px] text-slate-600 ml-2 font-normal font-sans border border-slate-800 px-1 rounded bg-slate-900/50">Рангов: <span id="total-ranks-display" class="text-yellow-500 font-bold">0</span></span></span></div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-auto min-h-[600px] lg:h-[calc(100vh-500px)]">
+                    
+                    <!-- General Skills -->
+                    <div class="lg:col-span-2 bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-[400px] lg:h-auto">
+                        <div class="bg-slate-950 px-3 py-2 border-b border-slate-800 flex justify-between items-center sticky top-0 z-10">
+                            <div class="flex items-center gap-2 sm:gap-3"><h3 class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Общие</h3><div class="flex gap-1 sm:gap-2 text-[8px] font-bold"><span class="text-green-500 flex items-center gap-1"><span class="w-3 h-3 sm:w-2 sm:h-2 border border-green-500 rounded-sm bg-green-500/20 text-center leading-none flex items-center justify-center text-[7px] sm:text-[9px]">К</span> <span class="hidden sm:inline">Карьера</span></span><span class="text-blue-400 flex items-center gap-1"><span class="w-3 h-3 sm:w-2 sm:h-2 border border-blue-500 rounded-sm bg-blue-500/20 text-center leading-none flex items-center justify-center text-[7px] sm:text-[9px]">С</span> <span class="hidden sm:inline">Спец.</span></span></div></div>
+                            <div class="text-[8px] sm:text-[9px] text-slate-600 uppercase font-bold flex gap-4 sm:gap-6 mr-1 sm:mr-4"><span>Ранг</span><span>Пул</span></div>
+                        </div>
+                        <div class="overflow-y-auto flex-grow custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="gen-skills-general-body" class="divide-y divide-slate-800/50"></tbody></table></div>
+                    </div>
+
+                    <!-- Combat Skills -->
+                    <div class="bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-auto lg:h-auto">
+                        <div class="bg-red-950/20 px-3 py-2 border-b border-red-900/20 flex justify-between items-center sticky top-0 z-10"><h3 class="text-[10px] font-bold uppercase text-red-400 tracking-widest flex items-center gap-2"><span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span> Боевые</h3></div>
+                        <div class="overflow-y-auto flex-grow custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="gen-skills-combat-body" class="divide-y divide-slate-800/50"></tbody></table></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === TAB: EDITOR === -->
+        <div id="tab-editor" class="hidden fade-in h-full">
+            <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-900 p-2 rounded border border-slate-800 mb-4 gap-2">
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="setEditorMode('races')" id="btn-edit-races" class="flex-1 sm:flex-none px-3 py-1 text-xs font-bold uppercase rounded bg-yellow-600 text-white">Расы</button>
+                    <button onclick="setEditorMode('careers')" id="btn-edit-careers" class="flex-1 sm:flex-none px-3 py-1 text-xs font-bold uppercase rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Карьеры</button>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto justify-end">
+                    <button onclick="resetDatabase()" class="text-[10px] text-red-500 hover:text-red-400 underline px-2">СБРОС БАЗЫ</button>
+                    <button onclick="exportData()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-white border border-slate-700">Скачать</button>
+                    <label class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-white border border-slate-700 cursor-pointer">Загрузить <input type="file" onchange="importData(this)" class="hidden" accept=".json"></label>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
+                <div class="bg-slate-900 border border-slate-800 rounded flex flex-col h-[300px] lg:h-auto">
+                    <div class="p-2 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                        <h3 class="text-xs font-bold uppercase text-slate-400" id="editor-list-title">Список</h3>
+                        <button onclick="addNewItem()" class="w-5 h-5 bg-green-700 hover:bg-green-600 rounded text-white flex items-center justify-center font-bold text-xs">+</button>
+                    </div>
+                    <div id="editor-list" class="flex-grow overflow-y-auto p-2 space-y-1"></div>
+                </div>
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded p-4 overflow-y-auto relative h-auto">
+                    <div id="editor-form-placeholder" class="h-full flex flex-col items-center justify-center text-slate-600 text-sm"><p>Выберите элемент</p></div>
+                    <form id="editor-form" class="hidden space-y-4" onsubmit="event.preventDefault(); saveCurrentItem();">
+                        <input type="hidden" id="edit-id">
+                        <div><label class="block text-[10px] uppercase font-bold text-slate-500">Название</label><input type="text" id="edit-name" class="w-full bg-slate-950 border border-slate-700 rounded p-2 focus:border-yellow-500 outline-none text-sm text-white" required></div>
+                        <div id="form-race-fields" class="hidden space-y-4">
+                             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
+                                <div class="space-y-1"><label class="text-[9px] text-red-400 font-bold">СИЛ</label><input type="number" min="1" max="6" id="edit-brawn" class="w-full bg-slate-950 border border-slate-700 p-1 text-center rounded text-sm"></div>
+                                <div class="space-y-1"><label class="text-[9px] text-green-400 font-bold">ЛОВ</label><input type="number" min="1" max="6" id="edit-agility" class="w-full bg-slate-950 border border-slate-700 p-1 text-center rounded text-sm"></div>
+                                <div class="space-y-1"><label class="text-[9px] text-blue-400 font-bold">ИНТ</label><input type="number" min="1" max="6" id="edit-intellect" class="w-full bg-slate-950 border border-slate-700 p-1 text-center rounded text-sm"></div>
+                                <div class="space-y-1"><label class="text-[9px] text-yellow-400 font-bold">СМК</label><input type="number" min="1" max="6" id="edit-cunning" class="w-full bg-slate-950 border border-slate-700 p-1 text-center rounded text-sm"></div>
+                                <div class="space-y-1"><label class="text-[9px] text-purple-400 font-bold">VOL</label><input type="number" min="1" max="6" id="edit-willpower" class="w-full bg-slate-950 border border-slate-700 p-1 text-center rounded text-sm"></div>
+                                <div class="space-y-1"><label class="text-[9px] text-pink-400 font-bold">HAR</label><input type="number" min="1" max="6" id="edit-presence" class="w-full bg-slate-950 border border-slate-700 p-1 text-center rounded text-sm"></div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div><label class="text-[9px] text-slate-500 block">Раны</label><input type="number" id="edit-baseWounds" class="w-full bg-slate-950 border border-slate-700 p-1 rounded text-sm"></div>
+                                <div><label class="text-[9px] text-slate-500 block">Усталость</label><input type="number" id="edit-baseStrain" class="w-full bg-slate-950 border border-slate-700 p-1 rounded text-sm"></div>
+                                <div><label class="text-[9px] text-slate-500 block">XP</label><input type="number" id="edit-startXP" class="w-full bg-slate-950 border border-slate-700 p-1 rounded text-sm"></div>
+                            </div>
+                            <div><label class="text-[9px] text-slate-500 block">Особенности</label><textarea id="edit-special" class="w-full bg-slate-950 border border-slate-700 p-2 rounded h-16 text-xs"></textarea></div>
+                        </div>
+                        <div id="form-career-fields" class="hidden space-y-4">
+                            <div><label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Навыки</label><div id="edit-career-skills-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-1 text-[10px] bg-slate-950 p-2 rounded border border-slate-800 max-h-32 overflow-y-auto"></div></div>
+                            <div class="border-t border-slate-800 pt-2"><div class="flex justify-between items-center mb-1"><label class="block text-[10px] uppercase font-bold text-slate-300">Специализации</label><button type="button" onclick="addSpecialization()" class="text-[9px] bg-blue-700 hover:bg-blue-600 px-2 py-0.5 rounded text-white">Add</button></div><div id="specs-container" class="space-y-2"></div></div>
+                        </div>
+                        <div class="flex justify-end pt-2 border-t border-slate-800 gap-2"><button type="button" onclick="deleteCurrentItem()" class="px-3 py-1 text-red-500 hover:text-red-400 text-xs">Удалить</button><button type="submit" class="px-4 py-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded text-xs">Сохранить</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JS LOGIC -->
+    <script>
+        const COMBAT_SKILLS_LIST = ["Световой меч", "Драка", "Холодное оружие", "Артиллерия", "Стрельба (Лёгкое)", "Стрельба (Тяжёлое)"];
+        const ALL_SKILLS = [
+            { name: "Астронавигация", char: "intellect" }, { name: "Атлетика", char: "brawn" }, 
+            { name: "Внимательность", char: "cunning" }, { name: "Воровство", char: "cunning" }, 
+            { name: "Выживание", char: "cunning" }, { name: "Готовность", char: "willpower" }, 
+            { name: "Запугивание", char: "willpower" }, { name: "Знание (Вселенная)", char: "intellect" }, 
+            { name: "Знание (Внешнее кольцо)", char: "intellect" }, { name: "Знание (Война)", char: "intellect" }, 
+            { name: "Знание (Преступность)", char: "intellect" }, { name: "Компьютеры", char: "intellect" }, 
+            { name: "Координация", char: "agility" }, { name: "Лидерство", char: "presence" }, 
+            { name: "Медицина", char: "intellect" }, { name: "Механика", char: "intellect" }, 
+            { name: "Обаяние", char: "presence" }, { name: "Обман", char: "cunning" }, 
+            { name: "Переговоры", char: "presence" }, { name: "Пилотирование (Космос)", char: "agility" }, 
+            { name: "Пилотирование (Планетарное)", char: "agility" }, { name: "Скрытность", char: "agility" }, 
+            { name: "Стойкость", char: "brawn" }, { name: "Уличное чутьё", char: "cunning" }, 
+            { name: "Хладнокровие", char: "presence" }, 
+            { name: "Артиллерия", char: "agility" }, { name: "Драка", char: "brawn" }, 
+            { name: "Стрельба (Лёгкое)", char: "agility" }, { name: "Стрельба (Тяжёлое)", char: "agility" }, 
+            { name: "Холодное оружие", char: "brawn" }, { name: "Световой меч", char: "brawn" } 
+        ].sort((a,b) => a.name.localeCompare(b.name));
+
+        const STAT_CONFIG = {
+            brawn: { t: "Физ. сила", color: "text-red-500", border: "border-red-900/50", bg: "bg-red-950/10" },
+            agility: { t: "Ловкость", color: "text-green-500", border: "border-green-900/50", bg: "bg-green-950/10" },
+            intellect: { t: "Интеллект", color: "text-blue-500", border: "border-blue-900/50", bg: "bg-blue-950/10" },
+            cunning: { t: "Смекалка", color: "text-yellow-500", border: "border-yellow-900/50", bg: "bg-yellow-950/10" },
+            willpower: { t: "Воля", color: "text-purple-500", border: "border-purple-900/50", bg: "bg-purple-950/10" },
+            presence: { t: "Харизма", color: "text-orange-500", border: "border-orange-900/50", bg: "bg-orange-950/10" }
+        };
+
+        const DEFAULT_DB = {
+            races: [
+                { id: "zabrak", name: "Забрак", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 3, presence: 1 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Выживание +1 ранг" },
+                { id: "human", name: "Человек", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 110, special: "+1 ранг в 2 любых навыках" },
+                { id: "wookiee", name: "Вуки", stats: { brawn: 3, agility: 2, intellect: 2, cunning: 2, willpower: 1, presence: 2 }, baseWounds: 14, baseStrain: 8, startXP: 90, special: "Ярость вуки (+урон)" },
+                { id: "twilek", name: "Тви'лек", stats: { brawn: 1, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 3 }, baseWounds: 10, baseStrain: 11, startXP: 100, special: "Устойчивость к жаре" }
+            ],
+            careers: [
+                { id: "mystic", name: "Мистик", careerSkills: ["Обаяние", "Запугивание", "Знание (Вселенная)", "Знание (Внешнее кольцо)", "Внимательность", "Готовность"], specializations: [{ id: "seer", name: "Провидец", bonusSkills: ["Знание (Вселенная)", "Внимательность", "Готовность", "Уличное чутьё"] }, { id: "advisor", name: "Советник", bonusSkills: ["Обаяние", "Переговоры", "Знание (Вселенная)", "Лидерство"] }] },
+                { id: "soldier", name: "Солдат", careerSkills: ["Атлетика", "Драка", "Стрельба (Лёгкое)", "Стрельба (Тяжёлое)", "Выживание", "Запугивание", "Внимательность", "Знание (Война)"], specializations: [{ id: "sharpshooter", name: "Снайпер", bonusSkills: ["Внимательность", "Хладнокровие", "Стрельба (Тяжёлое)", "Стрельба (Лёгкое)"] }, { id: "commando", name: "Коммандо", bonusSkills: ["Драка", "Стойкость", "Холодное оружие", "Выживание"] }] },
+                { id: "smuggler", name: "Контрабандист", careerSkills: ["Координация", "Обман", "Внимательность", "Пилотирование (Космос)", "Скрытность", "Уличное чутьё", "Внимательность", "Знание (Преступность)"], specializations: [{ id: "scoundrel", name: "Прохвост", bonusSkills: ["Обаяние", "Хладнокровие", "Обман", "Стрельба (Лёгкое)"] }] }
+            ]
+        };
+
+        let db = JSON.parse(JSON.stringify(DEFAULT_DB));
+        let editorMode = "races";
+        let currentEditItem = null;
+        let statMods = { brawn: 0, agility: 0, intellect: 0, cunning: 0, willpower: 0, presence: 0 };
+        let thresholdMods = { wounds: 0, strain: 0 };
+        let currentStatus = { wounds: 0, strain: 0 };
+        let xpData = { earned: 0, spent: 0 }; 
+        let xpHistory = []; 
+        let xpLog = []; 
+        let skillRanks = {}; 
+        let morality = 50; 
+
+        window.onload = function() { loadDatabase(); initGenerator(); switchTab('generator'); updateMorality(50); };
+
+        function switchTab(tab) {
+            document.getElementById('tab-generator').classList.add('hidden');
+            document.getElementById('tab-editor').classList.add('hidden');
+            document.getElementById('btn-generator').className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400";
+            document.getElementById('btn-editor').className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400";
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('btn-' + tab).className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow";
+            if(tab === 'editor') setEditorMode('races'); 
+            if(tab === 'generator') initGenerator(); 
+        }
+
+        function loadDatabase() { const saved = localStorage.getItem('swrpg_db_v3'); if (saved) { try { db = JSON.parse(saved); } catch(e) { db = JSON.parse(JSON.stringify(DEFAULT_DB)); } } }
+        function saveDatabase() { localStorage.setItem('swrpg_db_v3', JSON.stringify(db)); }
+        function resetDatabase() { if(confirm("Вы уверены?")) { localStorage.removeItem('swrpg_db_v3'); db = JSON.parse(JSON.stringify(DEFAULT_DB)); setEditorMode(editorMode); initGenerator(); alert("Сброс!"); } }
+        function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); const a = document.createElement('a'); a.href = dataStr; a.download = "swrpg_db.json"; document.body.appendChild(a); a.click(); a.remove(); }
+        function importData(input) { const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (e) => { try { db = JSON.parse(e.target.result); saveDatabase(); setEditorMode(editorMode); alert("Загружено!"); } catch(err) { alert("Ошибка!"); } }; reader.readAsText(file); }
+
+        function initGenerator() {
+            const raceSel = document.getElementById('gen-race');
+            const careerSel = document.getElementById('gen-career');
+            const prevRace = raceSel.value; const prevCareer = careerSel.value;
+            raceSel.innerHTML = ""; careerSel.innerHTML = "";
+            db.races.forEach(r => { const opt = document.createElement('option'); opt.value = r.id; opt.textContent = r.name; raceSel.appendChild(opt); });
+            db.careers.forEach(c => { const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.name; careerSel.appendChild(opt); });
+            if(prevRace && db.races.find(r=>r.id===prevRace)) raceSel.value = prevRace;
+            if(prevCareer && db.careers.find(c=>c.id===prevCareer)) careerSel.value = prevCareer;
+            raceSel.onchange = () => { resetStatMods(); updateGeneratorUI(); };
+            careerSel.onchange = updateSpecsAndUI;
+            document.getElementById('gen-spec').onchange = updateGeneratorUI;
+            document.getElementById('val-armor').oninput = updateGeneratorUI;
+            updateSpecsAndUI();
+        }
+
+        function resetStatMods() {
+            statMods = { brawn: 0, agility: 0, intellect: 0, cunning: 0, willpower: 0, presence: 0 };
+            thresholdMods = { wounds: 0, strain: 0 };
+            currentStatus = { wounds: 0, strain: 0 };
+            xpData = { earned: 0, spent: 0 }; 
+            xpHistory = []; xpLog = [];
+            skillRanks = {}; 
+            morality = 50; updateMorality(50);
+        }
+
+        function updateSpecsAndUI() {
+            const careerId = document.getElementById('gen-career').value;
+            const career = db.careers.find(c => c.id === careerId);
+            const specSel = document.getElementById('gen-spec');
+            specSel.innerHTML = "";
+            if (career && career.specializations) {
+                career.specializations.forEach(s => { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.name; specSel.appendChild(opt); });
+            }
+            updateGeneratorUI();
+        }
+
+        function modifyStat(statKey, delta) {
+            const race = db.races.find(r => r.id === document.getElementById('gen-race').value);
+            if (!race) return;
+            const newVal = race.stats[statKey] + (statMods[statKey] || 0) + delta;
+            if (newVal >= 1 && newVal <= 7) { statMods[statKey] = (statMods[statKey] || 0) + delta; updateGeneratorUI(); }
+        }
+        function modifyThreshold(type, delta) { thresholdMods[type] += delta; updateGeneratorUI(); }
+        function modifyCurrent(type, delta) { currentStatus[type] = Math.max(0, currentStatus[type] + delta); updateGeneratorUI(); }
+
+        // --- MORALITY LOGIC (DUAL COLOR) ---
+        function updateMorality(val) {
+            morality = Math.min(100, Math.max(1, parseInt(val) || 1));
+            const bar = document.getElementById('morality-bar');
+            const input = document.getElementById('morality-val');
+            const statusLabel = document.getElementById('morality-status'); 
+            
+            input.value = morality;
+            bar.style.width = morality + '%';
+            
+            let status = "Равновесие";
+            let textClass = "text-slate-500";
+
+            if (morality <= 10) {
+                status = "Тьма: Эффект 2";
+                textClass = "text-red-500 font-black animate-pulse";
+            } else if (morality <= 20) {
+                status = "Тьма: Эффект 1";
+                textClass = "text-red-400 font-bold";
+            } else if (morality <= 30) {
+                status = "Тёмная сторона";
+                textClass = "text-red-300";
+            } else if (morality >= 90) {
+                status = "Свет: Эффект 2";
+                textClass = "text-blue-100 font-black animate-pulse shadow-white";
+            } else if (morality >= 80) {
+                status = "Свет: Эффект 1";
+                textClass = "text-blue-200 font-bold";
+            } else if (morality >= 70) {
+                status = "Светлая сторона";
+                textClass = "text-blue-300";
+            } else {
+                status = "Равновесие";
+                textClass = "text-slate-500";
+            }
+
+            if(statusLabel) {
+                statusLabel.textContent = status;
+                statusLabel.className = `text-[8px] uppercase font-bold ml-2 transition-colors leading-none ${textClass}`;
+            }
+        }
+
+        function applyXP(action) {
+            const inputId = action === 'add' ? 'xp-add-input' : 'xp-spend-input';
+            const val = parseInt(document.getElementById(inputId).value) || 0;
+            
+            if (val !== 0) {
+                xpHistory.push({ earned: xpData.earned, spent: xpData.spent, log: [...xpLog] });
+                if (xpHistory.length > 10) xpHistory.shift();
+
+                let logEntry = "";
+                if (action === 'add') {
+                    xpData.earned += val;
+                    logEntry = val > 0 ? `<span class="text-green-500">+${val} Награда</span>` : `<span class="text-red-400">${val} Коррекция</span>`;
+                } else if (action === 'spend') {
+                    xpData.spent += val;
+                    logEntry = val > 0 ? `<span class="text-red-400">-${val} Трата</span>` : `<span class="text-green-500">+${Math.abs(val)} Возврат</span>`;
+                }
+                
+                xpLog.unshift(logEntry);
+                if (xpLog.length > 3) xpLog.pop();
+
+                document.getElementById(inputId).value = '';
+                updateGeneratorUI();
+            }
+        }
+
+        function undoLastXP() {
+            if (xpHistory.length === 0) return;
+            const state = xpHistory.pop();
+            xpData.earned = state.earned;
+            xpData.spent = state.spent;
+            xpLog = state.log;
+            updateGeneratorUI();
+        }
+
+        function renderXPLogDisplay() {
+            const list = document.getElementById('xp-log-list');
+            list.innerHTML = "";
+            if (xpLog.length === 0) {
+                list.innerHTML = `<li class="text-[9px] text-slate-600 italic text-center mt-2">Нет записей</li>`;
+            } else {
+                xpLog.forEach(entry => {
+                    list.innerHTML += `<li class="text-[9px] font-mono flex justify-between border-b border-slate-800/50 pb-0.5 last:border-0">${entry}</li>`;
+                });
+            }
+            
+            const tooltip = document.getElementById('undo-tooltip');
+            if (xpHistory.length > 0) {
+                const lastState = xpHistory[xpHistory.length - 1];
+                tooltip.textContent = "Отменить последнее";
+            }
+        }
+
+        function setSkillRank(skillName, rank) {
+            const current = skillRanks[skillName] || 0;
+            if (current === rank) skillRanks[skillName] = 0; else skillRanks[skillName] = rank;
+            updateGeneratorUI();
+        }
+        function toggleSkillDie(skillName, type) {
+            const current = skillRanks[skillName] || 0;
+            if(type==='green') skillRanks[skillName] = current + 1;
+            else if(type==='yellow') skillRanks[skillName] = Math.max(0, current - 1);
+            else if(type==='empty') skillRanks[skillName] = current + 1;
+            updateGeneratorUI();
+        }
+
+        function renderSkillRow(skill, finalStats, isCareer, isSpec) {
+            const charVal = finalStats[skill.char];
+            const rank = skillRanks[skill.name] || 0;
+            const totalPool = Math.max(charVal, rank);
+            const yellow = Math.min(charVal, rank);
+            const green = totalPool - yellow;
+            const displayLimit = Math.max(totalPool + 1, 6); 
+
+            let icon = "";
+            let rowClass = "hover:bg-slate-800/50 transition border-l-2 border-transparent"; 
+
+            if (isSpec) {
+                icon = `<div class="w-4 h-4 rounded-sm bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center text-[9px] font-bold cursor-help" title="Навык специализации (Карьерный)">С</div>`;
+                rowClass = "bg-blue-900/10 border-l-2 border-blue-500 hover:bg-slate-800/50 transition";
+            } else if (isCareer) {
+                icon = `<div class="w-4 h-4 rounded-sm bg-green-500/20 border border-green-500 text-green-400 flex items-center justify-center text-[9px] font-bold cursor-help" title="Карьерный навык">К</div>`;
+                rowClass = "bg-green-900/10 border-l-2 border-green-500 hover:bg-slate-800/50 transition";
+            } else {
+                icon = `<div class="w-4 h-4 opacity-5"></div>`;
+            }
+            
+            let rankHtml = '<div class="flex gap-0.5">';
+            for(let i=1; i<=5; i++) {
+                const filled = i <= rank;
+                const bg = filled ? "bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.5)] border-yellow-600" : "bg-slate-800 border-slate-700 hover:bg-slate-700";
+                rankHtml += `<div onclick="setSkillRank('${skill.name}', ${i})" class="rank-box w-2 h-3 rounded-[1px] border cursor-pointer ${bg}" title="Rank ${i}"></div>`;
+            }
+            rankHtml += '</div>';
+
+            let poolHtml = '<div class="flex gap-0.5 items-center justify-end">';
+            for(let i=0; i<displayLimit; i++) {
+                if(i < yellow) poolHtml += `<div onclick="toggleSkillDie('${skill.name}', 'yellow')" class="shape-hex w-3 h-3 bg-yellow-400 border border-yellow-600 cursor-pointer hover:brightness-110"></div>`;
+                else if(i < yellow + green) poolHtml += `<div onclick="toggleSkillDie('${skill.name}', 'green')" class="shape-rhombus w-3 h-3 bg-green-500 border border-green-600 cursor-pointer hover:brightness-110"></div>`;
+                else if(i === yellow + green) poolHtml += `<div onclick="toggleSkillDie('${skill.name}', 'empty')" class="w-3 h-3 bg-slate-800 border border-slate-700 rounded-sm cursor-pointer hover:bg-slate-700 opacity-50 hover:opacity-100"></div>`;
+                else poolHtml += `<div class="w-3 h-3 bg-transparent rounded-sm"></div>`;
+            }
+            poolHtml += '</div>';
+
+            return `
+                <tr class="${rowClass}">
+                    <td class="p-2 text-center w-6">${icon}</td>
+                    <td class="p-2 text-xs font-medium text-slate-300">
+                        <div class="flex flex-col leading-none">
+                            <span>${skill.name}</span>
+                            <span class="text-[8px] text-slate-500 mt-0.5 uppercase">${STAT_CONFIG[skill.char].t} (${charVal})</span>
+                        </div>
+                    </td>
+                    <td class="p-2 w-20">${rankHtml}</td>
+                    <td class="p-2 w-24 text-right">${poolHtml}</td>
+                </tr>
+            `;
+        }
+
+        function updateGeneratorUI() {
+            const race = db.races.find(r => r.id === document.getElementById('gen-race').value);
+            const career = db.careers.find(c => c.id === document.getElementById('gen-career').value);
+            const spec = career ? career.specializations.find(s => s.id === document.getElementById('gen-spec').value) : null;
+            const armor = parseInt(document.getElementById('val-armor').value) || 0;
+            if (!race) return;
+
+            document.getElementById('gen-race-info').textContent = `XP: ${race.startXP} | ${race.special}`;
+
+            const finalStats = {};
+            const statsDiv = document.getElementById('gen-stats-grid');
+            statsDiv.innerHTML = '';
+            Object.keys(race.stats).forEach(key => {
+                finalStats[key] = race.stats[key] + (statMods[key] || 0);
+                const val = finalStats[key];
+                const conf = STAT_CONFIG[key];
+                const isModified = (statMods[key] || 0) > 0;
+                const valueColor = isModified ? "text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]" : "text-white";
+                const borderClass = isModified ? "border-yellow-500/60 shadow-[0_0_10px_rgba(234,179,8,0.1)]" : conf.border;
+
+                statsDiv.innerHTML += `
+                    <div class="stat-card relative flex flex-col items-center p-2 rounded border bg-slate-900 ${borderClass} overflow-hidden group">
+                        <span class="text-[9px] uppercase font-black opacity-90 mb-0 leading-none ${conf.color}">${conf.t}</span>
+                        <div class="flex items-center gap-2 z-20 mt-1">
+                            <button onclick="modifyStat('${key}', -1)" class="w-4 h-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center font-bold text-[10px] shadow border border-slate-700 transition">-</button>
+                            <span class="text-4xl font-black ${valueColor} z-10 w-8 text-center leading-none tracking-tighter transition-colors">${val}</span>
+                            <button onclick="modifyStat('${key}', 1)" class="w-4 h-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center font-bold text-[10px] shadow border border-slate-700 transition">+</button>
+                        </div>
+                        <div class="absolute -bottom-2 -right-1 text-6xl opacity-5 font-black pointer-events-none ${conf.color}">${val}</div>
+                    </div>`;
+            });
+
+            const totalXP = race.startXP + xpData.earned;
+            const availXP = totalXP - xpData.spent;
+            document.getElementById('xp-total-display').textContent = totalXP;
+            document.getElementById('xp-avail-display').textContent = availXP;
+            
+            const undoBtn = document.getElementById('btn-xp-undo');
+            undoBtn.disabled = xpHistory.length === 0;
+            undoBtn.style.opacity = xpHistory.length === 0 ? '0.2' : '1';
+            
+            renderXPLogDisplay();
+
+            const maxWounds = race.baseWounds + finalStats.brawn + thresholdMods.wounds;
+            const maxStrain = race.baseStrain + finalStats.willpower + thresholdMods.strain;
+            const woundPct = Math.min(100, (currentStatus.wounds / maxWounds) * 100);
+            const strainPct = Math.min(100, (currentStatus.strain / maxStrain) * 100);
+
+            document.getElementById('card-wounds').innerHTML = `
+                <div class="flex justify-between items-start mb-1"><div class="flex items-center gap-1.5"><div class="p-1 bg-red-500/10 rounded-full text-red-500"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Раны</div></div><div class="flex items-center gap-1 text-[9px] font-mono text-slate-500">MAX <button onclick="modifyThreshold('wounds', -1)" class="mini-btn">-</button><span class="text-white font-bold w-3 text-center">${maxWounds}</span><button onclick="modifyThreshold('wounds', 1)" class="mini-btn">+</button></div></div>
+                <div class="flex items-center justify-between gap-2 mb-2 flex-grow"><button onclick="modifyCurrent('wounds', -1)" class="w-8 h-8 rounded bg-slate-950 border border-slate-700 hover:border-green-500 text-slate-400 hover:text-green-500 font-bold text-lg transition flex items-center justify-center">-</button><div class="text-4xl font-black text-white">${currentStatus.wounds}</div><button onclick="modifyCurrent('wounds', 1)" class="w-8 h-8 rounded bg-slate-950 border border-slate-700 hover:border-red-500 text-slate-400 hover:text-red-500 font-bold text-lg transition flex items-center justify-center">+</button></div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800"><div class="bg-red-600 h-full transition-all duration-300" style="width: ${woundPct}%"></div></div>`;
+
+            document.getElementById('card-strain').innerHTML = `
+                <div class="flex justify-between items-start mb-1"><div class="flex items-center gap-1.5"><div class="p-1 bg-blue-500/10 rounded-full text-blue-500"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Усталость</div></div><div class="flex items-center gap-1 text-[9px] font-mono text-slate-500">MAX <button onclick="modifyThreshold('strain', -1)" class="mini-btn">-</button><span class="text-white font-bold w-3 text-center">${maxStrain}</span><button onclick="modifyThreshold('strain', 1)" class="mini-btn">+</button></div></div>
+                <div class="flex items-center justify-between gap-2 mb-2 flex-grow"><button onclick="modifyCurrent('strain', -1)" class="w-8 h-8 rounded bg-slate-950 border border-slate-700 hover:border-green-500 text-slate-400 hover:text-green-500 font-bold text-lg transition flex items-center justify-center">-</button><div class="text-4xl font-black text-white">${currentStatus.strain}</div><button onclick="modifyCurrent('strain', 1)" class="w-8 h-8 rounded bg-slate-950 border border-slate-700 hover:border-blue-500 text-slate-400 hover:text-blue-500 font-bold text-lg transition flex items-center justify-center">+</button></div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800"><div class="bg-blue-500 h-full transition-all duration-300" style="width: ${strainPct}%"></div></div>`;
+
+            document.getElementById('val-soak').textContent = finalStats.brawn + armor;
+
+            const generalTbody = document.getElementById('gen-skills-general-body');
+            const combatTbody = document.getElementById('gen-skills-combat-body');
+            generalTbody.innerHTML = ''; combatTbody.innerHTML = '';
+            const careerSkills = new Set(career ? career.careerSkills : []);
+            const specSkills = new Set(spec ? spec.bonusSkills : []);
+
+            ALL_SKILLS.forEach(skill => {
+                const isCombat = COMBAT_SKILLS_LIST.includes(skill.name);
+                const html = renderSkillRow(skill, finalStats, careerSkills.has(skill.name), specSkills.has(skill.name));
+                if(isCombat) combatTbody.innerHTML += html; else generalTbody.innerHTML += html;
+            });
+
+            // ADDED: Calculate Total Ranks
+            const totalRanks = Object.values(skillRanks).reduce((a, b) => a + b, 0);
+            const ranksDisplay = document.getElementById('total-ranks-display');
+            if(ranksDisplay) ranksDisplay.textContent = totalRanks;
+        }
+
+        // ... Editor functions preserved ...
+        function setEditorMode(mode) { editorMode = mode; renderEditorList(); hideEditorForm(); }
+        function renderEditorList() { const list = document.getElementById('editor-list'); list.innerHTML = ""; (editorMode === 'races' ? db.races : db.careers).forEach(item => { list.innerHTML += `<div onclick="loadItemToForm('${item.id}')" class="p-2 bg-slate-800 hover:bg-slate-700 rounded cursor-pointer border border-transparent hover:border-slate-500 mb-1 flex justify-between"><span class="font-bold text-xs text-slate-300">${item.name}</span></div>`; }); }
+        function hideEditorForm() { document.getElementById('editor-form').classList.add('hidden'); document.getElementById('editor-form-placeholder').classList.remove('hidden'); }
+        function addNewItem() { const id = "c_"+Date.now(); if(editorMode==='races') db.races.push({id, name:"New Race", stats:{brawn:2,agility:2,intellect:2,cunning:2,willpower:2,presence:2},baseWounds:10,baseStrain:10,startXP:100,special:""}); else db.careers.push({id, name:"New Career", careerSkills:[], specializations:[{id:id+"_s", name:"Spec 1", bonusSkills:[]}]}); saveDatabase(); renderEditorList(); loadItemToForm(id); }
+        function loadItemToForm(id) { 
+            const items = editorMode === 'races' ? db.races : db.careers; 
+            currentEditItem = items.find(i=>i.id===id); 
+            if(!currentEditItem) return; 
+            document.getElementById('editor-form-placeholder').classList.add('hidden');
+            document.getElementById('editor-form').classList.remove('hidden');
+            document.getElementById('edit-id').value = id; 
+            document.getElementById('edit-name').value = currentEditItem.name;
+            if(editorMode==='races') { 
+                document.getElementById('form-race-fields').classList.remove('hidden'); document.getElementById('form-career-fields').classList.add('hidden'); 
+                ['brawn','agility','intellect','cunning','willpower','presence'].forEach(k => document.getElementById('edit-'+k).value = currentEditItem.stats[k]);
+                document.getElementById('edit-baseWounds').value = currentEditItem.baseWounds;
+                document.getElementById('edit-baseStrain').value = currentEditItem.baseStrain;
+                document.getElementById('edit-startXP').value = currentEditItem.startXP;
+                document.getElementById('edit-special').value = currentEditItem.special;
+            } else {
+                document.getElementById('form-race-fields').classList.add('hidden'); document.getElementById('form-career-fields').classList.remove('hidden');
+                const grid = document.getElementById('edit-career-skills-grid'); grid.innerHTML = ALL_SKILLS.map(s => `<label class="flex gap-1 items-center hover:bg-slate-800 p-0.5 rounded cursor-pointer"><input type="checkbox" class="career-skill-cb accent-yellow-600" value="${s.name}" ${currentEditItem.careerSkills.includes(s.name)?'checked':''}> <span class="text-slate-300">${s.name}</span></label>`).join('');
+                document.getElementById('specs-container').innerHTML = currentEditItem.specializations.map((s,i) => `<div class="bg-slate-900 p-1.5 rounded border border-slate-700 flex gap-2 items-center"><input class="bg-slate-950 border border-slate-700 rounded px-1 w-full text-xs text-slate-300" value="${s.name}" onchange="currentEditItem.specializations[${i}].name=this.value;saveDatabase()"><button type="button" onclick="currentEditItem.specializations.splice(${i},1);saveDatabase();loadItemToForm('${id}')" class="text-red-500 hover:text-red-400 text-[10px]">Del</button></div>`).join('');
+            }
+        }
+        function addSpecialization() { if(currentEditItem) { currentEditItem.specializations.push({id:Date.now(), name:"New Spec", bonusSkills:[]}); saveDatabase(); loadItemToForm(currentEditItem.id); } }
+        function deleteCurrentItem() { if(currentEditItem && confirm("Delete?")) { if(editorMode==='races') db.races = db.races.filter(i=>i.id!==currentEditItem.id); else db.careers = db.careers.filter(i=>i.id!==currentEditItem.id); saveDatabase(); renderEditorList(); hideEditorForm(); } }
+        function saveCurrentItem() { 
+            if(!currentEditItem) return; 
+            currentEditItem.name = document.getElementById('edit-name').value;
+            if(editorMode==='races') {
+                ['brawn','agility','intellect','cunning','willpower','presence'].forEach(k => currentEditItem.stats[k] = parseInt(document.getElementById('edit-'+k).value));
+                currentEditItem.baseWounds = parseInt(document.getElementById('edit-baseWounds').value);
+                currentEditItem.baseStrain = parseInt(document.getElementById('edit-baseStrain').value);
+                currentEditItem.startXP = parseInt(document.getElementById('edit-startXP').value);
+                currentEditItem.special = document.getElementById('edit-special').value;
+            } else {
+                currentEditItem.careerSkills = Array.from(document.querySelectorAll('.career-skill-cb:checked')).map(cb=>cb.value);
+            }
+            saveDatabase(); renderEditorList(); alert("Saved");
+        }
+    </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
+</script>
+</body>
+</html>
