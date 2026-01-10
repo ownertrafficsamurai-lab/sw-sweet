@@ -669,6 +669,88 @@
       navigator.serviceWorker.register('sw.js');
     });
   }
+// === СИСТЕМА АВТОСОХРАНЕНИЯ (AUTOSAVE) ===
+    
+    // 1. Функция сохранения всех данных в память телефона
+    function saveSession() {
+        const session = {
+            charName: document.getElementById('char-name').value,
+            raceVal: document.getElementById('gen-race').value,
+            careerVal: document.getElementById('gen-career').value,
+            specVal: document.getElementById('gen-spec').value,
+            armorVal: document.getElementById('val-armor').value,
+            // Сохраняем внутренние переменные
+            statMods: statMods,
+            thresholdMods: thresholdMods,
+            currentStatus: currentStatus,
+            xpData: xpData,
+            xpHistory: xpHistory,
+            xpLog: xpLog,
+            skillRanks: skillRanks,
+            morality: morality
+        };
+        localStorage.setItem('swrpg_autosave_v1', JSON.stringify(session));
+    }
+
+    // 2. Функция загрузки данных при старте
+    function loadSession() {
+        const saved = localStorage.getItem('swrpg_autosave_v1');
+        if (!saved) return; // Если сохранений нет, ничего не делаем
+
+        try {
+            const s = JSON.parse(saved);
+            
+            // Восстанавливаем поля ввода
+            document.getElementById('char-name').value = s.charName || "Имя Персонажа";
+            document.getElementById('val-armor').value = s.armorVal || 0;
+            
+            // Восстанавливаем выбор в списках (если такие расы еще есть в базе)
+            if(s.raceVal) document.getElementById('gen-race').value = s.raceVal;
+            if(s.careerVal) document.getElementById('gen-career').value = s.careerVal;
+            
+            // Обновляем списки специализаций, чтобы выбрать нужную
+            updateSpecsAndUI(); 
+            if(s.specVal) document.getElementById('gen-spec').value = s.specVal;
+
+            // Восстанавливаем переменные JS
+            if(s.statMods) statMods = s.statMods;
+            if(s.thresholdMods) thresholdMods = s.thresholdMods;
+            if(s.currentStatus) currentStatus = s.currentStatus;
+            if(s.xpData) xpData = s.xpData;
+            if(s.xpHistory) xpHistory = s.xpHistory;
+            if(s.xpLog) xpLog = s.xpLog;
+            if(s.skillRanks) skillRanks = s.skillRanks;
+            
+            // Восстанавливаем мораль и обновляем весь интерфейс
+            updateMorality(s.morality || 50);
+            updateGeneratorUI();
+            
+        } catch (e) {
+            console.error("Ошибка загрузки сохранения:", e);
+        }
+    }
+
+    // 3. Внедряем автосохранение в существующую логику
+    // Перехватываем основную функцию обновления интерфейса
+    const originalUpdateUI = updateGeneratorUI;
+    updateGeneratorUI = function() {
+        originalUpdateUI(); // Выполняем старую работу
+        saveSession();      // И сразу сохраняем
+    };
+
+    // Добавляем сохранение при вводе имени и смене морали (они не вызывают updateGeneratorUI)
+    document.getElementById('char-name').addEventListener('input', saveSession);
+    document.getElementById('morality-val').addEventListener('input', () => {
+         updateMorality(document.getElementById('morality-val').value);
+         saveSession();
+    });
+
+    // 4. Запускаем загрузку через 0.1 сек после старта приложения
+    const originalOnLoad = window.onload;
+    window.onload = function() {
+        if(originalOnLoad) originalOnLoad();
+        setTimeout(loadSession, 100);
+    };
 </script>
 </body>
 </html>
