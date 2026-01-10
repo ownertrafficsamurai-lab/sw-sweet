@@ -75,21 +75,28 @@
             <!-- Config Bar (Responsive Grid/Flex) -->
             <div id="config-bar" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 bg-slate-950/50 p-2 sm:p-1.5 rounded border border-slate-800 text-xs">
                 
-                <div class="relative group w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 mx-auto sm:mx-0">
-                    <div id="avatar-display" onclick="document.getElementById('avatar-input').click()" 
+                <div class="relative group w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 mx-auto sm:mx-0 z-20">
+                    
+                    <div id="avatar-display" onclick="handleAvatarClick(event)" 
                          class="w-full h-full rounded-full border border-slate-700 bg-slate-900 bg-cover bg-center cursor-pointer overflow-hidden flex items-center justify-center hover:border-yellow-500 transition shadow-lg shadow-black/50 relative z-0">
+                        
                         <svg id="avatar-placeholder" class="text-slate-700 w-1/2 h-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </div>
+                    
                     <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
                     
-                    <button onclick="clearAvatar(event)" id="avatar-clear-btn" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-400 rounded-full text-white flex items-center justify-center font-bold leading-none border border-slate-900 z-10" title="Удалить фото">×</button>
-                </div>
-                <div class="flex-grow w-full sm:w-auto min-w-[150px] relative group">
-                    <input type="text" id="char-name" value="Имя Персонажа" class="w-full bg-transparent border-none text-white font-bold text-lg px-1 sm:px-2 focus:ring-0 placeholder-slate-600 focus:text-yellow-400 transition-colors text-center sm:text-left">
-                    <div class="absolute bottom-0 left-2 right-2 h-[1px] bg-slate-700 group-hover:bg-slate-500 transition-colors"></div>
+                    <div id="avatar-menu" class="hidden absolute top-full mt-2 left-0 bg-slate-900 border border-slate-700 rounded shadow-xl flex flex-col overflow-hidden min-w-[120px] z-50 fade-in">
+                        <button onclick="actionReplace()" class="px-3 py-2 text-[10px] text-slate-300 hover:text-white hover:bg-slate-800 text-left border-b border-slate-800 transition w-full flex items-center gap-2">
+                            <span>↻</span> Заменить
+                        </button>
+                        <button onclick="actionDelete()" class="px-3 py-2 text-[10px] text-red-400 hover:text-red-300 hover:bg-slate-800 text-left transition w-full flex items-center gap-2">
+                            <span>×</span> Удалить
+                        </button>
+                    </div>
+
                 </div>
                 
                 <div class="grid grid-cols-3 sm:flex sm:items-center gap-2 w-full sm:w-auto">
@@ -709,21 +716,55 @@
         }
     </script>
 <script>
-  // Регистрация Service Worker (для работы офлайн)
+  // Регистрация Service Worker для работы без интернета
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js');
     });
   }
 
-// === СИСТЕМА АВТОСОХРАНЕНИЯ И АВАТАРА ===
+// ===========================================
+// === ГЛАВНЫЙ СКРИПТ АВТОСОХРАНЕНИЯ И АВАТАРА ===
+// ===========================================
 
     let isSaveReady = false; 
-    let charAvatar = ""; // Переменная для хранения картинки
+    let charAvatar = ""; // Здесь хранится картинка
 
-    // --- ФУНКЦИИ АВАТАРА ---
+    // --- ЛОГИКА АВАТАРА ---
     
-    // 1. Обработка загрузки файла
+    // 1. Что происходит при клике на круг
+    function handleAvatarClick(e) {
+        e.stopPropagation(); // Не даем клику "пройти сквозь"
+        const menu = document.getElementById('avatar-menu');
+        
+        if (!charAvatar) {
+            // Если фото НЕТ -> сразу открываем окно выбора файла
+            document.getElementById('avatar-input').click();
+            menu.classList.add('hidden'); // Меню прячем на всякий случай
+        } else {
+            // Если фото ЕСТЬ -> показываем/скрываем меню
+            menu.classList.toggle('hidden');
+        }
+    }
+
+    // 2. Кнопка "Заменить" в меню
+    function actionReplace() {
+        document.getElementById('avatar-menu').classList.add('hidden'); // Скрыть меню
+        document.getElementById('avatar-input').click(); // Открыть выбор файла
+    }
+
+    // 3. Кнопка "Удалить" в меню
+    function actionDelete() {
+        document.getElementById('avatar-menu').classList.add('hidden'); // Скрыть меню
+        if(confirm("Вы точно хотите удалить аватар?")) {
+            charAvatar = ""; // Стираем данные
+            document.getElementById('avatar-input').value = ""; // Очищаем инпут
+            updateAvatarUI(); // Обновляем вид
+            saveSession(); // Сохраняем
+        }
+    }
+
+    // 4. Загрузка файла (срабатывает, когда вы выбрали картинку)
     function uploadAvatar(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
@@ -736,47 +777,37 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                charAvatar = e.target.result; // Получаем картинку в Base64
-                updateAvatarUI();             // Обновляем вид
-                saveSession();                // Сохраняем
+                charAvatar = e.target.result; // Превращаем картинку в текст (Base64)
+                updateAvatarUI();
+                saveSession();
+                
+                // Скрываем меню, если оно было открыто
+                document.getElementById('avatar-menu').classList.add('hidden');
             }
             reader.readAsDataURL(file);
         }
     }
 
-    // 2. Обновление кружка с фото
+    // 5. Функция, которая рисует или стирает картинку на экране
     function updateAvatarUI() {
         const div = document.getElementById('avatar-display');
         const icon = document.getElementById('avatar-placeholder');
-        const btn = document.getElementById('avatar-clear-btn');
         
         if (charAvatar) {
-            // Если есть фото - показываем его как фон
+            // Ставим картинку фоном
             div.style.backgroundImage = `url(${charAvatar})`;
-            icon.classList.add('hidden');    // Скрываем иконку человечка
-            btn.classList.remove('hidden');  // Показываем крестик удаления
+            icon.classList.add('hidden'); // Прячем иконку человечка
         } else {
-            // Если нет фото - сброс
+            // Убираем фон
             div.style.backgroundImage = 'none';
-            icon.classList.remove('hidden');
-            btn.classList.add('hidden');
+            icon.classList.remove('hidden'); // Показываем иконку человечка
         }
     }
 
-    // 3. Удаление фото
-    function clearAvatar(e) {
-        e.stopPropagation(); // Чтобы не открылось окно выбора файла при клике на крестик
-        if(confirm("Удалить фото?")) {
-            charAvatar = "";
-            document.getElementById('avatar-input').value = ""; // Очищаем инпут
-            updateAvatarUI();
-            saveSession();
-        }
-    }
-
-    // --- СИСТЕМА СОХРАНЕНИЯ ---
+    // --- ЛОГИКА СОХРАНЕНИЯ (БАЗА) ---
 
     function saveSession() {
+        // Если страница еще не загрузилась до конца, не сохраняем
         if (!isSaveReady) return; 
 
         const session = {
@@ -786,7 +817,7 @@
             specVal: document.getElementById('gen-spec').value,
             armorVal: document.getElementById('val-armor').value,
             
-            charAvatar: charAvatar, // <-- ВАЖНО: Сохраняем аватар
+            charAvatar: charAvatar, // <-- Сохраняем и аватар
 
             statMods: statMods,
             thresholdMods: thresholdMods,
@@ -803,6 +834,7 @@
     function loadSession() {
         const saved = localStorage.getItem('swrpg_autosave_v1');
         
+        // Если сохранений нет, разрешаем работу и выходим
         if (!saved) {
             isSaveReady = true; 
             return; 
@@ -811,10 +843,11 @@
         try {
             const s = JSON.parse(saved);
             
+            // Восстанавливаем данные в поля
             document.getElementById('char-name').value = s.charName || "Имя Персонажа";
             document.getElementById('val-armor').value = s.armorVal || 0;
             
-            // Загружаем аватар
+            // Восстанавливаем аватар
             if (s.charAvatar) {
                 charAvatar = s.charAvatar;
                 updateAvatarUI();
@@ -823,9 +856,10 @@
             if(s.raceVal) document.getElementById('gen-race').value = s.raceVal;
             if(s.careerVal) document.getElementById('gen-career').value = s.careerVal;
             
-            updateSpecsAndUI();
+            updateSpecsAndUI(); // Обновляем списки
             if(s.specVal) document.getElementById('gen-spec').value = s.specVal;
 
+            // Восстанавливаем переменные
             if(s.statMods) statMods = s.statMods;
             if(s.thresholdMods) thresholdMods = s.thresholdMods;
             if(s.currentStatus) currentStatus = s.currentStatus;
@@ -840,16 +874,19 @@
         } catch (e) {
             console.error("Ошибка загрузки:", e);
         } finally {
+            // Включаем автосохранение только после полной загрузки
             isSaveReady = true;
         }
     }
 
+    // Перехват функции обновления интерфейса для автосохранения
     const originalUpdateUI = updateGeneratorUI;
     updateGeneratorUI = function() {
         originalUpdateUI(); 
         saveSession();      
     };
 
+    // Слушатели событий (когда что-то меняется — сохраняем)
     document.getElementById('char-name').addEventListener('input', saveSession);
     
     document.getElementById('morality-val').addEventListener('input', () => {
@@ -857,9 +894,20 @@
          saveSession();
     });
 
+    // Закрытие меню аватара, если кликнули в пустое место
+    window.addEventListener('click', (e) => {
+        const menu = document.getElementById('avatar-menu');
+        // Если клик был не по меню и не по кнопке аватара
+        if (menu && !menu.classList.contains('hidden') && !e.target.closest('#avatar-display')) {
+             menu.classList.add('hidden');
+        }
+    });
+
+    // Запуск при старте страницы
     const originalOnLoad = window.onload;
     window.onload = function() {
         if(originalOnLoad) originalOnLoad();
+        // Даем небольшую задержку (0.1с), чтобы всё прогрузилось, потом загружаем сохранение
         setTimeout(loadSession, 100);
     };
 </script>
