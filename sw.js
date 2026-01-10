@@ -1,4 +1,4 @@
-const CACHE_NAME = 'swrpg-v1';
+const CACHE_NAME = 'swrpg-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -20,4 +20,5 @@ self.addEventListener('fetch', event => {
       return response || fetch(event.request);
     })
   );
+
 });
