@@ -245,26 +245,67 @@
 
             <!-- SKILLS (Responsive Grid: 1 col mobile, 3 cols desktop) -->
             <div>
-                <div class="section-divider"><span class="section-title">Навыки <span class="text-[8px] text-slate-600 ml-2 font-normal font-sans border border-slate-800 px-1 rounded bg-slate-900/50">Рангов: <span id="total-ranks-display" class="text-yellow-500 font-bold">0</span></span></span></div>
+                <div class="section-divider">
+                    <span class="section-title">Навыки 
+                        <span class="text-[8px] text-slate-600 ml-2 font-normal font-sans border border-slate-800 px-1 rounded bg-slate-900/50">
+                            Рангов: <span id="total-ranks-display" class="text-yellow-500 font-bold">0</span>
+                        </span>
+                    </span>
+                </div>
+                
+                <div id="skill-mobile-tabs" class="flex lg:hidden bg-slate-900 rounded p-1 border border-slate-800 mb-2">
+                    <button onclick="toggleMobileSkills('gen')" id="tab-btn-gen" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded bg-slate-700 text-white shadow transition">
+                        Общие
+                    </button>
+                    <button onclick="toggleMobileSkills('com')" id="tab-btn-com" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded hover:bg-slate-800 text-slate-500 transition">
+                        Боевые
+                    </button>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-auto min-h-[600px] lg:h-[calc(100vh-500px)]">
                     
-                    <!-- General Skills -->
-                    <div class="lg:col-span-2 bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-[400px] lg:h-auto">
-                        <div class="bg-slate-950 px-3 py-2 border-b border-slate-800 flex justify-between items-center sticky top-0 z-10">
-                            <div class="flex items-center gap-2 sm:gap-3"><h3 class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Общие</h3><div class="flex gap-1 sm:gap-2 text-[8px] font-bold"><span class="text-green-500 flex items-center gap-1"><span class="w-3 h-3 sm:w-2 sm:h-2 border border-green-500 rounded-sm bg-green-500/20 text-center leading-none flex items-center justify-center text-[7px] sm:text-[9px]">К</span> <span class="hidden sm:inline">Карьера</span></span><span class="text-blue-400 flex items-center gap-1"><span class="w-3 h-3 sm:w-2 sm:h-2 border border-blue-500 rounded-sm bg-blue-500/20 text-center leading-none flex items-center justify-center text-[7px] sm:text-[9px]">С</span> <span class="hidden sm:inline">Спец.</span></span></div></div>
-                            <div class="text-[8px] sm:text-[9px] text-slate-600 uppercase font-bold flex gap-4 sm:gap-6 mr-1 sm:mr-4"><span>Ранг</span><span>Пул</span></div>
+                    <div id="view-skills-gen" class="lg:col-span-2 bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-[400px] lg:h-auto block lg:flex">
+                        
+                        <div class="bg-slate-950 border-b border-slate-800 flex items-center text-[8px] uppercase font-bold text-slate-500 sticky top-0 z-10 h-9">
+                            <div class="w-6 text-center flex-shrink-0"></div>
+                            <div class="flex-grow px-2 flex items-center gap-3">
+                                <span class="text-slate-400 text-[10px] tracking-widest">Общие</span>
+                                <div class="flex gap-2 opacity-50 font-normal">
+                                    <span class="text-green-500 flex items-center gap-0.5"><span class="border border-green-900 bg-green-900/20 w-3 h-3 flex items-center justify-center rounded-[1px] text-[6px]">К</span></span>
+                                    <span class="text-blue-400 flex items-center gap-0.5"><span class="border border-blue-900 bg-blue-900/20 w-3 h-3 flex items-center justify-center rounded-[1px] text-[6px]">С</span></span>
+                                </div>
+                            </div>
+                            <div class="w-20 pl-2 flex-shrink-0">Ранг</div>
+                            <div class="w-24 text-right pr-4 flex-shrink-0">Пул</div>
                         </div>
-                        <div class="overflow-y-auto flex-grow custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="gen-skills-general-body" class="divide-y divide-slate-800/50"></tbody></table></div>
+
+                        <div class="overflow-y-auto flex-grow custom-scrollbar">
+                            <table class="w-full text-xs text-left">
+                                <tbody id="gen-skills-general-body" class="divide-y divide-slate-800/50"></tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <!-- Combat Skills -->
-                    <div class="bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-auto lg:h-auto">
-                        <div class="bg-red-950/20 px-3 py-2 border-b border-red-900/20 flex justify-between items-center sticky top-0 z-10"><h3 class="text-[10px] font-bold uppercase text-red-400 tracking-widest flex items-center gap-2"><span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span> Боевые</h3></div>
-                        <div class="overflow-y-auto flex-grow custom-scrollbar"><table class="w-full text-xs text-left"><tbody id="gen-skills-combat-body" class="divide-y divide-slate-800/50"></tbody></table></div>
+                    <div id="view-skills-com" class="bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-auto lg:h-auto hidden lg:flex">
+                        
+                        <div class="bg-red-950/20 border-b border-red-900/20 flex items-center text-[8px] uppercase font-bold text-red-400/70 sticky top-0 z-10 h-9">
+                            <div class="w-6 text-center flex-shrink-0"></div>
+                            <div class="flex-grow px-2 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                <span class="tracking-widest text-[10px] text-red-400">Боевые</span>
+                            </div>
+                            <div class="w-20 pl-2 flex-shrink-0">Ранг</div>
+                            <div class="w-24 text-right pr-4 flex-shrink-0">Пул</div>
+                        </div>
+
+                        <div class="overflow-y-auto flex-grow custom-scrollbar">
+                            <table class="w-full text-xs text-left">
+                                <tbody id="gen-skills-combat-body" class="divide-y divide-slate-800/50"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
         <!-- === TAB: EDITOR === -->
         <div id="tab-editor" class="hidden fade-in h-full">
@@ -754,7 +795,7 @@
   }
 
 // ===========================================
-// === ГЛАВНЫЙ СКРИПТ (XP + СИЛА + КРИТЫ + АВАТАР) ===
+// === ГЛАВНЫЙ СКРИПТ (FINAL FIX) ===
 // ===========================================
 
     let isSaveReady = false; 
@@ -762,121 +803,88 @@
     let forceRating = 1;
     let criticalInjuries = []; 
 
-    // --- ЛОГИКА XP (НОВАЯ) ---
-    function applyXP(action) {
-        const input = document.getElementById('xp-amount-input'); // Ищем новое поле ввода
-        const val = parseInt(input.value) || 0;
-        
-        if (val !== 0) {
-            xpHistory.push({ earned: xpData.earned, spent: xpData.spent, log: [...xpLog] });
-            if (xpHistory.length > 10) xpHistory.shift();
+    // Функция переключения вкладок (дублируем сюда на всякий случай)
+    function toggleMobileSkills(tab) {
+        const viewGen = document.getElementById('view-skills-gen');
+        const viewCom = document.getElementById('view-skills-com');
+        const btnGen = document.getElementById('tab-btn-gen');
+        const btnCom = document.getElementById('tab-btn-com');
 
-            let logEntry = "";
-            if (action === 'add') {
-                xpData.earned += val;
-                logEntry = `+${val}`;
-            } else if (action === 'spend') {
-                xpData.spent += val;
-                logEntry = `-${val}`;
-            }
-            
-            xpLog.unshift(logEntry);
-            if (xpLog.length > 3) xpLog.pop();
+        const activeClass = "bg-slate-700 text-white shadow";
+        const inactiveClass = "hover:bg-slate-800 text-slate-500";
 
-            input.value = ''; 
-            updateGeneratorUI();
-            saveSession();
+        if (tab === 'gen') {
+            viewGen.classList.remove('hidden');
+            viewCom.classList.add('hidden');
+            if(btnGen) btnGen.className = "flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition " + activeClass;
+            if(btnCom) btnCom.className = "flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition " + inactiveClass;
+        } else {
+            viewGen.classList.add('hidden');
+            viewCom.classList.remove('hidden');
+            if(btnGen) btnGen.className = "flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition " + inactiveClass;
+            if(btnCom) btnCom.className = "flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition " + activeClass;
         }
     }
 
+    // Логика XP
+    function applyXP(action) {
+        const input = document.getElementById('xp-amount-input'); 
+        const val = parseInt(input.value) || 0;
+        if (val !== 0) {
+            xpHistory.push({ earned: xpData.earned, spent: xpData.spent, log: [...xpLog] });
+            if (xpHistory.length > 10) xpHistory.shift();
+            let logEntry = action === 'add' ? (val > 0 ? `+${val}` : `${val}`) : (val > 0 ? `-${val}` : `+${Math.abs(val)}`);
+            if (action === 'add') xpData.earned += val; else xpData.spent += val;
+            xpLog.unshift(logEntry);
+            if (xpLog.length > 5) xpLog.pop();
+            input.value = ''; updateGeneratorUI(); saveSession();
+        }
+    }
     function undoLastXP() {
         if (xpHistory.length === 0) return;
         const state = xpHistory.pop();
-        xpData.earned = state.earned;
-        xpData.spent = state.spent;
-        xpLog = state.log;
-        updateGeneratorUI();
-        saveSession();
+        xpData.earned = state.earned; xpData.spent = state.spent; xpLog = state.log;
+        updateGeneratorUI(); saveSession();
+    }
+    function renderXPLogDisplay() {
+        const list = document.getElementById('xp-log-list');
+        if (list) {
+            list.innerHTML = "";
+            if (xpLog.length === 0) list.innerHTML = `<li class="text-[8px] text-slate-600 italic text-center">Пусто</li>`;
+            else xpLog.forEach(e => list.innerHTML += `<li class="text-[8px] font-mono flex justify-between border-b border-slate-800/50 pb-0.5 last:border-0">${e}</li>`);
+        }
+        const btn = document.getElementById('btn-xp-undo');
+        if(btn) { btn.disabled = xpHistory.length === 0; btn.style.opacity = xpHistory.length === 0 ? '0.2' : '1'; }
     }
 
-    // --- ЛОГИКА СИЛЫ ---
-    function updateForce(val) {
-        forceRating = Math.max(0, parseInt(val) || 0);
-        const el = document.getElementById('force-rating');
-        if(el) el.value = forceRating;
-        saveSession();
-    }
-
-    // --- ЛОГИКА КРИТИЧЕСКИХ РАН ---
+    // Логика Силы и Ран
+    function updateForce(val) { forceRating = Math.max(0, parseInt(val) || 0); const el = document.getElementById('force-rating'); if(el) el.value = forceRating; saveSession(); }
     function renderCrits() {
-        const list = document.getElementById('crit-list');
-        const emptyMsg = document.getElementById('crit-empty');
+        const list = document.getElementById('crit-list'); const emptyMsg = document.getElementById('crit-empty');
         if (!list) return;
-        
         list.innerHTML = "";
-        if (criticalInjuries.length === 0) {
-            if(emptyMsg) emptyMsg.classList.remove('hidden');
-        } else {
+        if (criticalInjuries.length === 0) { if(emptyMsg) emptyMsg.classList.remove('hidden'); }
+        else {
             if(emptyMsg) emptyMsg.classList.add('hidden');
             criticalInjuries.forEach((crit, index) => {
-                const row = document.createElement('div');
-                row.className = "flex items-center gap-1 animate-fade-in";
-                
-                const input = document.createElement('input');
-                input.type = "text";
-                input.className = "w-full bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-red-300 placeholder-slate-700 focus:border-red-500 outline-none";
-                input.placeholder = "d100 эффект...";
-                input.value = crit;
-                input.onchange = (e) => updateCrit(index, e.target.value);
-                
-                const delBtn = document.createElement('button');
-                delBtn.className = "text-slate-600 hover:text-red-500 font-bold px-1";
-                delBtn.innerHTML = "×";
-                delBtn.onclick = () => removeCrit(index);
-
-                row.appendChild(input);
-                row.appendChild(delBtn);
+                const row = document.createElement('div'); row.className = "flex items-center gap-1 animate-fade-in";
+                row.innerHTML = `<input type="text" class="w-full bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-red-300 placeholder-slate-700 focus:border-red-500 outline-none" value="${crit}" onchange="updateCrit(${index}, this.value)" placeholder="d100 эффект..."><button class="text-slate-600 hover:text-red-500 font-bold px-1" onclick="removeCrit(${index})">×</button>`;
                 list.appendChild(row);
             });
         }
     }
+    function addCrit() { if (criticalInjuries.length >= 4) { alert("Максимум 4!"); return; } criticalInjuries.push(""); renderCrits(); saveSession(); }
+    function updateCrit(i, t) { criticalInjuries[i] = t; saveSession(); }
+    function removeCrit(i) { if(confirm("Исцелить?")) { criticalInjuries.splice(i, 1); renderCrits(); saveSession(); } }
 
-    function addCrit() {
-        if (criticalInjuries.length >= 4) { alert("Максимум 4 раны!"); return; }
-        criticalInjuries.push(""); renderCrits(); saveSession();
-    }
-    function updateCrit(index, text) { criticalInjuries[index] = text; saveSession(); }
-    function removeCrit(index) { if(confirm("Исцелить?")) { criticalInjuries.splice(index, 1); renderCrits(); saveSession(); } }
-
-    // --- ЛОГИКА АВАТАРА ---
-    function handleAvatarClick(e) {
-        e.stopPropagation(); 
-        const menu = document.getElementById('avatar-menu');
-        if (!charAvatar) { document.getElementById('avatar-input').click(); menu.classList.add('hidden'); }
-        else { menu.classList.toggle('hidden'); }
-    }
+    // Аватар
+    function handleAvatarClick(e) { e.stopPropagation(); const m = document.getElementById('avatar-menu'); if (!charAvatar) { document.getElementById('avatar-input').click(); m.classList.add('hidden'); } else m.classList.toggle('hidden'); }
     function actionReplace() { document.getElementById('avatar-menu').classList.add('hidden'); document.getElementById('avatar-input').click(); }
-    function actionDelete() {
-        document.getElementById('avatar-menu').classList.add('hidden');
-        if(confirm("Удалить аватар?")) { charAvatar = ""; document.getElementById('avatar-input').value = ""; updateAvatarUI(); saveSession(); }
-    }
-    function uploadAvatar(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            if(file.size > 2097152) { alert("Файл > 2Мб!"); return; }
-            const reader = new FileReader();
-            reader.onload = function(e) { charAvatar = e.target.result; updateAvatarUI(); saveSession(); document.getElementById('avatar-menu').classList.add('hidden'); }
-            reader.readAsDataURL(file);
-        }
-    }
-    function updateAvatarUI() {
-        const div = document.getElementById('avatar-display');
-        const icon = document.getElementById('avatar-placeholder');
-        if (charAvatar) { div.style.backgroundImage = `url(${charAvatar})`; icon.classList.add('hidden'); }
-        else { div.style.backgroundImage = 'none'; icon.classList.remove('hidden'); }
-    }
+    function actionDelete() { document.getElementById('avatar-menu').classList.add('hidden'); if(confirm("Удалить?")) { charAvatar = ""; document.getElementById('avatar-input').value = ""; updateAvatarUI(); saveSession(); } }
+    function uploadAvatar(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { charAvatar = e.target.result; updateAvatarUI(); saveSession(); document.getElementById('avatar-menu').classList.add('hidden'); }; reader.readAsDataURL(input.files[0]); } }
+    function updateAvatarUI() { const div = document.getElementById('avatar-display'); const icon = document.getElementById('avatar-placeholder'); if (charAvatar) { div.style.backgroundImage = `url(${charAvatar})`; icon.classList.add('hidden'); } else { div.style.backgroundImage = 'none'; icon.classList.remove('hidden'); } }
 
-    // --- СИСТЕМА СОХРАНЕНИЯ ---
+    // Сохранение
     function saveSession() {
         if (!isSaveReady) return; 
         const session = {
@@ -885,21 +893,12 @@
             careerVal: document.getElementById('gen-career').value,
             specVal: document.getElementById('gen-spec').value,
             armorVal: document.getElementById('val-armor').value,
-            charAvatar: charAvatar,
-            forceRating: forceRating,
-            criticalInjuries: criticalInjuries,
-            statMods: statMods,
-            thresholdMods: thresholdMods,
-            currentStatus: currentStatus,
-            xpData: xpData,
-            xpHistory: xpHistory,
-            xpLog: xpLog,
-            skillRanks: skillRanks, // <--- Проверьте, чтобы тут было skillRanks, а не просто skill
-            morality: morality
+            charAvatar: charAvatar, forceRating: forceRating, criticalInjuries: criticalInjuries,
+            statMods: statMods, thresholdMods: thresholdMods, currentStatus: currentStatus,
+            xpData: xpData, xpHistory: xpHistory, xpLog: xpLog, skillRanks: skillRanks, morality: morality
         };
         localStorage.setItem('swrpg_autosave_v1', JSON.stringify(session));
     }
-
     function loadSession() {
         const saved = localStorage.getItem('swrpg_autosave_v1');
         if (!saved) { isSaveReady = true; return; }
@@ -907,17 +906,13 @@
             const s = JSON.parse(saved);
             document.getElementById('char-name').value = s.charName || "Имя Персонажа";
             document.getElementById('val-armor').value = s.armorVal || 0;
-            
             if (s.charAvatar) { charAvatar = s.charAvatar; updateAvatarUI(); }
             if (s.forceRating !== undefined) { forceRating = s.forceRating; const el = document.getElementById('force-rating'); if(el) el.value = forceRating; }
             if (s.criticalInjuries) { criticalInjuries = s.criticalInjuries; renderCrits(); }
-
             if(s.raceVal) document.getElementById('gen-race').value = s.raceVal;
             if(s.careerVal) document.getElementById('gen-career').value = s.careerVal;
-            
             updateSpecsAndUI();
             if(s.specVal) document.getElementById('gen-spec').value = s.specVal;
-
             if(s.statMods) statMods = s.statMods;
             if(s.thresholdMods) thresholdMods = s.thresholdMods;
             if(s.currentStatus) currentStatus = s.currentStatus;
@@ -925,37 +920,20 @@
             if(s.xpHistory) xpHistory = s.xpHistory;
             if(s.xpLog) xpLog = s.xpLog;
             if(s.skillRanks) skillRanks = s.skillRanks;
-            
             updateMorality(s.morality || 50);
             updateGeneratorUI();
-        } catch (e) { console.error("Ошибка загрузки:", e); } finally { isSaveReady = true; }
+        } catch (e) { console.error("Error loading:", e); } finally { isSaveReady = true; }
     }
 
     const originalUpdateUI = updateGeneratorUI;
-    updateGeneratorUI = function() {
-        renderXPLogDisplay(); 
-        originalUpdateUI(); 
-        saveSession();      
-    };
+    updateGeneratorUI = function() { renderXPLogDisplay(); originalUpdateUI(); saveSession(); };
 
     document.getElementById('char-name').addEventListener('input', saveSession);
-    document.getElementById('morality-val').addEventListener('input', () => {
-         updateMorality(document.getElementById('morality-val').value);
-         saveSession();
-    });
+    document.getElementById('morality-val').addEventListener('input', () => { updateMorality(document.getElementById('morality-val').value); saveSession(); });
+    window.addEventListener('click', (e) => { const m = document.getElementById('avatar-menu'); if (m && !m.classList.contains('hidden') && !e.target.closest('#avatar-display')) m.classList.add('hidden'); });
     
-    window.addEventListener('click', (e) => {
-        const menu = document.getElementById('avatar-menu');
-        if (menu && !menu.classList.contains('hidden') && !e.target.closest('#avatar-display')) { 
-            menu.classList.add('hidden'); 
-        }
-    });
-
     const originalOnLoad = window.onload;
-    window.onload = function() {
-        if(originalOnLoad) originalOnLoad();
-        setTimeout(loadSession, 100);
-    };
+    window.onload = function() { if(originalOnLoad) originalOnLoad(); setTimeout(loadSession, 100); };
 </script>
 </body>
 </html>
