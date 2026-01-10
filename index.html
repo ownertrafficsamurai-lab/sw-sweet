@@ -293,10 +293,25 @@
 
         const DEFAULT_DB = {
             races: [
-                { id: "zabrak", name: "Забрак", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 3, presence: 1 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Выживание +1 ранг" },
-                { id: "human", name: "Человек", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 110, special: "+1 ранг в 2 любых навыках" },
+                { id: "bothan", name: "Ботан", stats: { brawn: 1, agility: 2, intellect: 2, cunning: 3, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 11, startXP: 100, special: "Уличное чутьё +1 ранг" },
                 { id: "wookiee", name: "Вуки", stats: { brawn: 3, agility: 2, intellect: 2, cunning: 2, willpower: 1, presence: 2 }, baseWounds: 14, baseStrain: 8, startXP: 90, special: "Ярость вуки (+урон)" },
-                { id: "twilek", name: "Тви'лек", stats: { brawn: 1, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 3 }, baseWounds: 10, baseStrain: 11, startXP: 100, special: "Устойчивость к жаре" }
+                { id: "gand", name: "Ганды", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 3, presence: 1 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "" },
+                { id: "gran", name: "Гран", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 1, willpower: 2, presence: 3 }, baseWounds: 10, baseStrain: 9, startXP: 100, special: "" },
+                { id: "droid", name: "Дроиды", stats: { brawn: 1, agility: 1, intellect: 1, cunning: 1, willpower: 1, presence: 1 }, baseWounds: 10, baseStrain: 10, startXP: 175, special: "Механическое тело, не нужен воздух" },
+                { id: "duros", name: "Дурос", stats: { brawn: 1, agility: 2, intellect: 3, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 11, baseStrain: 10, startXP: 100, special: "Пилотирование +1 ранг" },
+                { id: "zabrak", name: "Забрак", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 3, presence: 1 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Выживание +1 ранг" },
+                { id: "ithorian", name: "Иторианец", stats: { brawn: 2, agility: 1, intellect: 2, cunning: 2, willpower: 3, presence: 2 }, baseWounds: 9, baseStrain: 12, startXP: 90, special: "Звуковой удар" },
+                { id: "keldor", name: "Кел-дор", stats: { brawn: 1, agility: 2, intellect: 2, cunning: 2, willpower: 3, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Видит в темноте, нужна маска" },
+                { id: "human", name: "Человек", stats: { brawn: 2, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 110, special: "+1 ранг в 2 любых навыках" },
+                { id: "mirialan", name: "Мириалан", stats: { brawn: 2, agility: 3, intellect: 2, cunning: 1, willpower: 2, presence: 2 }, baseWounds: 11, baseStrain: 10, startXP: 100, special: "Дисциплина +1 ранг" },
+                { id: "moncalamari", name: "Мон Каламари", stats: { brawn: 2, agility: 2, intellect: 3, cunning: 1, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Дышит под водой" },
+                { id: "nautolan", name: "Наутолан", stats: { brawn: 3, agility: 2, intellect: 2, cunning: 2, willpower: 1, presence: 2 }, baseWounds: 11, baseStrain: 9, startXP: 100, special: "Дышит под водой" },
+                { id: "rodian", name: "Родиан", stats: { brawn: 2, agility: 3, intellect: 2, cunning: 2, willpower: 1, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Выживание +1 ранг" },
+                { id: "sullustan", name: "Сулустан", stats: { brawn: 2, agility: 3, intellect: 2, cunning: 1, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "" },
+                { id: "togruta", name: "Тогрута", stats: { brawn: 1, agility: 2, intellect: 2, cunning: 3, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 10, startXP: 100, special: "Стайная тактика" },
+                { id: "twilek", name: "Тви'лек", stats: { brawn: 1, agility: 2, intellect: 2, cunning: 2, willpower: 2, presence: 3 }, baseWounds: 10, baseStrain: 11, startXP: 100, special: "Устойчивость к жаре, Обаяние +1" },
+                { id: "trandoshan", name: "Трандошан", stats: { brawn: 3, agility: 1, intellect: 2, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 12, baseStrain: 9, startXP: 90, special: "Регенерация" },
+                { id: "cerean", name: "Цереане", stats: { brawn: 2, agility: 1, intellect: 3, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 13, startXP: 90, special: "Инициатива +1 ранг" }
             ],
             careers: [
                 { id: "mystic", name: "Мистик", careerSkills: ["Обаяние", "Запугивание", "Знание (Вселенная)", "Знание (Внешнее кольцо)", "Внимательность", "Готовность"], specializations: [{ id: "seer", name: "Провидец", bonusSkills: ["Знание (Вселенная)", "Внимательность", "Готовность", "Уличное чутьё"] }, { id: "advisor", name: "Советник", bonusSkills: ["Обаяние", "Переговоры", "Знание (Вселенная)", "Лидерство"] }] },
