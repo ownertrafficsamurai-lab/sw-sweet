@@ -1,11 +1,10 @@
-const CACHE_NAME = 'swrpg-v2';
+const CACHE_NAME = 'swrpg-v3'; // Смените версию на v3, чтобы обновить кэш у старых юзеров
 const urlsToCache = [
-  './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  'https://cdn.tailwindcss.com'
+  './tailwind.js' // Теперь грузим локально
 ];
 
 self.addEventListener('install', event => {
@@ -20,5 +19,18 @@ self.addEventListener('fetch', event => {
       return response || fetch(event.request);
     })
   );
-
+});
+// Добавьте очистку старого кэша, чтобы старые пользователи получили обновление
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
 });
