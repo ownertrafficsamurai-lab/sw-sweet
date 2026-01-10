@@ -894,7 +894,7 @@
             xpData: xpData,
             xpHistory: xpHistory,
             xpLog: xpLog,
-            skillRanks: skillRanks,
+            skillRanks: skillRanks, // <--- Проверьте, чтобы тут было skillRanks, а не просто skill
             morality: morality
         };
         localStorage.setItem('swrpg_autosave_v1', JSON.stringify(session));
@@ -933,6 +933,7 @@
 
     const originalUpdateUI = updateGeneratorUI;
     updateGeneratorUI = function() {
+        renderXPLogDisplay(); 
         originalUpdateUI(); 
         saveSession();      
     };
@@ -942,9 +943,12 @@
          updateMorality(document.getElementById('morality-val').value);
          saveSession();
     });
+    
     window.addEventListener('click', (e) => {
         const menu = document.getElementById('avatar-menu');
-        if (menu && !menu.classList.contains('hidden') && !e.target.closest('#avatar-display')) { menu.classList.add('hidden'); }
+        if (menu && !menu.classList.contains('hidden') && !e.target.closest('#avatar-display')) { 
+            menu.classList.add('hidden'); 
+        }
     });
 
     const originalOnLoad = window.onload;
