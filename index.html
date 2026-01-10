@@ -75,13 +75,23 @@
             <!-- Config Bar (Responsive Grid/Flex) -->
             <div id="config-bar" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 bg-slate-950/50 p-2 sm:p-1.5 rounded border border-slate-800 text-xs">
                 
-                <!-- Name -->
+                <div class="relative group w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 mx-auto sm:mx-0">
+                    <div id="avatar-display" onclick="document.getElementById('avatar-input').click()" 
+                         class="w-full h-full rounded-full border border-slate-700 bg-slate-900 bg-cover bg-center cursor-pointer overflow-hidden flex items-center justify-center hover:border-yellow-500 transition shadow-lg shadow-black/50 relative z-0">
+                        <svg id="avatar-placeholder" class="text-slate-700 w-1/2 h-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
+                    
+                    <button onclick="clearAvatar(event)" id="avatar-clear-btn" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-400 rounded-full text-white flex items-center justify-center font-bold leading-none border border-slate-900 z-10" title="Удалить фото">×</button>
+                </div>
                 <div class="flex-grow w-full sm:w-auto min-w-[150px] relative group">
                     <input type="text" id="char-name" value="Имя Персонажа" class="w-full bg-transparent border-none text-white font-bold text-lg px-1 sm:px-2 focus:ring-0 placeholder-slate-600 focus:text-yellow-400 transition-colors text-center sm:text-left">
                     <div class="absolute bottom-0 left-2 right-2 h-[1px] bg-slate-700 group-hover:bg-slate-500 transition-colors"></div>
                 </div>
                 
-                <!-- Selectors Group (Grid on mobile, Flex on desktop) -->
                 <div class="grid grid-cols-3 sm:flex sm:items-center gap-2 w-full sm:w-auto">
                     <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 bg-slate-900 rounded px-1 sm:px-2 py-1 border border-slate-800">
                         <label class="uppercase font-bold text-[8px] sm:text-[9px] text-slate-500">Раса</label>
@@ -97,10 +107,8 @@
                     </div>
                 </div>
 
-                <!-- Bottom Row on Mobile: Morality & Actions -->
                 <div class="flex items-center justify-between gap-2 w-full sm:w-auto mt-1 sm:mt-0">
                     
-                    <!-- Morality -->
                     <div class="flex items-center gap-2 bg-slate-900 rounded px-2 py-1 border border-slate-800 flex-grow sm:flex-grow-0 min-w-0">
                         <div class="flex flex-col gap-0.5 w-full">
                             <div class="flex justify-between items-end w-full">
@@ -118,7 +126,6 @@
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="flex items-center gap-1 border-l border-slate-800 pl-2">
                          <div class="relative group">
                             <button onclick="saveCharacter()" class="p-1.5 hover:text-green-400 text-slate-500 transition"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
@@ -702,20 +709,74 @@
         }
     </script>
 <script>
+  // Регистрация Service Worker (для работы офлайн)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js');
     });
   }
 
-// === СИСТЕМА АВТОСОХРАНЕНИЯ (AUTOSAVE) ===
+// === СИСТЕМА АВТОСОХРАНЕНИЯ И АВАТАРА ===
 
-    // Флаг: Разрешено ли сохранение. Сначала FALSE, чтобы не затереть данные при старте.
     let isSaveReady = false; 
+    let charAvatar = ""; // Переменная для хранения картинки
+
+    // --- ФУНКЦИИ АВАТАРА ---
     
-    // 1. Функция сохранения всех данных
+    // 1. Обработка загрузки файла
+    function uploadAvatar(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Проверка размера (2 Мб)
+            if(file.size > 2097152) {
+                alert("Файл слишком большой! Выберите картинку меньше 2 Мб.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                charAvatar = e.target.result; // Получаем картинку в Base64
+                updateAvatarUI();             // Обновляем вид
+                saveSession();                // Сохраняем
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // 2. Обновление кружка с фото
+    function updateAvatarUI() {
+        const div = document.getElementById('avatar-display');
+        const icon = document.getElementById('avatar-placeholder');
+        const btn = document.getElementById('avatar-clear-btn');
+        
+        if (charAvatar) {
+            // Если есть фото - показываем его как фон
+            div.style.backgroundImage = `url(${charAvatar})`;
+            icon.classList.add('hidden');    // Скрываем иконку человечка
+            btn.classList.remove('hidden');  // Показываем крестик удаления
+        } else {
+            // Если нет фото - сброс
+            div.style.backgroundImage = 'none';
+            icon.classList.remove('hidden');
+            btn.classList.add('hidden');
+        }
+    }
+
+    // 3. Удаление фото
+    function clearAvatar(e) {
+        e.stopPropagation(); // Чтобы не открылось окно выбора файла при клике на крестик
+        if(confirm("Удалить фото?")) {
+            charAvatar = "";
+            document.getElementById('avatar-input').value = ""; // Очищаем инпут
+            updateAvatarUI();
+            saveSession();
+        }
+    }
+
+    // --- СИСТЕМА СОХРАНЕНИЯ ---
+
     function saveSession() {
-        // БЛОКИРОВКА: Если мы еще не загрузились, не сохраняем "пустые" нули
         if (!isSaveReady) return; 
 
         const session = {
@@ -725,6 +786,8 @@
             specVal: document.getElementById('gen-spec').value,
             armorVal: document.getElementById('val-armor').value,
             
+            charAvatar: charAvatar, // <-- ВАЖНО: Сохраняем аватар
+
             statMods: statMods,
             thresholdMods: thresholdMods,
             currentStatus: currentStatus,
@@ -737,11 +800,9 @@
         localStorage.setItem('swrpg_autosave_v1', JSON.stringify(session));
     }
 
-    // 2. Функция загрузки данных при старте
     function loadSession() {
         const saved = localStorage.getItem('swrpg_autosave_v1');
         
-        // Если сохранений нет, просто разрешаем работу и выходим
         if (!saved) {
             isSaveReady = true; 
             return; 
@@ -750,18 +811,21 @@
         try {
             const s = JSON.parse(saved);
             
-            // Восстанавливаем поля
             document.getElementById('char-name').value = s.charName || "Имя Персонажа";
             document.getElementById('val-armor').value = s.armorVal || 0;
             
+            // Загружаем аватар
+            if (s.charAvatar) {
+                charAvatar = s.charAvatar;
+                updateAvatarUI();
+            }
+
             if(s.raceVal) document.getElementById('gen-race').value = s.raceVal;
             if(s.careerVal) document.getElementById('gen-career').value = s.careerVal;
             
-            // Сначала обновляем списки, чтобы появился нужный option
-            updateSpecsAndUI(); 
+            updateSpecsAndUI();
             if(s.specVal) document.getElementById('gen-spec').value = s.specVal;
 
-            // Восстанавливаем переменные JS
             if(s.statMods) statMods = s.statMods;
             if(s.thresholdMods) thresholdMods = s.thresholdMods;
             if(s.currentStatus) currentStatus = s.currentStatus;
@@ -770,21 +834,16 @@
             if(s.xpLog) xpLog = s.xpLog;
             if(s.skillRanks) skillRanks = s.skillRanks;
             
-            // Восстанавливаем мораль
             updateMorality(s.morality || 50);
-            
-            // Финальное обновление UI с загруженными данными
             updateGeneratorUI();
             
         } catch (e) {
-            console.error("Ошибка загрузки сохранения:", e);
+            console.error("Ошибка загрузки:", e);
         } finally {
-            // ВАЖНО: Только теперь, когда всё загружено, разрешаем автосохранение
             isSaveReady = true;
         }
     }
 
-    // 3. Внедряем автосохранение
     const originalUpdateUI = updateGeneratorUI;
     updateGeneratorUI = function() {
         originalUpdateUI(); 
@@ -792,16 +851,15 @@
     };
 
     document.getElementById('char-name').addEventListener('input', saveSession);
+    
     document.getElementById('morality-val').addEventListener('input', () => {
          updateMorality(document.getElementById('morality-val').value);
          saveSession();
     });
 
-    // 4. Запускаем
     const originalOnLoad = window.onload;
     window.onload = function() {
         if(originalOnLoad) originalOnLoad();
-        // Пытаемся загрузить данные чуть позже, когда DOM готов
         setTimeout(loadSession, 100);
     };
 </script>
