@@ -36,6 +36,20 @@
         .section-divider { @apply relative flex py-2 items-center; }
         .section-divider::before, .section-divider::after { content: ''; @apply flex-grow border-t border-slate-800; }
         .section-title { @apply mx-2 sm:mx-4 text-[10px] uppercase tracking-widest font-bold text-slate-500 bg-slate-950 px-2 font-mono flex items-center gap-2 whitespace-nowrap; }
+/* === ИСПРАВЛЕНИЕ ЦВЕТОВ SELECT === */
+        
+        /* 1. Красим само поле (когда список свернут) */
+        .compact-select {
+            background-color: #0f172a !important; /* Темный фон (Slate-900) */
+            color: #eab308 !important;            /* Желтый текст */
+            border: 1px solid #1e293b !important; /* Тонкая темная рамка */
+        }
+
+        /* 2. Красим выпадающие пункты (когда список развернут) */
+        .compact-select option {
+            background-color: #0f172a;
+            color: #eab308;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-300 font-sans min-h-screen flex flex-col selection:bg-yellow-900 selection:text-white">
