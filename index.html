@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SWRPG Datapad</title>
-    <script src="tailwind.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Dark Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -68,6 +68,7 @@
                 </div>
                 <div class="flex bg-slate-800 rounded-md p-0.5">
                     <button onclick="switchTab('generator')" id="btn-generator" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow">Лист</button>
+<button onclick="switchTab('talents')" id="btn-talents" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">Таланты</button>
                     <button onclick="switchTab('editor')" id="btn-editor" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">База</button>
                 </div>
             </div>
@@ -191,26 +192,29 @@
     <!-- MAIN CONTENT -->
     <main class="flex-grow max-w-7xl mx-auto w-full p-2 sm:p-4 relative space-y-6 sm:space-y-8">
         
-        <!-- === TAB: GENERATOR === -->
-        <div id="tab-generator" class="fade-in space-y-6 sm:space-y-8">
+        <div id="tab-talents" class="hidden fade-in space-y-4">
+            <div class="flex justify-between items-center bg-slate-900 p-2 rounded border border-slate-800">
+                <h2 id="talent-tree-title" class="text-xs uppercase font-bold text-slate-400 tracking-widest">Дерево талантов</h2>
+                <div class="text-[10px] text-slate-500">Потрачено XP: <span id="talent-xp-spent" class="text-white font-bold">0</span></div>
+            </div>
+            <div class="overflow-x-auto pb-4">
+                <div id="talent-tree-container" class="grid grid-cols-4 gap-4 min-w-[600px] mx-auto max-w-4xl relative p-4"></div>
+            </div>
+        </div>
 
-            <!-- CHARACTERISTICS (Responsive Grid: 2 cols mobile, 3 cols tablet+) -->
+        <div id="tab-generator" class="fade-in space-y-6 sm:space-y-8">
+            
             <div>
                 <div class="section-divider"><span class="section-title">Характеристики</span></div>
                 <div id="gen-stats-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"></div>
             </div>
 
-            <!-- VITALS & XP -->
             <div>
                 <div class="section-divider"><span class="section-title">Состояние</span></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <!-- Wounds -->
                     <div id="card-wounds" class="bg-slate-900 p-3 rounded border border-red-900/30 flex flex-col justify-between h-36 sm:h-40 relative overflow-hidden shadow-lg shadow-black/20"></div>
-                    <!-- Strain -->
                     <div id="card-strain" class="bg-slate-900 p-3 rounded border border-blue-900/30 flex flex-col justify-between h-36 sm:h-40 relative overflow-hidden shadow-lg shadow-black/20"></div>
-                    <!-- Soak -->
                     <div class="bg-slate-900 p-2 rounded border border-slate-700 shadow-lg shadow-black/20 h-36 sm:h-40 grid grid-cols-5 gap-2 relative overflow-hidden">
-                        
                         <div class="col-span-2 flex flex-col justify-between border-r border-slate-800 pr-2">
                             <div class="flex justify-between items-start">
                                 <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider leading-tight">Поглощение</div>
@@ -224,26 +228,20 @@
                                 <input type="number" id="val-armor" value="0" min="0" class="w-full bg-slate-950 border border-slate-600 rounded p-0.5 text-center text-xs text-white focus:border-yellow-500 outline-none transition-colors">
                             </div>
                         </div>
-
                         <div class="col-span-3 flex flex-col h-full relative">
                             <div class="flex justify-between items-center mb-1">
                                 <div class="text-[9px] uppercase font-bold text-red-500 tracking-wider">Крит. Раны</div>
                                 <button onclick="addCrit()" class="w-4 h-4 bg-red-900/30 hover:bg-red-500 text-red-500 hover:text-white rounded flex items-center justify-center text-[10px] transition font-bold" title="Добавить рану">+</button>
                             </div>
-                            
-                            <div id="crit-list" class="flex-col gap-1 overflow-y-auto custom-scrollbar h-full pr-1 space-y-1">
-                                </div>
-                            
+                            <div id="crit-list" class="flex-col gap-1 overflow-y-auto custom-scrollbar h-full pr-1 space-y-1"></div>
                             <div id="crit-empty" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
                                 <svg class="w-10 h-10 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
 
-            <!-- SKILLS (Responsive Grid: 1 col mobile, 3 cols desktop) -->
             <div>
                 <div class="section-divider">
                     <span class="section-title">Навыки 
@@ -254,21 +252,14 @@
                 </div>
                 
                 <div id="skill-mobile-tabs" class="flex lg:hidden bg-slate-900 rounded p-1 border border-slate-800 mb-2">
-                    <button onclick="toggleMobileSkills('gen')" id="tab-btn-gen" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded bg-slate-700 text-white shadow transition">
-                        Общие
-                    </button>
-                    <button onclick="toggleMobileSkills('com')" id="tab-btn-com" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded hover:bg-slate-800 text-slate-500 transition">
-                        Боевые
-                    </button>
+                    <button onclick="toggleMobileSkills('gen')" id="tab-btn-gen" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded bg-slate-700 text-white shadow transition">Общие</button>
+                    <button onclick="toggleMobileSkills('com')" id="tab-btn-com" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded hover:bg-slate-800 text-slate-500 transition">Боевые</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-auto min-h-[600px] lg:h-[calc(100vh-500px)]">
-                    
                     <div id="view-skills-gen" class="lg:col-span-2 bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-[400px] lg:h-auto block lg:flex">
-                        
-                        <div class="bg-slate-950 border-b border-slate-800 flex items-center text-[8px] uppercase font-bold text-slate-500 sticky top-0 z-10 h-9">
-                            <div class="w-6 text-center flex-shrink-0"></div>
-                            <div class="flex-grow px-2 flex items-center gap-3">
+                        <div class="bg-slate-950 border-b border-slate-800 flex items-center text-[8px] uppercase font-bold text-slate-500 sticky top-0 z-10 h-9 pr-2">
+                            <div class="w-6 text-center flex-shrink-0"></div> <div class="flex-grow px-2 flex items-center gap-3">
                                 <span class="text-slate-400 text-[10px] tracking-widest">Общие</span>
                                 <div class="flex gap-2 opacity-50 font-normal">
                                     <span class="text-green-500 flex items-center gap-0.5"><span class="border border-green-900 bg-green-900/20 w-3 h-3 flex items-center justify-center rounded-[1px] text-[6px]">К</span></span>
@@ -278,17 +269,15 @@
                             <div class="w-20 pl-2 flex-shrink-0">Ранг</div>
                             <div class="w-24 text-right pr-4 flex-shrink-0">Пул</div>
                         </div>
-
                         <div class="overflow-y-auto flex-grow custom-scrollbar">
-                            <table class="w-full text-xs text-left">
+                            <table class="w-full text-xs text-left border-collapse">
                                 <tbody id="gen-skills-general-body" class="divide-y divide-slate-800/50"></tbody>
                             </table>
                         </div>
                     </div>
 
                     <div id="view-skills-com" class="bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-auto lg:h-auto hidden lg:flex">
-                        
-                        <div class="bg-red-950/20 border-b border-red-900/20 flex items-center text-[8px] uppercase font-bold text-red-400/70 sticky top-0 z-10 h-9">
+                        <div class="bg-red-950/20 border-b border-red-900/20 flex items-center text-[8px] uppercase font-bold text-red-400/70 sticky top-0 z-10 h-9 pr-2">
                             <div class="w-6 text-center flex-shrink-0"></div>
                             <div class="flex-grow px-2 flex items-center gap-2">
                                 <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
@@ -297,18 +286,14 @@
                             <div class="w-20 pl-2 flex-shrink-0">Ранг</div>
                             <div class="w-24 text-right pr-4 flex-shrink-0">Пул</div>
                         </div>
-
                         <div class="overflow-y-auto flex-grow custom-scrollbar">
-                            <table class="w-full text-xs text-left">
+                            <table class="w-full text-xs text-left border-collapse">
                                 <tbody id="gen-skills-combat-body" class="divide-y divide-slate-800/50"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div>
-
-        <!-- === TAB: EDITOR === -->
-        </div> <div id="tab-editor" class="hidden fade-in h-full">
+            </div> </div> <div id="tab-editor" class="hidden fade-in h-full">
             <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-900 p-2 rounded border border-slate-800 mb-4 gap-2">
                 <div class="flex gap-2 w-full sm:w-auto">
                     <button onclick="setEditorMode('races')" id="btn-edit-races" class="flex-1 sm:flex-none px-3 py-1 text-xs font-bold uppercase rounded bg-yellow-600 text-white">Расы</button>
@@ -358,15 +343,547 @@
                 </div>
             </div>
         </div>
+
     </main>
 
     <!-- JS LOGIC -->
     <script>
+// === БАЗА ДАННЫХ ТАЛАНТОВ (С ЦВЕТНЫМИ КУБИКАМИ) ===
+const TALENTS_DB = {
+    // === МИСТИК ===
+"seer": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "seer_1_1", row: 1, col: 1, cost: 5, 
+            name: "Forage", passive: true, 
+            desc: "Убирает <span class='text-slate-500 text-[11px]'>■■</span> с поиска еды/воды. Выживание занимает -50% времени.", 
+            links: [] 
+        },
+        { 
+            id: "seer_1_2", row: 1, col: 2, cost: 5, 
+            name: "Uncanny Reactions", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[11px]'>■</span> к проверкам Готовности.", 
+            links: ["down"] 
+        },
+        { 
+            id: "seer_1_3", row: 1, col: 3, cost: 5, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: [] 
+        },
+        { 
+            id: "seer_1_4", row: 1, col: 4, cost: 5, 
+            name: "Expert Tracker", passive: true, 
+            desc: "Уберите <span class='text-slate-500 text-[11px]'>■</span> за каждый ранг при поиске следов. Время поиска -50%.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "seer_2_1", row: 2, col: 1, cost: 10, 
+            name: "Rapid Reaction", passive: true, 
+            desc: "Получите усталость, чтобы добавить успехи к Инициативе (макс = ранг). Не может превышать ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "seer_2_2", row: 2, col: 2, cost: 10, 
+            name: "Keen Eyed", passive: true, 
+            desc: "Уберите <span class='text-slate-500 text-[11px]'>■</span> из Внимания/Готовности. Поиск занимает -50% времени.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "seer_2_3", row: 2, col: 3, cost: 10, 
+            name: "Uncanny Reactions", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[11px]'>■</span> к проверкам Готовности.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "seer_2_4", row: 2, col: 4, cost: 10, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "seer_3_1", row: 3, col: 1, cost: 15, 
+            name: "Sense Danger", passive: false, 
+            desc: "Раз в сессию уберите <span class='text-slate-500 text-[11px]'>■■</span> из любой проверки.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "seer_3_2", row: 3, col: 2, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["left", "down", "right" ] 
+        },
+        { 
+            id: "seer_3_3", row: 3, col: 3, cost: 15, 
+            name: "Forewarning", passive: false, 
+            desc: "Действие: Все союзники на средней дистанции получают Защиту = Сила. До конца их действий в этой сцене", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "seer_3_4", row: 3, col: 4, cost: 15, 
+            name: "Preemptive Avoidance", passive: false, 
+            desc: "Можешь перевернуть 1 жетон судьбы и выйти из боя свободным действием.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "seer_4_1", row: 4, col: 1, cost: 20, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рангу Силы.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "seer_4_2", row: 4, col: 2, cost: 20, 
+            name: "Sense Advantage", passive: false, 
+            desc: "Раз в сессию можешь убрать <span class='text-slate-500 text-[11px]'>■■</span> из проверки Силы как моневр.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "seer_4_3", row: 4, col: 3, cost: 20, 
+            name: "The Force Is My Ally", passive: false, 
+            desc: "Раз в сессию: получите 2 усталости и используйте Силу как маневр.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "seer_4_4", row: 4, col: 4, cost: 20, 
+            name: "Dodge", passive: false, 
+            desc: "Реакция: Когда вы цель атаки, можете выполнить Dodge. Получи усталось, не больше чем ранг уворота, и ослабь на столько же раз пул атаки", 
+            links: [] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "seer_5_1", row: 5, col: 1, cost: 25, 
+            name: "Rapid Reaction", passive: true, 
+            desc: "Получите усталости, прибавьте столько же успехов при проверке инициативы, потраченная усталость не может превышать ранг таланта", 
+            links: ["right"] 
+        },
+        { 
+            id: "seer_5_2", row: 5, col: 2, cost: 25, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "seer_5_3", row: 5, col: 3, cost: 25, 
+            name: "Natural Mystic", passive: false, 
+            desc: "Раз в сессию перебросьте проверку Силы.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "seer_5_4", row: 5, col: 4, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рангу Силы.", 
+            links: [] 
+        },
+    ],
+"ataru": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "ataru_1_1", row: 1, col: 1, cost: 5, 
+            name: "Conditioned", passive: true, 
+            desc: "Убирайте <span class='text-slate-500 text-[11px]'>■</span> за ранг таланта из Атлетики/Координации. Снижает урон/усталость от падения.", 
+            links: ["down"] 
+        },
+        { 
+            id: "ataru_1_2", row: 1, col: 2, cost: 5, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: [] 
+        },
+        { 
+            id: "ataru_1_3", row: 1, col: 3, cost: 5, 
+            name: "Jump Up", passive: false, 
+            desc: "Раз в раунд: Встать из положения лежа/ничком свободным действием.", 
+            links: ["down"] 
+        },
+        { 
+            id: "ataru_1_4", row: 1, col: 4, cost: 5, 
+            name: "Quick Draw", passive: false, 
+            desc: "Раз в раунд: Достать оружие или предмет свободным действием.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "ataru_2_1", row: 2, col: 1, cost: 10, 
+            name: "Dodge", passive: false, 
+            desc: "Реакция: Когда цель атаки — получи усталость (макс = ранг), чтобы увеличить сложность атаки на столько же.", 
+            links: ["down"] 
+        },
+        { 
+            id: "ataru_2_2", row: 2, col: 2, cost: 10, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "ataru_2_3", row: 2, col: 3, cost: 10, 
+            name: "Ataru Technique", passive: true, 
+            desc: "Используйте Ловкость вместо Физ. силы для проверок Светового меча.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "ataru_2_4", row: 2, col: 4, cost: 10, 
+            name: "Quick Strike", passive: true, 
+            desc: "Добавь <span class='text-blue-400 font-bold text-[11px]'>■</span> против целей, которые еще не ходили в этой сцене.", 
+            links: [] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "ataru_3_1", row: 3, col: 1, cost: 15, 
+            name: "Quick Strike", passive: true, 
+            desc: "Добавь <span class='text-blue-400 font-bold text-[11px]'>■</span> против целей, которые еще не ходили в этой сцене.", 
+            links: ["down"] 
+        },
+        { 
+            id: "ataru_3_2", row: 3, col: 2, cost: 15, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "ataru_3_3", row: 3, col: 3, cost: 15, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "ataru_3_4", row: 3, col: 4, cost: 15, 
+            name: "Improved Parry", passive: true, 
+            desc: "При парировании: если атака врага дала 'Провал' (Despair) или 3 Угрозы, нанеси ответный удар (базовый урон) после его атаки.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "ataru_4_1", row: 4, col: 1, cost: 20, 
+            name: "Dodge", passive: false, 
+            desc: "Реакция: Получи усталость (макс = ранг), увеличь сложность входящей атаки на столько же.", 
+            links: ["down"] 
+        },
+        { 
+            id: "ataru_4_2", row: 4, col: 2, cost: 20, 
+            name: "Hawk Bat Swoop", passive: false, 
+            desc: "Действие: Атака Мечом. Добавь кубы Силы. За 1 ○ можно сблизиться с целью перед атакой. Остальные ○ дают Преимущества.", 
+            links: ["down"] 
+        },
+        { 
+            id: "ataru_4_3", row: 4, col: 3, cost: 20, 
+            name: "Saber Swarm", passive: false, 
+            desc: "Маневр: Получи 1 усталость. Следующая атака Мечом получает свойство 'Спаренное' (Linked) с рангом = ранг Силы.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "ataru_4_4", row: 4, col: 4, cost: 20, 
+            name: "Conditioned", passive: true, 
+            desc: "Убирайте <span class='text-slate-500 text-[11px]'>■</span> за ранг из Атлетики/Координации. Снижает урон от падения.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "ataru_5_1", row: 5, col: 1, cost: 25, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["right"] 
+        },
+        { 
+            id: "ataru_5_2", row: 5, col: 2, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к любой характеристике (макс 6).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "ataru_5_3", row: 5, col: 3, cost: 25, 
+            name: "Saber Throw", passive: false, 
+            desc: "Действие: Атака Мечом на СРЕДНЕЙ дистанции (как дальний бой). Добавь кубы Силы к урону. За 1 ○ меч возвращается в руку.", 
+            links: ["left"] 
+        },
+        { 
+            id: "ataru_5_4", row: 5, col: 4, cost: 25, 
+            name: "Balance", passive: false, 
+            desc: "Конец сцены: Добавь кубы Силы к восстановлению Усталости. Каждый ○ восстанавливает 1 доп. усталость.", 
+            links: [] 
+        },
+    ],
+"healer": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "healer_1_1", row: 1, col: 1, cost: 5, 
+            name: "Surgeon", passive: true, 
+            desc: "При проверке Медицины для восстановления ран, цель восстанавливает +1 рану за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "healer_1_2", row: 1, col: 2, cost: 5, 
+            name: "Healing Trance", passive: false, 
+            desc: "Действие: Фиксируйте 1 кубик Силы. После сцены верните его и вылечи 1 рану за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "healer_1_3", row: 1, col: 3, cost: 5, 
+            name: "Rapid Recovery", passive: true, 
+            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "healer_1_4", row: 1, col: 4, cost: 5, 
+            name: "Physician", passive: true, 
+            desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", 
+            links: [] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "healer_2_1", row: 2, col: 1, cost: 10, 
+            name: "Physician", passive: true, 
+            desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "healer_2_2", row: 2, col: 2, cost: 10, 
+            name: "Physician", passive: true, 
+            desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", 
+            links: ["down", "left"] 
+        },
+        { 
+            id: "healer_2_3", row: 2, col: 3, cost: 10, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["right"] 
+        },
+        { 
+            id: "healer_2_4", row: 2, col: 4, cost: 10, 
+            name: "Healing Trance", passive: false, 
+            desc: "Действие: Фиксируйте 1 кубик Силы. После сцены верните его и вылечи 1 рану за ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "healer_3_1", row: 3, col: 1, cost: 15, 
+            name: "Healing Trance", passive: false, 
+            desc: "Действие: Фиксируйте 1 кубик Силы. После сцены верните его и вылечи 1 рану за ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "healer_3_2", row: 3, col: 2, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "healer_3_3", row: 3, col: 3, cost: 15, 
+            name: "Knowledgeable Healing", passive: false, 
+            desc: "Инцидент: При лечении союзника переверни жетон Судьбы, чтобы вылечить доп. раны = ранг Знания (Ксенология).", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "healer_3_4", row: 3, col: 4, cost: 15, 
+            name: "Rapid Recovery", passive: true, 
+            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "healer_4_1", row: 4, col: 1, cost: 20, 
+            name: "Surgeon", passive: true, 
+            desc: "При проверке Медицины для восстановления ран, цель восстанавливает +1 рану за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "healer_4_2", row: 4, col: 2, cost: 20, 
+            name: "Improved Healing Trance", passive: true, 
+            desc: "При использовании Healing Trance можно пройти проверку Стойкости, чтобы вылечить Крит. рану.", 
+            links: [] 
+        },
+        { 
+            id: "healer_4_3", row: 4, col: 3, cost: 20, 
+            name: "Calming Aura", passive: false, 
+            desc: "Реакция: Когда враг целится в вас способностью Силы, уменьшите его пул очков Силы на 1.", 
+            links: ["down"] 
+        },
+        { 
+            id: "healer_4_4", row: 4, col: 4, cost: 20, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: [] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "healer_5_1", row: 5, col: 1, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "Увеличьте одну из характеристик на 1 (макс. 6).", 
+            links: ["right"] 
+        },
+        { 
+            id: "healer_5_2", row: 5, col: 2, cost: 25, 
+            name: "Natural Doctor", passive: false, 
+            desc: "Инцидент: Раз в сессию можете перебросить одну проверку Медицины.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "healer_5_3", row: 5, col: 3, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рангу Силы.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "healer_5_4", row: 5, col: 4, cost: 25, 
+            name: "Improved Calming Aura", passive: false, 
+            desc: "Маневр: Получите 2 усталости, чтобы распространить Calming Aura на союзников (кол-во = Воля) в кор. дистанции.", 
+            links: ["left"] 
+        },
+    ],
+"niman": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "niman_1_1", row: 1, col: 1, cost: 5, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: [] 
+        },
+        { 
+            id: "niman_1_2", row: 1, col: 2, cost: 5, 
+            name: "Nobody’s Fool", passive: true, 
+            desc: "Повысьте сложность проверок Обаяния, Запугивания или Обмана против вас (1 раз за ранг).", 
+            links: ["down"] 
+        },
+        { 
+            id: "niman_1_3", row: 1, col: 3, cost: 5, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: [] 
+        },
+        { 
+            id: "niman_1_4", row: 1, col: 4, cost: 5, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: [] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "niman_2_1", row: 2, col: 1, cost: 10, 
+            name: "Defensive Training", passive: true, 
+            desc: "Световые мечи, Рукопашная и Холодное оружие получают свойство Защитное (рейтинг = ранг таланта).", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "niman_2_2", row: 2, col: 2, cost: 10, 
+            name: "Niman Technique", passive: true, 
+            desc: "Используйте Волю вместо Силы для проверок Светового меча.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "niman_2_3", row: 2, col: 3, cost: 10, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["down"] 
+        },
+        { 
+            id: "niman_2_4", row: 2, col: 4, cost: 10, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "niman_3_1", row: 3, col: 1, cost: 15, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "niman_3_2", row: 3, col: 2, cost: 15, 
+            name: "Sense Emotions", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[11px]'>■</span> ко всем проверкам Обаяния, Запугивания и Обмана.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "niman_3_3", row: 3, col: 3, cost: 15, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "niman_3_4", row: 3, col: 4, cost: 15, 
+            name: "Defensive Training", passive: true, 
+            desc: "Световые мечи, Рукопашная и Холодное оружие получают свойство Защитное (рейтинг = ранг таланта).", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "niman_4_1", row: 4, col: 1, cost: 20, 
+            name: "Sum Djem", passive: true, 
+            desc: "При проверке Светового меча: потратьте Триумф или 2 Преимущества, чтобы обезоружить противника.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "niman_4_2", row: 4, col: 2, cost: 20, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "niman_4_3", row: 4, col: 3, cost: 20, 
+            name: "Draw Closer", passive: false, 
+            desc: "Действие: Атака Световым мечом (средняя дистанция). Добавь ○ Силы к проверке. За 1 ○ притяни цель или добавь 1 успех.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "niman_4_4", row: 4, col: 4, cost: 20, 
+            name: "Center of Being", passive: false, 
+            desc: "Маневр: До след. хода увеличьте крит. рейтинг атак по вам на 1 за каждый ранг таланта.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "niman_5_1", row: 5, col: 1, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: ["right"] 
+        },
+        { 
+            id: "niman_5_2", row: 5, col: 2, cost: 25, 
+            name: "Force Assault", passive: true, 
+            desc: "При промахе Световым мечом: потратьте Триумф или 3 Успеха, чтобы применить Силу Move как маневр.", 
+            links: ["left"] 
+        },
+        { 
+            id: "niman_5_3", row: 5, col: 3, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рейтингу Силы.", 
+            links: ["right"] 
+        },
+        { 
+            id: "niman_5_4", row: 5, col: 4, cost: 25, 
+            name: "Improved Center of Being", passive: true, 
+            desc: "Маневр: Получите 1 усталость и используйте Center of Being как свободное действие.", 
+            links: ["left"] 
+        },
+    ],
+
+};
+
+// Хранит ID купленных талантов
         const COMBAT_SKILLS_LIST = ["Световой меч", "Драка", "Холодное оружие", "Артиллерия", "Стрельба (Лёгкое)", "Стрельба (Тяжёлое)"];
         const ALL_SKILLS = [
             { name: "Астронавигация", char: "intellect" }, { name: "Атлетика", char: "brawn" }, 
             { name: "Внимательность", char: "cunning" }, { name: "Воровство", char: "cunning" }, 
-            { name: "Выживание", char: "cunning" }, { name: "Готовность", char: "willpower" }, 
+            { name: "Выживание", char: "cunning" }, { name: "Готовность", char: "willpower" }, { name: "Дисциплина", char: "willpower" }, 
             { name: "Запугивание", char: "willpower" }, { name: "Знание (Вселенная)", char: "intellect" }, 
             { name: "Знание (Внешнее кольцо)", char: "intellect" }, { name: "Знание (Война)", char: "intellect" }, 
             { name: "Знание (Преступность)", char: "intellect" }, { name: "Компьютеры", char: "intellect" }, 
@@ -414,10 +931,209 @@
                 { id: "cerean", name: "Цереане", stats: { brawn: 2, agility: 1, intellect: 3, cunning: 2, willpower: 2, presence: 2 }, baseWounds: 10, baseStrain: 13, startXP: 90, special: "Инициатива +1 ранг" }
             ],
             careers: [
-                { id: "mystic", name: "Мистик", careerSkills: ["Обаяние", "Запугивание", "Знание (Вселенная)", "Знание (Внешнее кольцо)", "Внимательность", "Готовность"], specializations: [{ id: "seer", name: "Провидец", bonusSkills: ["Знание (Вселенная)", "Внимательность", "Готовность", "Уличное чутьё"] }, { id: "advisor", name: "Советник", bonusSkills: ["Обаяние", "Переговоры", "Знание (Вселенная)", "Лидерство"] }] },
-                { id: "soldier", name: "Солдат", careerSkills: ["Атлетика", "Драка", "Стрельба (Лёгкое)", "Стрельба (Тяжёлое)", "Выживание", "Запугивание", "Внимательность", "Знание (Война)"], specializations: [{ id: "sharpshooter", name: "Снайпер", bonusSkills: ["Внимательность", "Хладнокровие", "Стрельба (Тяжёлое)", "Стрельба (Лёгкое)"] }, { id: "commando", name: "Коммандо", bonusSkills: ["Драка", "Стойкость", "Холодное оружие", "Выживание"] }] },
-                { id: "smuggler", name: "Контрабандист", careerSkills: ["Координация", "Обман", "Внимательность", "Пилотирование (Космос)", "Скрытность", "Уличное чутьё", "Внимательность", "Знание (Преступность)"], specializations: [{ id: "scoundrel", name: "Прохвост", bonusSkills: ["Обаяние", "Хладнокровие", "Обман", "Стрельба (Лёгкое)"] }] }
-            ]
+    // === КОНСУЛ (FaD) ===
+    { 
+        id: "consular", 
+        name: "Консул", 
+        careerSkills: ["Хладнокровие", "Дисциплина", "Знание (Образование)", "Знание (Мифы и легенды)", "Лидерство", "Переговоры"], 
+        specializations: [
+            { id: "healer", name: "Лекарь", bonusSkills: ["Дисциплина", "Знание (Образование)", "Знание (Мифы и легенды)", "Медицина"] },
+            { id: "niman", name: "Ученик Нимана", bonusSkills: ["Дисциплина", "Лидерство", "Световой меч", "Переговоры"] },
+            { id: "sage", name: "Мудрец", bonusSkills: ["Астронавигация", "Обаяние", "Хладнокровие", "Знание (Мифы и легенды)"] }
+        ] 
+    },
+
+    // === ЗАЩИТНИК (FaD) ===
+    { 
+        id: "guardian", 
+        name: "Защитник", 
+        careerSkills: ["Драка", "Хладнокровие", "Дисциплина", "Холодное оружие", "Стойкость", "Готовность"], 
+        specializations: [
+            { id: "peacekeeper", name: "Миротворец", bonusSkills: ["Дисциплина", "Лидерство", "Внимательность", "Пилотирование (Планетарное)"] },
+            { id: "protector", name: "Телохранитель", bonusSkills: ["Атлетика", "Медицина", "Стрельба (Лёгкое)", "Стойкость"] },
+            { id: "soresu", name: "Соресу-защитник", bonusSkills: ["Дисциплина", "Бдительность", "Световой меч", "Интеллект"] } // *Навыки восстановлены вручную, т.к. в PDF пропуск
+        ] 
+    },
+
+    // === МИСТИК (FaD) ===
+    { 
+        id: "mystic", 
+        name: "Мистик", 
+        careerSkills: ["Обаяние", "Запугивание", "Знание (Внешнее Кольцо)", "Знание (Мифы и легенды)", "Внимательность", "Готовность"], 
+        specializations: [
+            { id: "advisor", name: "Советник", bonusSkills: ["Обаяние", "Обман", "Переговоры", "Уличное чутьё"] },
+            { id: "makashi", name: "Дуэлист Макаши", bonusSkills: ["Обаяние", "Хладнокровие", "Координация", "Световой меч"] },
+            { id: "seer", name: "Провидец", bonusSkills: ["Дисциплина", "Знание (Мифы и легенды)", "Выживание", "Готовность"] }
+        ] 
+    },
+
+    // === ИЩЕЙКА (FaD) ===
+    { 
+        id: "seeker", 
+        name: "Ищейка", 
+        careerSkills: ["Знание (Ксенология)", "Пилотирование (Космос)", "Пилотирование (Планетарное)", "Стрельба (Тяжёлое)", "Выживание", "Готовность"], 
+        specializations: [
+            { id: "ataru", name: "Боец Атари", bonusSkills: ["Атлетика", "Координация", "Световой меч", "Внимательность"] },
+            { id: "hunter", name: "Охотник", bonusSkills: ["Координация", "Стрельба (Тяжёлое)", "Скрытность", "Готовность"] },
+            { id: "pathfinder", name: "Следопыт", bonusSkills: ["Медицина", "Стрельба (Лёгкое)", "Стойкость", "Выживание"] }
+        ] 
+    },
+
+    // === СТРАЖ (FaD) ===
+    { 
+        id: "sentinel", 
+        name: "Страж", 
+        careerSkills: ["Компьютеры", "Обман", "Знание (Центральные миры)", "Внимательность", "Воровство", "Скрытность"], 
+        specializations: [
+            { id: "artisan", name: "Ремесленник", bonusSkills: ["Компьютеры", "Знание (Образование)", "Механика", "Астронавигация"] },
+            { id: "shadow", name: "Тень", bonusSkills: ["Знание (Преступный мир)", "Воровство", "Скрытность", "Уличное чутьё"] },
+            { id: "shien", name: "Эксперт Шиен", bonusSkills: ["Атлетика", "Световой меч", "Стойкость", "Воровство"] }
+        ] 
+    },
+
+    // === ВОИН (FaD) ===
+    { 
+        id: "warrior", 
+        name: "Воин", 
+        careerSkills: ["Атлетика", "Драка", "Хладнокровие", "Холодное оружие", "Внимательность", "Выживание"], 
+        specializations: [
+            { id: "aggressor", name: "Агрессор", bonusSkills: ["Запугивание", "Знание (Военное дело)", "Стрельба (Тяжёлое)", "Уличное чутьё"] },
+            { id: "shicho", name: "Рыцарь Ши-Чо", bonusSkills: ["Атлетика", "Координация", "Световой меч", "Холодное оружие"] },
+            { id: "starfighter", name: "Пилот Ас", bonusSkills: ["Астронавигация", "Артиллерия", "Механика", "Пилотирование (Космос)"] }
+        ] 
+    },
+
+    // === ИССЛЕДОВАТЕЛЬ (EotE) ===
+    {
+        id: "explorer",
+        name: "Исследователь",
+        careerSkills: ["Астронавигация", "Внимательность", "Выживание", "Знание (Внешнее Кольцо)", "Знание (Ксенология)", "Знание (Мифы и легенды)", "Пилотирование (Космос)", "Хладнокровие"],
+        specializations: [
+            { id: "archaeologist", name: "Археолог", bonusSkills: ["Атлетика", "Дисциплина", "Знание (Мифы и легенды)", "Знание (Образование)"] },
+            { id: "driver", name: "Водитель", bonusSkills: ["Артиллерия", "Механика", "Пилотирование (Планетарное)", "Хладнокровие"] },
+            { id: "fringer", name: "Ловчий", bonusSkills: ["Выживание", "Знание (Ксенология)", "Скрытность", "Стрельба (Тяжёлое)"] },
+            { id: "scout", name: "Разведчик", bonusSkills: ["Атлетика", "Выживание", "Медицина", "Пилотирование (Планетарное)"] },
+            { id: "trader", name: "Торговец", bonusSkills: ["Знание (Центральные миры)", "Знание (Преступный мир)", "Обман", "Переговоры"] }
+        ]
+    },
+
+    // === КОЛОНИСТ (EotE) ===
+    {
+        id: "colonist",
+        name: "Колонист",
+        careerSkills: ["Знание (Мифы и легенды)", "Знание (Образование)", "Знание (Центральные миры)", "Уличное чутьё", "Лидерство", "Обман", "Переговоры", "Обаяние"],
+        specializations: [
+            { id: "performer", name: "Актёр", bonusSkills: ["Драка", "Координация", "Обман", "Обаяние"] },
+            { id: "doctor", name: "Врач", bonusSkills: ["Знание (Образование)", "Медицина", "Стойкость", "Хладнокровие"] },
+            { id: "entrepreneur", name: "Делец", bonusSkills: ["Дисциплина", "Знание (Образование)", "Знание (Преступный мир)", "Переговоры"] },
+            { id: "marshal", name: "Маршал", bonusSkills: ["Готовность", "Запугивание", "Знание (Преступный мир)", "Стрельба (Лёгкое)"] },
+            { id: "politico", name: "Политик", bonusSkills: ["Запугивание", "Знание (Центральные миры)", "Обман", "Обаяние"] },
+            { id: "scholar", name: "Учёный", bonusSkills: ["Внимательность", "Знание (Внешнее Кольцо)", "Знание (Ксенология)", "Знание (Преступный мир)"] }
+        ]
+    },
+
+    // === КОНТРАБАНДИСТ (EotE) ===
+    {
+        id: "smuggler",
+        name: "Контрабандист",
+        careerSkills: ["Внимательность", "Готовность", "Знание (Преступный мир)", "Уличное чутьё", "Координация", "Обман", "Пилотирование (Космос)", "Воровство"],
+        specializations: [
+            { id: "thief", name: "Вор", bonusSkills: ["Готовность", "Компьютеры", "Воровство", "Скрытность"] },
+            { id: "gambler", name: "Игрок", bonusSkills: ["Компьютеры", "Обман", "Воровство", "Хладнокровие"] },
+            { id: "scoundrel", name: "Мошенник", bonusSkills: ["Обман", "Стрельба (Лёгкое)", "Хладнокровие", "Обаяние"] },
+            { id: "charmer", name: "Обольститель", bonusSkills: ["Лидерство", "Переговоры", "Хладнокровие", "Обаяние"] },
+            { id: "smuggler_pilot", name: "Пилот (Контрабандист)", bonusSkills: ["Артиллерия", "Астронавигация", "Пилотирование (Космос)", "Пилотирование (Планетарное)"] },
+            { id: "gunslinger", name: "Стрелок", bonusSkills: ["Запугивание", "Знание (Внешнее Кольцо)", "Стрельба (Лёгкое)", "Хладнокровие"] }
+        ]
+    },
+
+    // === НАЁМНИК (EotE) ===
+    {
+        id: "hired_gun",
+        name: "Наёмник",
+        careerSkills: ["Атлетика", "Драка", "Готовность", "Дисциплина", "Холодное оружие", "Пилотирование (Планетарное)", "Стойкость", "Стрельба (Лёгкое)"],
+        specializations: [
+            { id: "mercenary", name: "Боевик", bonusSkills: ["Артиллерия", "Дисциплина", "Лидерство", "Стрельба (Тяжёлое)"] },
+            { id: "enforcer", name: "Головорез", bonusSkills: ["Драка", "Запугивание", "Знание (Преступный мир)", "Уличное чутьё"] },
+            { id: "heavy", name: "Громила", bonusSkills: ["Артиллерия", "Внимательность", "Стойкость", "Стрельба (Тяжёлое)"] }
+        ]
+    },
+
+    // === АС (AoR) ===
+    {
+        id: "ace",
+        name: "Ас",
+        careerSkills: ["Астронавигация", "Хладнокровие", "Артиллерия", "Механика", "Внимательность", "Пилотирование (Космос)", "Пилотирование (Планетарное)", "Стрельба (Лёгкое)"],
+        specializations: [
+            { id: "rigger", name: "Авиамеханик", bonusSkills: ["Артиллерия", "Знание (Преступный мир)", "Механика", "Стойкость"] },
+            { id: "ace_gunner", name: "Артиллерист", bonusSkills: ["Артиллерия", "Дисциплина", "Стойкость", "Стрельба (Тяжёлое)"] },
+            { id: "beast_rider", name: "Наездник", bonusSkills: ["Атлетика", "Внимательность", "Выживание", "Знание (Ксенология)"] },
+            { id: "ace_pilot", name: "Пилот (Ас)", bonusSkills: ["Артиллерия", "Астронавигация", "Пилотирование (Космос)", "Пилотирование (Планетарное)"] },
+            { id: "hotshot", name: "Сорвиголова", bonusSkills: ["Координация", "Пилотирование (Космос)", "Пилотирование (Планетарное)", "Хладнокровие"] }
+        ]
+    },
+
+    // === ДИПЛОМАТ (AoR) ===
+    {
+        id: "diplomat",
+        name: "Дипломат",
+        careerSkills: ["Обаяние", "Обман", "Знание (Центральные миры)", "Знание (Внешнее Кольцо)", "Знание (Ксенология)", "Знание (Мифы и легенды)", "Лидерство", "Переговоры"],
+        specializations: [
+            { id: "agitator", name: "Агитатор", bonusSkills: ["Запугивание", "Знание (Преступный мир)", "Уличное чутьё", "Обман"] },
+            { id: "advocate", name: "Адвокат", bonusSkills: ["Готовность", "Запугивание", "Обман", "Переговоры"] },
+            { id: "analyst", name: "Аналитик", bonusSkills: ["Внимательность", "Знание (Военное дело)", "Знание (Образование)", "Компьютеры"] },
+            { id: "quartermaster", name: "Интендант", bonusSkills: ["Готовность", "Компьютеры", "Переговоры", "Воровство"] },
+            { id: "ambassador", name: "Посол", bonusSkills: ["Дисциплина", "Знание (Центральные миры)", "Переговоры", "Обаяние"] },
+            { id: "propagandist", name: "Пропагандист", bonusSkills: ["Внимательность", "Знание (Военное дело)", "Обман", "Обаяние"] }
+        ]
+    },
+
+    // === ИНЖЕНЕР (AoR) ===
+    {
+        id: "engineer",
+        name: "Инженер",
+        careerSkills: ["Атлетика", "Компьютеры", "Внимательность", "Готовность", "Знание (Образование)", "Механика", "Пилотирование (Космос)", "Стрельба (Лёгкое)"],
+        specializations: [
+            { id: "saboteur", name: "Диверсант", bonusSkills: ["Координация", "Механика", "Воровство", "Скрытность"] },
+            { id: "mechanic", name: "Механик", bonusSkills: ["Драка", "Механика", "Пилотирование (Космос)", "Воровство"] },
+            { id: "scientist", name: "Разработчик", bonusSkills: ["Знание (Мифы и легенды)", "Знание (Образование)", "Компьютеры", "Медицина"] }
+        ]
+    },
+
+    // === КОМАНДИР (AoR) ===
+    {
+        id: "commander",
+        name: "Командир",
+        careerSkills: ["Запугивание", "Лидерство", "Хладнокровие", "Внимательность", "Готовность", "Дисциплина", "Знание (Военное дело)", "Стрельба (Лёгкое)"],
+        specializations: [
+            { id: "commodore", name: "Командор", bonusSkills: ["Астронавигация", "Компьютеры", "Знание (Внешнее Кольцо)", "Знание (Образование)"] },
+            { id: "squadron_leader", name: "Лидер эскадрильи", bonusSkills: ["Артиллерия", "Механика", "Пилотирование (Космос)", "Пилотирование (Планетарное)"] },
+            { id: "tactician", name: "Тактик", bonusSkills: ["Дисциплина", "Драка", "Лидерство", "Стрельба (Тяжёлое)"] }
+        ]
+    },
+
+    // === СОЛДАТ (AoR) ===
+    {
+        id: "soldier",
+        name: "Солдат",
+        careerSkills: ["Атлетика", "Драка", "Холодное оружие", "Стрельба (Лёгкое)", "Стрельба (Тяжёлое)", "Выживание", "Медицина", "Знание (Военное дело)"],
+        specializations: [
+            { id: "commando", name: "Коммандос", bonusSkills: ["Холодное оружие", "Выживание", "Драка", "Стойкость"] },
+            { id: "medic", name: "Медик", bonusSkills: ["Медицина", "Стойкость", "Знание (Ксенология)", "Выживание"] }, // *Медик отсутствовал в таблице, но он стандартный для Солдата, добавил на всякий случай, если нужно
+            { id: "sharpshooter", name: "Снайпер", bonusSkills: ["Хладнокровие", "Стрельба (Лёгкое)", "Стрельба (Тяжёлое)", "Внимательность"] } // *Аналогично
+        ]
+    },
+    
+    // === УНИВЕРСАЛЬНЫЙ ===
+    {
+        id: "universal",
+        name: "Универсальный",
+        careerSkills: [], // Нет карьерных навыков
+        specializations: [
+            { id: "recruit", name: "Рекрут", bonusSkills: ["Атлетика", "Выживание", "Готовность", "Дисциплина"] }
+        ]
+    }
+],
         };
 
         let db = JSON.parse(JSON.stringify(DEFAULT_DB));
@@ -435,15 +1151,34 @@
         window.onload = function() { loadDatabase(); initGenerator(); switchTab('generator'); updateMorality(50); };
 
         function switchTab(tab) {
-            document.getElementById('tab-generator').classList.add('hidden');
-            document.getElementById('tab-editor').classList.add('hidden');
-            document.getElementById('btn-generator').className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400";
-            document.getElementById('btn-editor').className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400";
-            document.getElementById('tab-' + tab).classList.remove('hidden');
-            document.getElementById('btn-' + tab).className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow";
-            if(tab === 'editor') setEditorMode('races'); 
-            if(tab === 'generator') initGenerator(); 
-        }
+    // 1. Скрываем все вкладки
+    const tabGen = document.getElementById('tab-generator');
+    if (tabGen) tabGen.classList.add('hidden');
+    
+    const tabEdit = document.getElementById('tab-editor');
+    if (tabEdit) tabEdit.classList.add('hidden');
+    
+    const tabTalents = document.getElementById('tab-talents');
+    if (tabTalents) tabTalents.classList.add('hidden');
+
+    // 2. Сбрасываем стили кнопок
+    ['btn-generator', 'btn-editor', 'btn-talents'].forEach(id => {
+        const btn = document.getElementById(id);
+        if(btn) btn.className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400";
+    });
+
+    // 3. Показываем выбранную
+    const activeTab = document.getElementById('tab-' + tab);
+    if(activeTab) activeTab.classList.remove('hidden');
+    
+    const activeBtn = document.getElementById('btn-' + tab);
+    if(activeBtn) activeBtn.className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow";
+
+    // 4. Логика инициализации
+    if(tab === 'talents') initTalentTree();
+    if(tab === 'generator') updateGeneratorUI();
+    if(tab === 'editor') setEditorMode('races');
+}
 
         function loadDatabase() { const saved = localStorage.getItem('swrpg_db_v3'); if (saved) { try { db = JSON.parse(saved); } catch(e) { db = JSON.parse(JSON.stringify(DEFAULT_DB)); } } }
         function saveDatabase() { localStorage.setItem('swrpg_db_v3', JSON.stringify(db)); }
@@ -486,6 +1221,7 @@
                 career.specializations.forEach(s => { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.name; specSel.appendChild(opt); });
             }
             updateGeneratorUI();
+initTalentTree();
         }
 
         function modifyStat(statKey, delta) {
@@ -547,32 +1283,7 @@
                 statusLabel.className = `text-[8px] uppercase font-bold ml-2 transition-colors leading-none ${textClass}`;
             }
         }
-
-        function applyXP(action) {
-            const inputId = action === 'add' ? 'xp-add-input' : 'xp-spend-input';
-            const val = parseInt(document.getElementById(inputId).value) || 0;
-            
-            if (val !== 0) {
-                xpHistory.push({ earned: xpData.earned, spent: xpData.spent, log: [...xpLog] });
-                if (xpHistory.length > 10) xpHistory.shift();
-
-                let logEntry = "";
-                if (action === 'add') {
-                    xpData.earned += val;
-                    logEntry = val > 0 ? `<span class="text-green-500">+${val} Награда</span>` : `<span class="text-red-400">${val} Коррекция</span>`;
-                } else if (action === 'spend') {
-                    xpData.spent += val;
-                    logEntry = val > 0 ? `<span class="text-red-400">-${val} Трата</span>` : `<span class="text-green-500">+${Math.abs(val)} Возврат</span>`;
-                }
-                
-                xpLog.unshift(logEntry);
-                if (xpLog.length > 3) xpLog.pop();
-
-                document.getElementById(inputId).value = '';
-                updateGeneratorUI();
-            }
-        }
-
+      
         function undoLastXP() {
             if (xpHistory.length === 0) return;
             const state = xpHistory.pop();
@@ -619,49 +1330,55 @@
             const totalPool = Math.max(charVal, rank);
             const yellow = Math.min(charVal, rank);
             const green = totalPool - yellow;
-            const displayLimit = Math.max(totalPool + 1, 6); 
-
+            
+            // Иконки карьеры/специализации
             let icon = "";
             let rowClass = "hover:bg-slate-800/50 transition border-l-2 border-transparent"; 
 
             if (isSpec) {
-                icon = `<div class="w-4 h-4 rounded-sm bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center text-[9px] font-bold cursor-help" title="Навык специализации (Карьерный)">С</div>`;
+                icon = `<div class="w-4 h-4 rounded-sm bg-blue-500/20 border border-blue-500 text-blue-400 flex items-center justify-center text-[9px] font-bold cursor-help" title="Специализация">С</div>`;
                 rowClass = "bg-blue-900/10 border-l-2 border-blue-500 hover:bg-slate-800/50 transition";
             } else if (isCareer) {
-                icon = `<div class="w-4 h-4 rounded-sm bg-green-500/20 border border-green-500 text-green-400 flex items-center justify-center text-[9px] font-bold cursor-help" title="Карьерный навык">К</div>`;
+                icon = `<div class="w-4 h-4 rounded-sm bg-green-500/20 border border-green-500 text-green-400 flex items-center justify-center text-[9px] font-bold cursor-help" title="Карьера">К</div>`;
                 rowClass = "bg-green-900/10 border-l-2 border-green-500 hover:bg-slate-800/50 transition";
             } else {
                 icon = `<div class="w-4 h-4 opacity-5"></div>`;
             }
             
+            // Колонка РАНГ (Квадратики для прокачки)
             let rankHtml = '<div class="flex gap-0.5">';
             for(let i=1; i<=5; i++) {
                 const filled = i <= rank;
                 const bg = filled ? "bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.5)] border-yellow-600" : "bg-slate-800 border-slate-700 hover:bg-slate-700";
-                rankHtml += `<div onclick="setSkillRank('${skill.name}', ${i})" class="rank-box w-2 h-3 rounded-[1px] border cursor-pointer ${bg}" title="Rank ${i}"></div>`;
+                rankHtml += `<div onclick="setSkillRank('${skill.name}', ${i})" class="rank-box w-2 h-3 rounded-[1px] border cursor-pointer ${bg}" title="Ранг ${i}"></div>`;
             }
             rankHtml += '</div>';
 
-            let poolHtml = '<div class="flex gap-0.5 items-center justify-end">';
-            for(let i=0; i<displayLimit; i++) {
-                if(i < yellow) poolHtml += `<div onclick="toggleSkillDie('${skill.name}', 'yellow')" class="shape-hex w-3 h-3 bg-yellow-400 border border-yellow-600 cursor-pointer hover:brightness-110"></div>`;
-                else if(i < yellow + green) poolHtml += `<div onclick="toggleSkillDie('${skill.name}', 'green')" class="shape-rhombus w-3 h-3 bg-green-500 border border-green-600 cursor-pointer hover:brightness-110"></div>`;
-                else if(i === yellow + green) poolHtml += `<div onclick="toggleSkillDie('${skill.name}', 'empty')" class="w-3 h-3 bg-slate-800 border border-slate-700 rounded-sm cursor-pointer hover:bg-slate-700 opacity-50 hover:opacity-100"></div>`;
-                else poolHtml += `<div class="w-3 h-3 bg-transparent rounded-sm"></div>`;
+            // Колонка ПУЛ (Только кубики, без пустых мест)
+            let poolHtml = '<div class="flex gap-0.5 items-center justify-end h-full">';
+            
+            // Рисуем Желтые (Мастерство)
+            for(let i=0; i<yellow; i++) {
+                poolHtml += `<div class="shape-hex w-3 h-3 bg-yellow-400 border border-yellow-600"></div>`;
             }
+            // Рисуем Зеленые (Способность)
+            for(let i=0; i<green; i++) {
+                poolHtml += `<div class="shape-rhombus w-3 h-3 bg-green-500 border border-green-600" style="transform: scale(1.15);"></div>`;
+            }
+            
             poolHtml += '</div>';
 
             return `
                 <tr class="${rowClass}">
-                    <td class="p-2 text-center w-6">${icon}</td>
-                    <td class="p-2 text-xs font-medium text-slate-300">
+                    <td class="p-2 text-center w-6 flex-shrink-0">${icon}</td>
+                    <td class="p-2 text-xs font-medium text-slate-300 flex-grow">
                         <div class="flex flex-col leading-none">
                             <span>${skill.name}</span>
                             <span class="text-[8px] text-slate-500 mt-0.5 uppercase">${STAT_CONFIG[skill.char].t} (${charVal})</span>
                         </div>
                     </td>
-                    <td class="p-2 w-20">${rankHtml}</td>
-                    <td class="p-2 w-24 text-right">${poolHtml}</td>
+                    <td class="p-2 w-20 flex-shrink-0">${rankHtml}</td>
+                    <td class="p-2 w-24 text-right flex-shrink-0 pr-4">${poolHtml}</td>
                 </tr>
             `;
         }
@@ -825,21 +1542,254 @@
             if(btnCom) btnCom.className = "flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition " + activeClass;
         }
     }
+// ==========================================
+// === ЛОГИКА ДЕРЕВА ТАЛАНТОВ (STEP 3) ===
+// ==========================================
 
-    // Логика XP
-    function applyXP(action) {
-        const input = document.getElementById('xp-amount-input'); 
-        const val = parseInt(input.value) || 0;
-        if (val !== 0) {
-            xpHistory.push({ earned: xpData.earned, spent: xpData.spent, log: [...xpLog] });
-            if (xpHistory.length > 10) xpHistory.shift();
-            let logEntry = action === 'add' ? (val > 0 ? `+${val}` : `${val}`) : (val > 0 ? `-${val}` : `+${Math.abs(val)}`);
-            if (action === 'add') xpData.earned += val; else xpData.spent += val;
-            xpLog.unshift(logEntry);
-            if (xpLog.length > 5) xpLog.pop();
-            input.value = ''; updateGeneratorUI(); saveSession();
+let purchasedTalents = []; // Массив ID купленных талантов
+
+// Функция инициализации и перерисовки дерева
+// === АВТОМАТИЧЕСКАЯ СИСТЕМА ТАЛАНТОВ ===
+
+function initTalentTree() {
+    const container = document.getElementById('talent-tree-container');
+    const title = document.getElementById('talent-tree-title');
+    const specSelect = document.getElementById('gen-spec');
+    
+    if (!specSelect || !container) return;
+    
+    const currentSpecId = specSelect.value;
+    
+    let specName = "Дерево талантов";
+    db.careers.forEach(c => {
+        const s = c.specializations.find(sp => sp.id === currentSpecId);
+        if(s) specName = `${c.name}: ${s.name}`;
+    });
+    if(title) title.textContent = specName;
+
+    const currentData = TALENTS_DB[currentSpecId]; 
+    container.innerHTML = '';
+
+    if (!currentData) {
+        container.innerHTML = `<div class="col-span-4 text-center text-slate-500 py-10 opacity-50">Дерево не найдено</div>`;
+        return;
+    }
+
+    // 1. Рассчитываем входящие связи (включая LEFT)
+    const incomingLinks = {}; 
+    currentData.forEach(t => {
+        if(t.links) {
+            t.links.forEach(dir => {
+                let targetR = t.row;
+                let targetC = t.col;
+                
+                if(dir === 'down') targetR++;
+                if(dir === 'right') targetC++;
+                if(dir === 'left') targetC--; // <--- ДОБАВИЛИ ОБРАБОТКУ ВЛЕВО
+                
+                const targetId = `${targetR}_${targetC}`;
+                if(!incomingLinks[targetId]) incomingLinks[targetId] = [];
+                incomingLinks[targetId].push(t.id);
+            });
+        }
+    });
+
+    currentData.forEach(t => {
+        const isBought = purchasedTalents.includes(t.id);
+        let isAvailable = isBought;
+
+        if (!isBought) {
+            const myCoordKey = `${t.row}_${t.col}`;
+            const parents = incomingLinks[myCoordKey] || [];
+            
+            // Доступен, если это корень (нет родителей, 1 ряд) ИЛИ есть купленный родитель
+            const isRoot = (t.row === 1 && parents.length === 0);
+            const hasActiveParent = parents.some(pid => purchasedTalents.includes(pid));
+            
+            if (isRoot || hasActiveParent) isAvailable = true;
+        }
+
+        let opacityClass = isAvailable ? "opacity-100" : "opacity-40 grayscale cursor-not-allowed";
+        let borderClass = isBought 
+            ? "border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)] bg-green-950/40" 
+            : "border-slate-800 bg-slate-900";
+        if(isAvailable && !isBought) borderClass += " hover:border-slate-500 hover:bg-slate-800";
+
+        let nameColor = isBought ? "text-white" : (t.passive ? "text-slate-300" : "text-red-400");
+        let costColor = isBought ? "text-green-400 font-bold" : "text-slate-600";
+        
+        // 2. Рисуем линии (включая LEFT)
+        let linksHtml = '';
+        if (t.links) {
+            t.links.forEach(dir => {
+                let linkColor = isBought ? "bg-slate-600" : "bg-slate-800";
+                
+                if (dir === 'right') {
+                    linksHtml += `<div class="absolute top-1/2 -right-6 w-8 h-1 ${linkColor} -z-10 transform -translate-y-1/2 border-t border-b border-slate-900"></div>`;
+                }
+                if (dir === 'down') {
+                    linksHtml += `<div class="absolute -bottom-6 left-1/2 w-1 h-8 ${linkColor} -z-10 transform -translate-x-1/2 border-l border-r border-slate-900"></div>`;
+                }
+                // <--- ДОБАВИЛИ ОТРИСОВКУ ЛИНИИ ВЛЕВО
+                if (dir === 'left') {
+                    linksHtml += `<div class="absolute top-1/2 -left-6 w-8 h-1 ${linkColor} -z-10 transform -translate-y-1/2 border-t border-b border-slate-900"></div>`;
+                }
+            });
+        }
+
+        const div = document.createElement('div');
+        div.style.gridRow = t.row;
+        div.style.gridColumn = t.col;
+        div.className = `relative p-2 rounded border transition-all duration-200 cursor-pointer group flex flex-col justify-between min-h-[120px] select-none ${borderClass} ${opacityClass}`;
+        
+        div.onclick = () => toggleTalent(t.id, currentSpecId, isAvailable);
+
+        div.innerHTML = `
+            ${linksHtml}
+            <div class="flex justify-between items-start mb-1 gap-2">
+                <span class="text-[10px] uppercase font-black leading-tight tracking-tight ${nameColor}">${t.name}</span>
+                <span class="text-[9px] font-mono whitespace-nowrap ${costColor}">${t.cost} XP</span>
+            </div>
+            <div class="text-[9px] leading-3 overflow-hidden text-slate-500 flex-grow">${t.desc}</div>
+            <div class="mt-1 pt-1 border-t border-slate-800/50 text-[8px] uppercase tracking-wider font-bold text-slate-700 flex justify-between items-center">
+                <span>${t.passive ? 'Пассивный' : 'Действие'}</span>
+                ${isBought ? '<span class="text-green-500">●</span>' : (isAvailable ? '' : '🔒')}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    
+    updateTalentStats(currentData);
+}
+
+// Умная функция переключения талантов (с проверкой альтернативных путей)
+function toggleTalent(id, specId, isAvailable) {
+    const data = TALENTS_DB[specId];
+    if (!data) return;
+    const talent = data.find(t => t.id === id);
+
+    if (purchasedTalents.includes(id)) {
+        // --- ПРОДАЖА ---
+        
+        // 1. Находим всех "детей" (купленные таланты, к которым ведет наш талант)
+        const children = data.filter(child => {
+            if (!purchasedTalents.includes(child.id)) return false; // Нас волнуют только купленные
+            
+            // Проверяем, ведет ли наш талант к этому ребенку
+            if (!talent.links) return false;
+            return talent.links.some(dir => {
+                let r = talent.row; let c = talent.col;
+                if (dir === 'down') r++;
+                if (dir === 'right') c++;
+                if (dir === 'left') c--;
+                return (child.row === r && child.col === c);
+            });
+        });
+
+        // 2. Проверяем каждого ребенка: станет ли он "сиротой", если мы продадим талант?
+        const wouldBreakChain = children.some(child => {
+            // Ищем любого ДРУГОГО купленного родителя для этого ребенка
+            const hasOtherParent = data.some(potentialParent => {
+                if (potentialParent.id === talent.id) return false; // Это мы сами, пропускаем
+                if (!purchasedTalents.includes(potentialParent.id)) return false; // Родитель должен быть куплен
+                
+                if (!potentialParent.links) return false;
+                return potentialParent.links.some(dir => {
+                    let r = potentialParent.row; let c = potentialParent.col;
+                    if (dir === 'down') r++;
+                    if (dir === 'right') c++;
+                    if (dir === 'left') c--;
+                    return (child.row === r && child.col === c);
+                });
+            });
+            
+            // Если другого родителя НЕТ, значит цепочка разорвется -> запрещаем
+            return !hasOtherParent; 
+        });
+
+        if (wouldBreakChain) {
+            // Красивое сообщение с пояснением
+            alert("Нельзя отменить этот талант!\n\nОн является единственным связующим звеном для следующих талантов. Сначала отмените их, или откройте к ним путь через другую ветку.");
+            return;
+        }
+
+        if (confirm(`Вернуть талант "${talent.name}" за ${talent.cost} XP?`)) {
+            purchasedTalents = purchasedTalents.filter(tid => tid !== id);
+            applyXP('refund_talent', talent.cost);
+        }
+
+    } else {
+        // --- ПОКУПКА ---
+        if (!isAvailable) return; 
+        
+        const race = db.races.find(r => r.id === document.getElementById('gen-race').value);
+        const startXP = race ? race.startXP : 0;
+        const totalXP = startXP + xpData.earned;
+        const availXP = totalXP - xpData.spent;
+
+        if (availXP >= talent.cost) {
+            purchasedTalents.push(id);
+            applyXP('buy_talent', talent.cost);
+        } else {
+            alert(`Недостаточно XP! Нужно ${talent.cost}, у вас ${availXP}.`);
         }
     }
+    
+    initTalentTree();
+    saveSession();
+}
+
+function updateTalentStats(currentData) {
+    if (!currentData) return;
+    const totalSpent = currentData
+        .filter(t => purchasedTalents.includes(t.id))
+        .reduce((sum, t) => sum + t.cost, 0);
+    const el = document.getElementById('talent-xp-spent');
+    if (el) el.textContent = totalSpent;
+}
+    // Обновленная функция applyXP с поддержкой аргументов
+function applyXP(action, amountOverride = null) {
+    const input = document.getElementById('xp-amount-input');
+    // Если передан amountOverride, используем его. Если нет — берем из поля ввода.
+    const val = amountOverride !== null ? amountOverride : (parseInt(input.value) || 0);
+
+    if (val !== 0) {
+        // Сохраняем историю для Ctrl+Z
+        xpHistory.push({ earned: xpData.earned, spent: xpData.spent, log: [...xpLog] });
+        if (xpHistory.length > 10) xpHistory.shift();
+
+        let logEntry = "";
+
+        // Логика для кнопок +/-
+        if (action === 'add' || action === 'spend') {
+             if (action === 'add') {
+                xpData.earned += val;
+                logEntry = val > 0 ? `+${val} Награда` : `${val} Корр.`;
+            } else {
+                xpData.spent += val;
+                logEntry = val > 0 ? `-${val} Трата` : `+${Math.abs(val)} Возврат`;
+            }
+            // Очищаем поле ввода только если это было ручное действие
+            if (amountOverride === null) input.value = '';
+        }
+        
+        // Логика для талантов (скрытая трата)
+        if (action === 'buy_talent') {
+            xpData.spent += val;
+            logEntry = `<span class="text-yellow-500">-${val} Талант</span>`;
+        }
+        if (action === 'refund_talent') {
+            xpData.spent -= val; // Уменьшаем потраченное = возвращаем опыт
+            logEntry = `<span class="text-blue-400">+${val} Отмена</span>`;
+        }
+
+        xpLog.unshift(logEntry);
+        if (xpLog.length > 5) xpLog.pop();
+        
+        updateGeneratorUI();
+        saveSession();
+    }
+}
     function undoLastXP() {
         if (xpHistory.length === 0) return;
         const state = xpHistory.pop();
@@ -895,7 +1845,9 @@
             armorVal: document.getElementById('val-armor').value,
             charAvatar: charAvatar, forceRating: forceRating, criticalInjuries: criticalInjuries,
             statMods: statMods, thresholdMods: thresholdMods, currentStatus: currentStatus,
+purchasedTalents: purchasedTalents,
             xpData: xpData, xpHistory: xpHistory, xpLog: xpLog, skillRanks: skillRanks, morality: morality
+
         };
         localStorage.setItem('swrpg_autosave_v1', JSON.stringify(session));
     }
@@ -920,8 +1872,13 @@
             if(s.xpHistory) xpHistory = s.xpHistory;
             if(s.xpLog) xpLog = s.xpLog;
             if(s.skillRanks) skillRanks = s.skillRanks;
+if (s.purchasedTalents) {
+            purchasedTalents = s.purchasedTalents;
+        }
             updateMorality(s.morality || 50);
             updateGeneratorUI();
+
+initTalentTree();
         } catch (e) { console.error("Error loading:", e); } finally { isSaveReady = true; }
     }
 
