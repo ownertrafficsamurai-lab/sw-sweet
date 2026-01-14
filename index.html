@@ -350,529 +350,1453 @@
     <script>
 // === БАЗА ДАННЫХ ТАЛАНТОВ (С ЦВЕТНЫМИ КУБИКАМИ) ===
 const TALENTS_DB = {
-    // === МИСТИК ===
-"seer": [
-        // --- РЯД 1 (5 XP) ---
-        { 
-            id: "seer_1_1", row: 1, col: 1, cost: 5, 
-            name: "Forage", passive: true, 
-            desc: "Убирает <span class='text-slate-500 text-[11px]'>■■</span> с поиска еды/воды. Выживание занимает -50% времени.", 
-            links: [] 
-        },
-        { 
-            id: "seer_1_2", row: 1, col: 2, cost: 5, 
-            name: "Uncanny Reactions", passive: true, 
-            desc: "Добавьте <span class='text-blue-400 font-bold text-[11px]'>■</span> к проверкам Готовности.", 
-            links: ["down"] 
-        },
-        { 
-            id: "seer_1_3", row: 1, col: 3, cost: 5, 
-            name: "Grit", passive: true, 
-            desc: "+1 к порогу усталости.", 
-            links: [] 
-        },
-        { 
-            id: "seer_1_4", row: 1, col: 4, cost: 5, 
-            name: "Expert Tracker", passive: true, 
-            desc: "Уберите <span class='text-slate-500 text-[11px]'>■</span> за каждый ранг при поиске следов. Время поиска -50%.", 
-            links: ["down"] 
-        },
-
-        // --- РЯД 2 (10 XP) ---
-        { 
-            id: "seer_2_1", row: 2, col: 1, cost: 10, 
-            name: "Rapid Reaction", passive: true, 
-            desc: "Получите усталость, чтобы добавить успехи к Инициативе (макс = ранг). Не может превышать ранг таланта.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "seer_2_2", row: 2, col: 2, cost: 10, 
-            name: "Keen Eyed", passive: true, 
-            desc: "Уберите <span class='text-slate-500 text-[11px]'>■</span> из Внимания/Готовности. Поиск занимает -50% времени.", 
-            links: ["left", "down", "right"] 
-        },
-        { 
-            id: "seer_2_3", row: 2, col: 3, cost: 10, 
-            name: "Uncanny Reactions", passive: true, 
-            desc: "Добавьте <span class='text-blue-400 font-bold text-[11px]'>■</span> к проверкам Готовности.", 
-            links: ["left", "down"] 
-        },
-        { 
-            id: "seer_2_4", row: 2, col: 4, cost: 10, 
-            name: "Toughened", passive: true, 
-            desc: "+2 к порогу ран.", 
-            links: ["down"] 
-        },
-
-        // --- РЯД 3 (15 XP) ---
-        { 
-            id: "seer_3_1", row: 3, col: 1, cost: 15, 
-            name: "Sense Danger", passive: false, 
-            desc: "Раз в сессию уберите <span class='text-slate-500 text-[11px]'>■■</span> из любой проверки.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "seer_3_2", row: 3, col: 2, cost: 15, 
-            name: "Grit", passive: true, 
-            desc: "+1 к порогу усталости.", 
-            links: ["left", "down", "right" ] 
-        },
-        { 
-            id: "seer_3_3", row: 3, col: 3, cost: 15, 
-            name: "Forewarning", passive: false, 
-            desc: "Действие: Все союзники на средней дистанции получают Защиту = Сила. До конца их действий в этой сцене", 
-            links: ["left", "down"] 
-        },
-        { 
-            id: "seer_3_4", row: 3, col: 4, cost: 15, 
-            name: "Preemptive Avoidance", passive: false, 
-            desc: "Можешь перевернуть 1 жетон судьбы и выйти из боя свободным действием.", 
-            links: ["down"] 
-        },
-
-        // --- РЯД 4 (20 XP) ---
-        { 
-            id: "seer_4_1", row: 4, col: 1, cost: 20, 
-            name: "Force Rating", passive: true, 
-            desc: "+1 к рангу Силы.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "seer_4_2", row: 4, col: 2, cost: 20, 
-            name: "Sense Advantage", passive: false, 
-            desc: "Раз в сессию можешь убрать <span class='text-slate-500 text-[11px]'>■■</span> из проверки Силы как моневр.", 
-            links: ["left", "down", "right"] 
-        },
-        { 
-            id: "seer_4_3", row: 4, col: 3, cost: 20, 
-            name: "The Force Is My Ally", passive: false, 
-            desc: "Раз в сессию: получите 2 усталости и используйте Силу как маневр.", 
-            links: ["left", "down"] 
-        },
-        { 
-            id: "seer_4_4", row: 4, col: 4, cost: 20, 
-            name: "Dodge", passive: false, 
-            desc: "Реакция: Когда вы цель атаки, можете выполнить Dodge. Получи усталось, не больше чем ранг уворота, и ослабь на столько же раз пул атаки", 
-            links: [] 
-        },
-
-        // --- РЯД 5 (25 XP) ---
-        { 
-            id: "seer_5_1", row: 5, col: 1, cost: 25, 
-            name: "Rapid Reaction", passive: true, 
-            desc: "Получите усталости, прибавьте столько же успехов при проверке инициативы, потраченная усталость не может превышать ранг таланта", 
-            links: ["right"] 
-        },
-        { 
-            id: "seer_5_2", row: 5, col: 2, cost: 25, 
-            name: "Toughened", passive: true, 
-            desc: "+2 к порогу ран.", 
-            links: ["left", "right"] 
-        },
-        { 
-            id: "seer_5_3", row: 5, col: 3, cost: 25, 
-            name: "Natural Mystic", passive: false, 
-            desc: "Раз в сессию перебросьте проверку Силы.", 
-            links: ["left", "right"] 
-        },
-        { 
-            id: "seer_5_4", row: 5, col: 4, cost: 25, 
-            name: "Force Rating", passive: true, 
-            desc: "+1 к рангу Силы.", 
-            links: [] 
-        },
+    // === МИСТИК: ПРОВИДЕЦ (SEER) ===
+    "seer": [
+        // --- РЯД 1 ---
+        { id: "seer_1_1", row: 1, col: 1, cost: 5, name: "Forage", passive: true, desc: "Убирает <span class='text-slate-500 font-bold text-[12px]'>■■</span> с поиска еды/воды. Выживание занимает -50% времени.", links: [] },
+        { id: "seer_1_2", row: 1, col: 2, cost: 5, name: "Uncanny Reactions", passive: true, desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к проверкам Готовности.", links: ["down"] },
+        { id: "seer_1_3", row: 1, col: 3, cost: 5, name: "Grit", passive: true, desc: "+1 к порогу усталости.", links: [] },
+        { id: "seer_1_4", row: 1, col: 4, cost: 5, name: "Expert Tracker", passive: true, desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за каждый ранг при поиске следов. Время поиска -50%.", links: ["down"] },
+        // --- РЯД 2 ---
+        { id: "seer_2_1", row: 2, col: 1, cost: 10, name: "Rapid Reaction", passive: true, desc: "Получите усталость, чтобы добавить успехи к Инициативе (макс = ранг).", links: ["down", "right"] },
+        { id: "seer_2_2", row: 2, col: 2, cost: 10, name: "Keen Eyed", passive: true, desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> из Внимания/Готовности. Поиск занимает -50% времени.", links: ["left", "down", "right"] },
+        { id: "seer_2_3", row: 2, col: 3, cost: 10, name: "Uncanny Reactions", passive: true, desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к проверкам Готовности.", links: ["left", "down"] },
+        { id: "seer_2_4", row: 2, col: 4, cost: 10, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: ["down"] },
+        // --- РЯД 3 ---
+        { id: "seer_3_1", row: 3, col: 1, cost: 15, name: "Sense Danger", passive: false, desc: "Раз в сессию уберите <span class='text-slate-500 font-bold text-[12px]'>■■</span> из любой проверки.", links: ["down", "right"] },
+        { id: "seer_3_2", row: 3, col: 2, cost: 15, name: "Grit", passive: true, desc: "+1 к порогу усталости.", links: ["left", "down", "right" ] },
+        { id: "seer_3_3", row: 3, col: 3, cost: 15, name: "Forewarning", passive: false, desc: "Действие: Все союзники на средней дистанции получают Защиту = Сила.", links: ["left", "down"] },
+        { id: "seer_3_4", row: 3, col: 4, cost: 15, name: "Preemptive Avoidance", passive: false, desc: "Можешь перевернуть 1 жетон судьбы и выйти из боя свободным действием.", links: ["down"] },
+        // --- РЯД 4 ---
+        { id: "seer_4_1", row: 4, col: 1, cost: 20, name: "Force Rating", passive: true, desc: "+1 к рангу Силы.", links: ["down", "right"] },
+        { id: "seer_4_2", row: 4, col: 2, cost: 20, name: "Sense Advantage", passive: false, desc: "Раз в сессию можешь убрать <span class='text-slate-500 font-bold text-[12px]'>■■</span> из проверки Силы как маневр.", links: ["left", "down", "right"] },
+        { id: "seer_4_3", row: 4, col: 3, cost: 20, name: "The Force Is My Ally", passive: false, desc: "Раз в сессию: получите 2 усталости и используйте Силу как маневр.", links: ["left", "down"] },
+        { id: "seer_4_4", row: 4, col: 4, cost: 20, name: "Dodge", passive: false, desc: "Реакция: Получи усталость (макс = ранг), чтобы увеличить сложность атаки на столько же.", links: [] },
+        // --- РЯД 5 ---
+        { id: "seer_5_1", row: 5, col: 1, cost: 25, name: "Rapid Reaction", passive: true, desc: "Получите усталости, прибавьте столько же успехов при проверке инициативы.", links: ["right"] },
+        { id: "seer_5_2", row: 5, col: 2, cost: 25, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: ["left", "right"] },
+        { id: "seer_5_3", row: 5, col: 3, cost: 25, name: "Natural Mystic", passive: false, desc: "Раз в сессию перебросьте проверку Силы.", links: ["left", "right"] },
+        { id: "seer_5_4", row: 5, col: 4, cost: 25, name: "Force Rating", passive: true, desc: "+1 к рангу Силы.", links: [] }
     ],
-"ataru": [
-        // --- РЯД 1 (5 XP) ---
-        { 
-            id: "ataru_1_1", row: 1, col: 1, cost: 5, 
-            name: "Conditioned", passive: true, 
-            desc: "Убирайте <span class='text-slate-500 text-[11px]'>■</span> за ранг таланта из Атлетики/Координации. Снижает урон/усталость от падения.", 
-            links: ["down"] 
-        },
-        { 
-            id: "ataru_1_2", row: 1, col: 2, cost: 5, 
-            name: "Parry", passive: false, 
-            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
-            links: [] 
-        },
-        { 
-            id: "ataru_1_3", row: 1, col: 3, cost: 5, 
-            name: "Jump Up", passive: false, 
-            desc: "Раз в раунд: Встать из положения лежа/ничком свободным действием.", 
-            links: ["down"] 
-        },
-        { 
-            id: "ataru_1_4", row: 1, col: 4, cost: 5, 
-            name: "Quick Draw", passive: false, 
-            desc: "Раз в раунд: Достать оружие или предмет свободным действием.", 
-            links: ["down"] 
-        },
-
-        // --- РЯД 2 (10 XP) ---
-        { 
-            id: "ataru_2_1", row: 2, col: 1, cost: 10, 
-            name: "Dodge", passive: false, 
-            desc: "Реакция: Когда цель атаки — получи усталость (макс = ранг), чтобы увеличить сложность атаки на столько же.", 
-            links: ["down"] 
-        },
-        { 
-            id: "ataru_2_2", row: 2, col: 2, cost: 10, 
-            name: "Reflect", passive: false, 
-            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "ataru_2_3", row: 2, col: 3, cost: 10, 
-            name: "Ataru Technique", passive: true, 
-            desc: "Используйте Ловкость вместо Физ. силы для проверок Светового меча.", 
-            links: ["left", "down"] 
-        },
-        { 
-            id: "ataru_2_4", row: 2, col: 4, cost: 10, 
-            name: "Quick Strike", passive: true, 
-            desc: "Добавь <span class='text-blue-400 font-bold text-[11px]'>■</span> против целей, которые еще не ходили в этой сцене.", 
-            links: [] 
-        },
-
-        // --- РЯД 3 (15 XP) ---
-        { 
-            id: "ataru_3_1", row: 3, col: 1, cost: 15, 
-            name: "Quick Strike", passive: true, 
-            desc: "Добавь <span class='text-blue-400 font-bold text-[11px]'>■</span> против целей, которые еще не ходили в этой сцене.", 
-            links: ["down"] 
-        },
-        { 
-            id: "ataru_3_2", row: 3, col: 2, cost: 15, 
-            name: "Reflect", passive: false, 
-            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "ataru_3_3", row: 3, col: 3, cost: 15, 
-            name: "Parry", passive: false, 
-            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
-            links: ["left", "down", "right"] 
-        },
-        { 
-            id: "ataru_3_4", row: 3, col: 4, cost: 15, 
-            name: "Improved Parry", passive: true, 
-            desc: "При парировании: если атака врага дала 'Провал' (Despair) или 3 Угрозы, нанеси ответный удар (базовый урон) после его атаки.", 
-            links: ["down"] 
-        },
-
-        // --- РЯД 4 (20 XP) ---
-        { 
-            id: "ataru_4_1", row: 4, col: 1, cost: 20, 
-            name: "Dodge", passive: false, 
-            desc: "Реакция: Получи усталость (макс = ранг), увеличь сложность входящей атаки на столько же.", 
-            links: ["down"] 
-        },
-        { 
-            id: "ataru_4_2", row: 4, col: 2, cost: 20, 
-            name: "Hawk Bat Swoop", passive: false, 
-            desc: "Действие: Атака Мечом. Добавь кубы Силы. За 1 ○ можно сблизиться с целью перед атакой. Остальные ○ дают Преимущества.", 
-            links: ["down"] 
-        },
-        { 
-            id: "ataru_4_3", row: 4, col: 3, cost: 20, 
-            name: "Saber Swarm", passive: false, 
-            desc: "Маневр: Получи 1 усталость. Следующая атака Мечом получает свойство 'Спаренное' (Linked) с рангом = ранг Силы.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "ataru_4_4", row: 4, col: 4, cost: 20, 
-            name: "Conditioned", passive: true, 
-            desc: "Убирайте <span class='text-slate-500 text-[11px]'>■</span> за ранг из Атлетики/Координации. Снижает урон от падения.", 
-            links: ["left", "down"] 
-        },
-
-        // --- РЯД 5 (25 XP) ---
-        { 
-            id: "ataru_5_1", row: 5, col: 1, cost: 25, 
-            name: "Parry", passive: false, 
-            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
-            links: ["right"] 
-        },
-        { 
-            id: "ataru_5_2", row: 5, col: 2, cost: 25, 
-            name: "Dedication", passive: true, 
-            desc: "+1 к любой характеристике (макс 6).", 
-            links: ["left", "right"] 
-        },
-        { 
-            id: "ataru_5_3", row: 5, col: 3, cost: 25, 
-            name: "Saber Throw", passive: false, 
-            desc: "Действие: Атака Мечом на СРЕДНЕЙ дистанции (как дальний бой). Добавь кубы Силы к урону. За 1 ○ меч возвращается в руку.", 
-            links: ["left"] 
-        },
-        { 
-            id: "ataru_5_4", row: 5, col: 4, cost: 25, 
-            name: "Balance", passive: false, 
-            desc: "Конец сцены: Добавь кубы Силы к восстановлению Усталости. Каждый ○ восстанавливает 1 доп. усталость.", 
-            links: [] 
-        },
+// === ИЩЕЙКА: АТАРУ (ATARU) ===
+    "ataru": [
+        // --- РЯД 1 ---
+        { id: "ataru_1_1", row: 1, col: 1, cost: 5, name: "Conditioned", passive: true, desc: "Убирайте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из Атлетики/Координации. Снижает урон/усталость от падения.", links: ["down"] },
+        { id: "ataru_1_2", row: 1, col: 2, cost: 5, name: "Parry", passive: false, desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", links: [] },
+        { id: "ataru_1_3", row: 1, col: 3, cost: 5, name: "Jump Up", passive: false, desc: "Раз в раунд: Встать из положения лежа/ничком свободным действием.", links: ["down"] },
+        { id: "ataru_1_4", row: 1, col: 4, cost: 5, name: "Quick Draw", passive: false, desc: "Раз в раунд: Достать оружие или предмет свободным действием.", links: ["down"] },
+        // --- РЯД 2 ---
+        { id: "ataru_2_1", row: 2, col: 1, cost: 10, name: "Dodge", passive: false, desc: "Реакция: Когда цель атаки — получи усталость (макс = ранг), чтобы увеличить сложность атаки на столько же.", links: ["down"] },
+        { id: "ataru_2_2", row: 2, col: 2, cost: 10, name: "Reflect", passive: false, desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", links: ["down", "right"] },
+        { id: "ataru_2_3", row: 2, col: 3, cost: 10, name: "Ataru Technique", passive: true, desc: "Используйте Ловкость вместо Физ. силы для проверок Светового меча.", links: ["left", "down"] },
+        { id: "ataru_2_4", row: 2, col: 4, cost: 10, name: "Quick Strike", passive: true, desc: "Добавь <span class='text-blue-400 font-bold text-[12px]'>■</span> против целей, которые еще не ходили в этой сцене.", links: [] },
+        // --- РЯД 3 ---
+        { id: "ataru_3_1", row: 3, col: 1, cost: 15, name: "Quick Strike", passive: true, desc: "Добавь <span class='text-blue-400 font-bold text-[12px]'>■</span> против целей, которые еще не ходили в этой сцене.", links: ["down"] },
+        { id: "ataru_3_2", row: 3, col: 2, cost: 15, name: "Reflect", passive: false, desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", links: ["down", "right"] },
+        { id: "ataru_3_3", row: 3, col: 3, cost: 15, name: "Parry", passive: false, desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", links: ["left", "down", "right"] },
+        { id: "ataru_3_4", row: 3, col: 4, cost: 15, name: "Improved Parry", passive: true, desc: "При парировании: если атака врага дала <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 3 <span class='text-red-400 font-bold text-[11px]'>۞</span>, нанеси ответный удар (базовый урон) после его атаки.", links: ["down"] },
+        // --- РЯД 4 ---
+        { id: "ataru_4_1", row: 4, col: 1, cost: 20, name: "Dodge", passive: false, desc: "Реакция: Получи усталость (макс = ранг), увеличь сложность входящей атаки на столько же.", links: ["down"] },
+        { id: "ataru_4_2", row: 4, col: 2, cost: 20, name: "Hawk Bat Swoop", passive: false, desc: "Действие: Атака Мечом. Добавь кубы Силы. За 1 <span class='text-white font-bold'>○</span> можно сблизиться с целью перед атакой. Остальные <span class='text-white font-bold'>○</span> дают <span class='text-blue-300 font-bold text-[11px]'>▲</span>.", links: ["down"] },
+        { id: "ataru_4_3", row: 4, col: 3, cost: 20, name: "Saber Swarm", passive: false, desc: "Маневр: Получи 1 усталость. Следующая атака Мечом получает свойство 'Спаренное' (Linked) с рангом = ранг Силы.", links: ["down", "right"] },
+        { id: "ataru_4_4", row: 4, col: 4, cost: 20, name: "Conditioned", passive: true, desc: "Убирайте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг из Атлетики/Координации. Снижает урон от падения.", links: ["left", "down"] },
+        // --- РЯД 5 ---
+        { id: "ataru_5_1", row: 5, col: 1, cost: 25, name: "Parry", passive: false, desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", links: ["right"] },
+        { id: "ataru_5_2", row: 5, col: 2, cost: 25, name: "Dedication", passive: true, desc: "+1 к любой характеристике (макс 6).", links: ["left", "right"] },
+        { id: "ataru_5_3", row: 5, col: 3, cost: 25, name: "Saber Throw", passive: false, desc: "Действие: Атака Мечом (средняя). Добавь кубы Силы к урону. За 1 <span class='text-white font-bold'>○</span> меч возвращается в руку.", links: ["left"] },
+        { id: "ataru_5_4", row: 5, col: 4, cost: 25, name: "Balance", passive: false, desc: "Конец сцены: Добавь кубы Силы к восст. Усталости. Каждый <span class='text-white font-bold'>○</span> восстанавливает 1 доп. усталость.", links: [] },
     ],
 "healer": [
+        // --- РЯД 1 ---
+        { id: "healer_1_1", row: 1, col: 1, cost: 5, name: "Surgeon", passive: true, desc: "При проверке Медицины для восстановления ран, цель восстанавливает +1 рану за ранг таланта.", links: ["down"] },
+        { id: "healer_1_2", row: 1, col: 2, cost: 5, name: "Healing Trance", passive: false, desc: "Действие: Зафиксируй 1 кубик Силы (<span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>). В конце сцены верни его и вылечи 1 рану за ранг таланта.", links: ["down"] },
+        { id: "healer_1_3", row: 1, col: 3, cost: 5, name: "Rapid Recovery", passive: true, desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", links: ["down"] },
+        { id: "healer_1_4", row: 1, col: 4, cost: 5, name: "Physician", passive: true, desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", links: [] },
+        // --- РЯД 2 ---
+        { id: "healer_2_1", row: 2, col: 1, cost: 10, name: "Physician", passive: true, desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", links: ["down", "right"] },
+        { id: "healer_2_2", row: 2, col: 2, cost: 10, name: "Physician", passive: true, desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", links: ["down", "left"] },
+        { id: "healer_2_3", row: 2, col: 3, cost: 10, name: "Grit", passive: true, desc: "+1 к порогу усталости.", links: ["right"] },
+        { id: "healer_2_4", row: 2, col: 4, cost: 10, name: "Healing Trance", passive: false, desc: "Действие: Зафиксируй 1 кубик Силы (<span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>). В конце сцены верни его и вылечи 1 рану за ранг таланта.", links: ["down"] },
+        // --- РЯД 3 ---
+        { id: "healer_3_1", row: 3, col: 1, cost: 15, name: "Healing Trance", passive: false, desc: "Действие: Зафиксируй 1 кубик Силы (<span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>). В конце сцены верни его и вылечи 1 рану за ранг таланта.", links: ["down", "right"] },
+        { id: "healer_3_2", row: 3, col: 2, cost: 15, name: "Grit", passive: true, desc: "+1 к порогу усталости.", links: ["left", "down", "right"] },
+        { id: "healer_3_3", row: 3, col: 3, cost: 15, name: "Knowledgeable Healing", passive: false, desc: "Инцидент: При лечении союзника переверни Очко Судьбы, чтобы вылечить доп. раны = ранг Знания (Ксенология).", links: ["left", "down"] },
+        { id: "healer_3_4", row: 3, col: 4, cost: 15, name: "Rapid Recovery", passive: true, desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", links: ["down"] },
+        // --- РЯД 4 ---
+        { id: "healer_4_1", row: 4, col: 1, cost: 20, name: "Surgeon", passive: true, desc: "При проверке Медицины для восстановления ран, цель восстанавливает +1 рану за ранг таланта.", links: ["down"] },
+        { id: "healer_4_2", row: 4, col: 2, cost: 20, name: "Improved Healing Trance", passive: true, desc: "При использовании Healing Trance можно пройти проверку Стойкости, чтобы вылечить Крит. рану.", links: [] },
+        { id: "healer_4_3", row: 4, col: 3, cost: 20, name: "Calming Aura", passive: false, desc: "Реакция: Когда враг целится в вас способностью Силы, уменьшите его пул очков Силы на 1.", links: ["down"] },
+        { id: "healer_4_4", row: 4, col: 4, cost: 20, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: [] },
+        // --- РЯД 5 ---
+        { id: "healer_5_1", row: 5, col: 1, cost: 25, name: "Dedication", passive: true, desc: "Увеличьте одну из характеристик на 1 (макс. 6).", links: ["right"] },
+        { id: "healer_5_2", row: 5, col: 2, cost: 25, name: "Natural Doctor", passive: false, desc: "Инцидент: Раз в сессию можете перебросить одну проверку Медицины.", links: ["left", "right"] },
+        { id: "healer_5_3", row: 5, col: 3, cost: 25, name: "Force Rating", passive: true, desc: "+1 к рангу Силы.", links: ["left", "right"] },
+        { id: "healer_5_4", row: 5, col: 4, cost: 25, name: "Improved Calming Aura", passive: false, desc: "Маневр: Получите 2 усталости, чтобы распространить Calming Aura на союзников (кол-во = Воля) в кор. дистанции.", links: ["left"] }
+    ],
+// === КОНСУЛ: УЧЕНИК НИМАНА (NIMAN) ===
+    "niman": [
+        // --- РЯД 1 ---
+        { id: "niman_1_1", row: 1, col: 1, cost: 5, name: "Parry", passive: false, desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", links: [] },
+        { id: "niman_1_2", row: 1, col: 2, cost: 5, name: "Nobody’s Fool", passive: true, desc: "Повысьте сложность проверок Обаяния, Запугивания или Обмана против вас (1 раз за ранг).", links: ["down"] },
+        { id: "niman_1_3", row: 1, col: 3, cost: 5, name: "Reflect", passive: false, desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", links: ["down"] },
+        { id: "niman_1_4", row: 1, col: 4, cost: 5, name: "Grit", passive: true, desc: "+1 к порогу усталости.", links: ["down"] },
+        // --- РЯД 2 ---
+        { id: "niman_2_1", row: 2, col: 1, cost: 10, name: "Defensive Training", passive: true, desc: "Световые мечи, Рукопашная и Холодное оружие получают свойство Защитное (рейтинг = ранг таланта).", links: ["right", "down"] },
+        { id: "niman_2_2", row: 2, col: 2, cost: 10, name: "Niman Technique", passive: true, desc: "Используйте Волю вместо Силы для проверок Светового меча.", links: ["left", "down"] },
+        { id: "niman_2_3", row: 2, col: 3, cost: 10, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: ["down"] },
+        { id: "niman_2_4", row: 2, col: 4, cost: 10, name: "Parry", passive: false, desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", links: ["down"] },
+        // --- РЯД 3 ---
+        { id: "niman_3_1", row: 3, col: 1, cost: 15, name: "Parry", passive: false, desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", links: ["down", "right"] },
+        { id: "niman_3_2", row: 3, col: 2, cost: 15, name: "Sense Emotions", passive: true, desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> ко всем проверкам Обаяния, Запугивания и Обмана.", links: ["left", "down", "right"] },
+        { id: "niman_3_3", row: 3, col: 3, cost: 15, name: "Reflect", passive: false, desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", links: ["left", "down", "right"] },
+        { id: "niman_3_4", row: 3, col: 4, cost: 15, name: "Defensive Training", passive: true, desc: "Световые мечи, Рукопашная и Холодное оружие получают свойство Защитное (рейтинг = ранг таланта).", links: ["left", "down"] },
+        // --- РЯД 4 ---
+        { id: "niman_4_1", row: 4, col: 1, cost: 20, name: "Sum Djem", passive: true, desc: "При проверке Светового меча: потратьте <span class='text-yellow-400 font-bold text-[11px]'>❂</span> или 2 <span class='text-blue-300 font-bold text-[11px]'>▲</span>, чтобы обезоружить противника.", links: ["down", "right"] },
+        { id: "niman_4_2", row: 4, col: 2, cost: 20, name: "Reflect", passive: false, desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", links: ["left", "down", "right"] },
+        { id: "niman_4_3", row: 4, col: 3, cost: 20, name: "Draw Closer", passive: false, desc: "Действие: Атака Световым мечом (средняя). Добавь куб Силы. За <span class='text-white font-bold'>○</span> притяни цель или добавь <span class='text-green-400 font-bold text-[11px]'>✶</span>.", links: ["left", "right"] },
+        { id: "niman_4_4", row: 4, col: 4, cost: 20, name: "Center of Being", passive: false, desc: "Маневр: До след. хода увеличьте крит. рейтинг атак по вам на 1 за каждый ранг таланта.", links: ["left", "down"] },
+        // --- РЯД 5 ---
+        { id: "niman_5_1", row: 5, col: 1, cost: 25, name: "Dedication", passive: true, desc: "+1 к характеристике (макс 6).", links: ["right"] },
+        { id: "niman_5_2", row: 5, col: 2, cost: 25, name: "Force Assault", passive: true, desc: "При промахе Световым мечом: потратьте <span class='text-yellow-400 font-bold text-[11px]'>❂</span> или 3 <span class='text-green-400 font-bold text-[11px]'>✶</span>, чтобы применить Силу Move как маневр.", links: ["left"] },
+        { id: "niman_5_3", row: 5, col: 3, cost: 25, name: "Force Rating", passive: true, desc: "+1 к рейтингу Силы.", links: [] },
+        { id: "niman_5_4", row: 5, col: 4, cost: 25, name: "Improved Center of Being", passive: true, desc: "Маневр: Получите 1 усталость и используйте Center of Being как свободное действие.", links: ["left"] }
+    ],
+// === ЗАЩИТНИК: МИРОТВОРЕЦ (PEACEKEEPER) ===
+    "peacekeeper": [
+        // --- РЯД 1 ---
+        { id: "peacekeeper_1_1", row: 1, col: 1, cost: 5, name: "Command", passive: true, desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к Лидерству. Союзники получают <span class='text-blue-400 font-bold text-[12px]'>■</span> к Дисциплине на 24 часа.", links: ["down"] },
+        { id: "peacekeeper_1_2", row: 1, col: 2, cost: 5, name: "Confidence", passive: true, desc: "Снижает сложность проверок Дисциплины против страха на 1 за ранг таланта.", links: [] },
+        { id: "peacekeeper_1_3", row: 1, col: 3, cost: 5, name: "Second Wind", passive: false, desc: "Инцидент: Раз за столкновение восстановите усталость = рангу таланта.", links: [] },
+        { id: "peacekeeper_1_4", row: 1, col: 4, cost: 5, name: "Commanding Presence", passive: true, desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Лидерства и Хладнокровия.", links: ["down"] },
+        // --- РЯД 2 ---
+        { id: "peacekeeper_2_1", row: 2, col: 1, cost: 10, name: "Commanding Presence", passive: true, desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Лидерства и Хладнокровия.", links: ["right"] },
+        { id: "peacekeeper_2_2", row: 2, col: 2, cost: 10, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: ["left", "down", "right"] },
+        { id: "peacekeeper_2_3", row: 2, col: 3, cost: 10, name: "Second Wind", passive: false, desc: "Инцидент: Раз за столкновение восстановите усталость = рангу таланта.", links: ["left", "down", "right"] },
+        { id: "peacekeeper_2_4", row: 2, col: 4, cost: 10, name: "Confidence", passive: true, desc: "Снижает сложность проверок Дисциплины против страха на 1 за ранг таланта.", links: ["left"] },
+        // --- РЯД 3 ---
+        { id: "peacekeeper_3_1", row: 3, col: 1, cost: 15, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: ["down", "right"] },
+        { id: "peacekeeper_3_2", row: 3, col: 2, cost: 15, name: "Enhanced Leader", passive: true, desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к Лидерству (макс = рейтинг Силы). Тратьте Очки Силы на <span class='text-green-400 font-bold text-[11px]'>✶</span> или <span class='text-blue-300 font-bold text-[11px]'>▲</span>.", links: ["left", "right"] },
+        { id: "peacekeeper_3_3", row: 3, col: 3, cost: 15, name: "Command", passive: true, desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к Лидерству. Союзники получают <span class='text-blue-400 font-bold text-[12px]'>■</span> к Дисциплине.", links: ["left", "right"] },
+        { id: "peacekeeper_3_4", row: 3, col: 4, cost: 15, name: "Field Commander", passive: false, desc: "Действие: Проверка Лидерства (Сложность <span class='text-purple-400 font-bold text-[12px]'>◆◆</span>). Союзники (кол-во = Presence) получают 1 уст. и делают свободный маневр.", links: ["left", "down"] },
+        // --- РЯД 4 ---
+        { id: "peacekeeper_4_1", row: 4, col: 1, cost: 20, name: "Steely Nerves", passive: false, desc: "Потратьте Очко Судьбы: игнорируйте эффекты Критических ран на проверки Воли/Харизмы до конца сцены.", links: ["down", "right"] },
+        { id: "peacekeeper_4_2", row: 4, col: 2, cost: 20, name: "Second Wind", passive: false, desc: "Инцидент: Раз за столкновение восстановите усталость = рангу таланта.", links: ["left", "down", "right"] },
+        { id: "peacekeeper_4_3", row: 4, col: 3, cost: 20, name: "Toughened", passive: true, desc: "+2 к порогу ран.", links: ["left", "down", "right"] },
+        { id: "peacekeeper_4_4", row: 4, col: 4, cost: 20, name: "Improved Field Commander", passive: true, desc: "Field Commander влияет на 2x Presence. За <span class='text-yellow-400 font-bold text-[11px]'>❂</span>: союзник получает 1 уст. и делает свободное ДЕЙСТВИЕ.", links: ["left", "down"] },
+        // --- РЯД 5 ---
+        { id: "peacekeeper_5_1", row: 5, col: 1, cost: 25, name: "Unity Assault", passive: false, desc: "Если атака провалена с <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 3 <span class='text-red-400 font-bold text-[11px]'>۞</span>: потратьте <span class='text-red-500 font-bold text-[11px]'>Ø</span>, чтобы применить Силу на союзников как маневр.", links: [] },
+        { id: "peacekeeper_5_2", row: 5, col: 2, cost: 25, name: "Dedication", passive: true, desc: "+1 к характеристике (макс 6).", links: [] },
+        { id: "peacekeeper_5_3", row: 5, col: 3, cost: 25, name: "Force Rating", passive: true, desc: "+1 к рейтингу Силы.", links: [] },
+        { id: "peacekeeper_5_4", row: 5, col: 4, cost: 25, name: "Natural Leader", passive: false, desc: "Раз в сессию: Перебросьте проверку Лидерства или Хладнокровия.", links: [] }
+    ],
+"protector": [
         // --- РЯД 1 (5 XP) ---
         { 
-            id: "healer_1_1", row: 1, col: 1, cost: 5, 
-            name: "Surgeon", passive: true, 
-            desc: "При проверке Медицины для восстановления ран, цель восстанавливает +1 рану за ранг таланта.", 
-            links: ["down"] 
-        },
-        { 
-            id: "healer_1_2", row: 1, col: 2, cost: 5, 
-            name: "Healing Trance", passive: false, 
-            desc: "Действие: Фиксируйте 1 кубик Силы. После сцены верните его и вылечи 1 рану за ранг таланта.", 
-            links: ["down"] 
-        },
-        { 
-            id: "healer_1_3", row: 1, col: 3, cost: 5, 
-            name: "Rapid Recovery", passive: true, 
-            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
-            links: ["down"] 
-        },
-        { 
-            id: "healer_1_4", row: 1, col: 4, cost: 5, 
-            name: "Physician", passive: true, 
-            desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", 
+            id: "protector_1_1", row: 1, col: 1, cost: 5, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
             links: [] 
+        },
+        { 
+            id: "protector_1_2", row: 1, col: 2, cost: 5, 
+            name: "Body Guard", passive: false, 
+            desc: "Маневр: Защитить союзника в ближнем бою. Получите усталость (макс = ранг). Повысьте сложность атак по нему на это число.", 
+            links: ["down"] 
+        },
+        { 
+            id: "protector_1_3", row: 1, col: 3, cost: 5, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: [] 
+        },
+        { 
+            id: "protector_1_4", row: 1, col: 4, cost: 5, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["down"] 
         },
 
         // --- РЯД 2 (10 XP) ---
         { 
-            id: "healer_2_1", row: 2, col: 1, cost: 10, 
-            name: "Physician", passive: true, 
-            desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", 
+            id: "protector_2_1", row: 2, col: 1, cost: 10, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
             links: ["down", "right"] 
         },
         { 
-            id: "healer_2_2", row: 2, col: 2, cost: 10, 
+            id: "protector_2_2", row: 2, col: 2, cost: 10, 
             name: "Physician", passive: true, 
             desc: "При проверке Медицины для лечения ран цель также восстанавливает 1 усталость за ранг таланта.", 
-            links: ["down", "left"] 
+            links: ["left", "down", "right"] 
         },
         { 
-            id: "healer_2_3", row: 2, col: 3, cost: 10, 
-            name: "Grit", passive: true, 
-            desc: "+1 к порогу усталости.", 
-            links: ["right"] 
+            id: "protector_2_3", row: 2, col: 3, cost: 10, 
+            name: "Stimpack Specialization", passive: true, 
+            desc: "Стимпаки лечат +1 рану за ранг таланта.", 
+            links: ["left", "down", "right"] 
         },
         { 
-            id: "healer_2_4", row: 2, col: 4, cost: 10, 
-            name: "Healing Trance", passive: false, 
-            desc: "Действие: Фиксируйте 1 кубик Силы. После сцены верните его и вылечи 1 рану за ранг таланта.", 
+            id: "protector_2_4", row: 2, col: 4, cost: 10, 
+            name: "Force Protection", passive: false, 
+            desc: "Маневр: Получите 1 усталость, зафиксируйте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг). Увеличьте поглощение на кол-во кубиков.", 
             links: ["down"] 
         },
 
         // --- РЯД 3 (15 XP) ---
         { 
-            id: "healer_3_1", row: 3, col: 1, cost: 15, 
-            name: "Healing Trance", passive: false, 
-            desc: "Действие: Фиксируйте 1 кубик Силы. После сцены верните его и вылечи 1 рану за ранг таланта.", 
+            id: "protector_3_1", row: 3, col: 1, cost: 15, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "protector_3_2", row: 3, col: 2, cost: 15, 
+            name: "Stimpack Specialization", passive: true, 
+            desc: "Стимпаки лечат +1 рану за ранг таланта.", 
             links: ["down", "right"] 
         },
         { 
-            id: "healer_3_2", row: 3, col: 2, cost: 15, 
-            name: "Grit", passive: true, 
-            desc: "+1 к порогу усталости.", 
+            id: "protector_3_3", row: 3, col: 3, cost: 15, 
+            name: "Heightened Awareness", passive: true, 
+            desc: "Союзники рядом получают <span class='text-blue-400 font-bold text-[12px]'>■</span> к Внимательности/Бдительности (в упор — <span class='text-blue-400 font-bold text-[12px]'>■■</span>).", 
             links: ["left", "down", "right"] 
         },
         { 
-            id: "healer_3_3", row: 3, col: 3, cost: 15, 
-            name: "Knowledgeable Healing", passive: false, 
-            desc: "Инцидент: При лечении союзника переверни жетон Судьбы, чтобы вылечить доп. раны = ранг Знания (Ксенология).", 
-            links: ["left", "down"] 
-        },
-        { 
-            id: "healer_3_4", row: 3, col: 4, cost: 15, 
-            name: "Rapid Recovery", passive: true, 
-            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
+            id: "protector_3_4", row: 3, col: 4, cost: 15, 
+            name: "Center of Being", passive: false, 
+            desc: "Маневр: До след. хода увеличьте крит. рейтинг атак по вам на 1 за каждый ранг таланта.", 
             links: ["down"] 
         },
 
         // --- РЯД 4 (20 XP) ---
         { 
-            id: "healer_4_1", row: 4, col: 1, cost: 20, 
-            name: "Surgeon", passive: true, 
-            desc: "При проверке Медицины для восстановления ран, цель восстанавливает +1 рану за ранг таланта.", 
-            links: ["down"] 
-        },
-        { 
-            id: "healer_4_2", row: 4, col: 2, cost: 20, 
-            name: "Improved Healing Trance", passive: true, 
-            desc: "При использовании Healing Trance можно пройти проверку Стойкости, чтобы вылечить Крит. рану.", 
-            links: [] 
-        },
-        { 
-            id: "healer_4_3", row: 4, col: 3, cost: 20, 
-            name: "Calming Aura", passive: false, 
-            desc: "Реакция: Когда враг целится в вас способностью Силы, уменьшите его пул очков Силы на 1.", 
-            links: ["down"] 
-        },
-        { 
-            id: "healer_4_4", row: 4, col: 4, cost: 20, 
-            name: "Toughened", passive: true, 
-            desc: "+2 к порогу ран.", 
-            links: [] 
-        },
-
-        // --- РЯД 5 (25 XP) ---
-        { 
-            id: "healer_5_1", row: 5, col: 1, cost: 25, 
-            name: "Dedication", passive: true, 
-            desc: "Увеличьте одну из характеристик на 1 (макс. 6).", 
+            id: "protector_4_1", row: 4, col: 1, cost: 20, 
+            name: "Circle of Shelter", passive: true, 
+            desc: "Когда союзник рядом получает урон, можете использовать Parry/Reflect за него.", 
             links: ["right"] 
         },
         { 
-            id: "healer_5_2", row: 5, col: 2, cost: 25, 
-            name: "Natural Doctor", passive: false, 
-            desc: "Инцидент: Раз в сессию можете перебросить одну проверку Медицины.", 
-            links: ["left", "right"] 
-        },
-        { 
-            id: "healer_5_3", row: 5, col: 3, cost: 25, 
-            name: "Force Rating", passive: true, 
-            desc: "+1 к рангу Силы.", 
-            links: ["left", "right"] 
-        },
-        { 
-            id: "healer_5_4", row: 5, col: 4, cost: 25, 
-            name: "Improved Calming Aura", passive: false, 
-            desc: "Маневр: Получите 2 усталости, чтобы распространить Calming Aura на союзников (кол-во = Воля) в кор. дистанции.", 
-            links: ["left"] 
-        },
-    ],
-"niman": [
-        // --- РЯД 1 (5 XP) ---
-        { 
-            id: "niman_1_1", row: 1, col: 1, cost: 5, 
-            name: "Parry", passive: false, 
-            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
-            links: [] 
-        },
-        { 
-            id: "niman_1_2", row: 1, col: 2, cost: 5, 
-            name: "Nobody’s Fool", passive: true, 
-            desc: "Повысьте сложность проверок Обаяния, Запугивания или Обмана против вас (1 раз за ранг).", 
-            links: ["down"] 
-        },
-        { 
-            id: "niman_1_3", row: 1, col: 3, cost: 5, 
-            name: "Reflect", passive: false, 
-            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
-            links: [] 
-        },
-        { 
-            id: "niman_1_4", row: 1, col: 4, cost: 5, 
-            name: "Grit", passive: true, 
-            desc: "+1 к порогу усталости.", 
-            links: [] 
-        },
-
-        // --- РЯД 2 (10 XP) ---
-        { 
-            id: "niman_2_1", row: 2, col: 1, cost: 10, 
-            name: "Defensive Training", passive: true, 
-            desc: "Световые мечи, Рукопашная и Холодное оружие получают свойство Защитное (рейтинг = ранг таланта).", 
+            id: "protector_4_2", row: 4, col: 2, cost: 20, 
+            name: "Force Protection", passive: false, 
+            desc: "Маневр: Получите 1 усталость, зафиксируйте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг). Увеличьте поглощение на кол-во кубиков.", 
             links: ["right", "down"] 
         },
         { 
-            id: "niman_2_2", row: 2, col: 2, cost: 10, 
-            name: "Niman Technique", passive: true, 
-            desc: "Используйте Волю вместо Силы для проверок Светового меча.", 
-            links: ["left", "down"] 
+            id: "protector_4_3", row: 4, col: 3, cost: 20, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["right"] 
         },
         { 
-            id: "niman_2_3", row: 2, col: 3, cost: 10, 
-            name: "Toughened", passive: true, 
-            desc: "+2 к порогу ран.", 
-            links: ["down"] 
-        },
-        { 
-            id: "niman_2_4", row: 2, col: 4, cost: 10, 
-            name: "Parry", passive: false, 
-            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
-            links: ["down"] 
-        },
-
-        // --- РЯД 3 (15 XP) ---
-        { 
-            id: "niman_3_1", row: 3, col: 1, cost: 15, 
-            name: "Parry", passive: false, 
-            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "niman_3_2", row: 3, col: 2, cost: 15, 
-            name: "Sense Emotions", passive: true, 
-            desc: "Добавьте <span class='text-blue-400 font-bold text-[11px]'>■</span> ко всем проверкам Обаяния, Запугивания и Обмана.", 
-            links: ["left", "down", "right"] 
-        },
-        { 
-            id: "niman_3_3", row: 3, col: 3, cost: 15, 
-            name: "Reflect", passive: false, 
-            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
-            links: ["left", "down", "right"] 
-        },
-        { 
-            id: "niman_3_4", row: 3, col: 4, cost: 15, 
-            name: "Defensive Training", passive: true, 
-            desc: "Световые мечи, Рукопашная и Холодное оружие получают свойство Защитное (рейтинг = ранг таланта).", 
-            links: ["left", "down"] 
-        },
-
-        // --- РЯД 4 (20 XP) ---
-        { 
-            id: "niman_4_1", row: 4, col: 1, cost: 20, 
-            name: "Sum Djem", passive: true, 
-            desc: "При проверке Светового меча: потратьте Триумф или 2 Преимущества, чтобы обезоружить противника.", 
-            links: ["down", "right"] 
-        },
-        { 
-            id: "niman_4_2", row: 4, col: 2, cost: 20, 
-            name: "Reflect", passive: false, 
-            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
-            links: ["left", "down", "right"] 
-        },
-        { 
-            id: "niman_4_3", row: 4, col: 3, cost: 20, 
-            name: "Draw Closer", passive: false, 
-            desc: "Действие: Атака Световым мечом (средняя дистанция). Добавь ○ Силы к проверке. За 1 ○ притяни цель или добавь 1 успех.", 
-            links: ["left", "right"] 
-        },
-        { 
-            id: "niman_4_4", row: 4, col: 4, cost: 20, 
-            name: "Center of Being", passive: false, 
-            desc: "Маневр: До след. хода увеличьте крит. рейтинг атак по вам на 1 за каждый ранг таланта.", 
+            id: "protector_4_4", row: 4, col: 4, cost: 20, 
+            name: "Body Guard", passive: false, 
+            desc: "Маневр: Защитить союзника в ближнем бою. Получите усталость (макс = ранг). Повысьте сложность атак по нему на это число.", 
             links: ["left", "down"] 
         },
 
         // --- РЯД 5 (25 XP) ---
         { 
-            id: "niman_5_1", row: 5, col: 1, cost: 25, 
+            id: "protector_5_1", row: 5, col: 1, cost: 25, 
+            name: "Center of Being", passive: false, 
+            desc: "Маневр: До след. хода увеличьте крит. рейтинг атак по вам на 1 за каждый ранг таланта.", 
+            links: ["right"] 
+        },
+        { 
+            id: "protector_5_2", row: 5, col: 2, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рейтингу Силы.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "protector_5_3", row: 5, col: 3, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "protector_5_4", row: 5, col: 4, cost: 25, 
+            name: "Improved Bodyguard", passive: true, 
+            desc: "Раз в сессию: Примите урон вместо защищаемого союзника.", 
+            links: ["left"] 
+        },
+    ],
+"soresu": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "soresu_1_1", row: 1, col: 1, cost: 5, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "soresu_1_2", row: 1, col: 2, cost: 5, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: [] 
+        },
+        { 
+            id: "soresu_1_3", row: 1, col: 3, cost: 5, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: [] 
+        },
+        { 
+            id: "soresu_1_4", row: 1, col: 4, cost: 5, 
+            name: "Defensive Stance", passive: false, 
+            desc: "Маневр: Получите усталость (макс = ранг). Повысьте сложность входящих атак ближнего боя на это число.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "soresu_2_1", row: 2, col: 1, cost: 10, 
+            name: "Soresu Technique", passive: true, 
+            desc: "Используйте Интеллект вместо Силы для проверок Светового меча.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "soresu_2_2", row: 2, col: 2, cost: 10, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "soresu_2_3", row: 2, col: 3, cost: 10, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "soresu_2_4", row: 2, col: 4, cost: 10, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "soresu_3_1", row: 3, col: 1, cost: 15, 
+            name: "Confidence", passive: true, 
+            desc: "Снижает сложность проверок Дисциплины против страха на 1 за ранг таланта.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "soresu_3_2", row: 3, col: 2, cost: 15, 
+            name: "Improved Parry", passive: true, 
+            desc: "При парировании: если атака врага дала <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 3 <span class='text-red-400 font-bold text-[11px]'>۞</span>, нанеси ответный удар (базовый урон) после его атаки.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "soresu_3_3", row: 3, col: 3, cost: 15, 
+            name: "Defensive Circle", passive: false, 
+            desc: "Действие: Проверка Светового меча (Сложн. <span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>). <span class='text-green-400 font-bold text-[11px]'>✶</span>: +1 защита вам и союзнику. 2 <span class='text-blue-300 font-bold text-[11px]'>▲</span>: +1 защита.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "soresu_3_4", row: 3, col: 4, cost: 15, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "soresu_4_1", row: 4, col: 1, cost: 20, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "soresu_4_2", row: 4, col: 2, cost: 20, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "soresu_4_3", row: 4, col: 3, cost: 20, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "soresu_4_4", row: 4, col: 4, cost: 20, 
+            name: "Defensive Stance", passive: false, 
+            desc: "Маневр: Получите усталость (макс = ранг). Повысьте сложность входящих атак ближнего боя на это число.", 
+            links: ["left"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "soresu_5_1", row: 5, col: 1, cost: 25, 
+            name: "Supreme Parry", passive: true, 
+            desc: "Если вы не атаковали в прошлом ходу, стоимость Parry снижается до 1 усталости.", 
+            links: ["right"] 
+        },
+        { 
+            id: "soresu_5_2", row: 5, col: 2, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "soresu_5_3", row: 5, col: 3, cost: 25, 
+            name: "Improved Reflect", passive: true, 
+            desc: "При отражении: если атака врага дала <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 3 <span class='text-red-400 font-bold text-[11px]'>۞</span>, нанеси ответный удар (базовый урон).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "soresu_5_4", row: 5, col: 4, cost: 25, 
+            name: "Strategic Form", passive: false, 
+            desc: "Действие: Проверка Светового меча (Сложн. <span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>). Успех: враг атакует только вас 1 раунд. 2 <span class='text-blue-300 font-bold text-[11px]'>▲</span>: продлить эффект.", 
+            links: ["left"] 
+        },
+    ],
+"pathfinder": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "pathfinder_1_1", row: 1, col: 1, cost: 5, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down"] 
+        },
+        { 
+            id: "pathfinder_1_2", row: 1, col: 2, cost: 5, 
+            name: "Keen Eyed", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> из проверок Внимания и Готовности. Поиск занимает -50% времени.", 
+            links: ["down"] 
+        },
+        { 
+            id: "pathfinder_1_3", row: 1, col: 3, cost: 5, 
+            name: "Forager", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■■</span> из проверок на поиск еды, воды или укрытия. Поиск занимает -50% времени.", 
+            links: ["down"] 
+        },
+        { 
+            id: "pathfinder_1_4", row: 1, col: 4, cost: 5, 
+            name: "Swift", passive: true, 
+            desc: "Игнорируйте штрафы за передвижение по сложной местности.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "pathfinder_2_1", row: 2, col: 1, cost: 10, 
+            name: "Keen Eyed", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Восприятия/Бдительности. Время проверки -50%.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "pathfinder_2_2", row: 2, col: 2, cost: 10, 
+            name: "Outdoorsman", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Выживания. Время поиска -50%.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "pathfinder_2_3", row: 2, col: 3, cost: 10, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "pathfinder_2_4", row: 2, col: 4, cost: 10, 
+            name: "Outdoorsman", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Выживания. Время поиска -50%.", 
+            links: ["left"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "pathfinder_3_1", row: 3, col: 1, cost: 15, 
+            name: "Animal Empathy", passive: true, 
+            desc: "Добавьте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг Силы) к проверкам Выживания с животными. <span class='text-white font-bold'>○</span> дает 1 успех или преимущество.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "pathfinder_3_2", row: 3, col: 2, cost: 15, 
+            name: "Animal Bond", passive: true, 
+            desc: "Установите постоянную связь с животным (Силуэт = 1/2 рейтинга Силы).", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "pathfinder_3_3", row: 3, col: 3, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "pathfinder_3_4", row: 3, col: 4, cost: 15, 
+            name: "Sleight of Mind", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к проверкам Скрытности против целей, не чувствительных к Силе.", 
+            links: [] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "pathfinder_4_1", row: 4, col: 1, cost: 20, 
+            name: "Mental Bond", passive: false, 
+            desc: "Действие: Зафиксируйте 1 <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>. Общайтесь с животным на расстоянии, видьте его глазами.", 
+            links: ["down"] 
+        },
+        { 
+            id: "pathfinder_4_2", row: 4, col: 2, cost: 20, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рейтингу Силы.", 
+            links: ["left"] 
+        },
+        { 
+            id: "pathfinder_4_3", row: 4, col: 3, cost: 20, 
+            name: "Quick Movement", passive: false, 
+            desc: "Свободное: 2 усталости, добавьте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> к проверке. Или потратьте 2 <span class='text-white font-bold'>○</span> для доп. маневра движения.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "pathfinder_4_4", row: 4, col: 4, cost: 20, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: [] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "pathfinder_5_1", row: 5, col: 1, cost: 25, 
+            name: "Share Pain", passive: false, 
+            desc: "Свободное: Уменьшите урон по животному вдвое, но получите столько же урона сами.", 
+            links: [] 
+        },
+        { 
+            id: "pathfinder_5_2", row: 5, col: 2, cost: 25, 
+            name: "Enduring", passive: true, 
+            desc: "+1 к Поглощению.", 
+            links: [] 
+        },
+        { 
+            id: "pathfinder_5_3", row: 5, col: 3, cost: 25, 
+            name: "Natural Outdoorsman", passive: false, 
+            desc: "Раз в сессию: Перебросьте проверку Выживания или Стойкости.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "pathfinder_5_4", row: 5, col: 4, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: [] 
+        },
+    ],
+"hunter": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "hunter_1_1", row: 1, col: 1, cost: 5, 
+            name: "Rapid Recovery", passive: true, 
+            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "hunter_1_2", row: 1, col: 2, cost: 5, 
+            name: "Hunter", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> за ранг против зверей. +10 к результату крит. раны против них.", 
+            links: ["down"] 
+        },
+        { 
+            id: "hunter_1_3", row: 1, col: 3, cost: 5, 
+            name: "Expert Tracker", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг из проверок выслеживания. Время поиска -50%.", 
+            links: ["down"] 
+        },
+        { 
+            id: "hunter_1_4", row: 1, col: 4, cost: 5, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: [] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "hunter_2_1", row: 2, col: 1, cost: 10, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["right"] 
+        },
+        { 
+            id: "hunter_2_2", row: 2, col: 2, cost: 10, 
+            name: "Expert Tracker", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг из проверок выслеживания. Время поиска -50%.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "hunter_2_3", row: 2, col: 3, cost: 10, 
+            name: "Hunter", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> за ранг против зверей. +10 к результату крит. раны против них.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "hunter_2_4", row: 2, col: 4, cost: 10, 
+            name: "Uncanny Senses", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> за ранг таланта к Внимательности.", 
+            links: [] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "hunter_3_1", row: 3, col: 1, cost: 15, 
+            name: "Side Step", passive: false, 
+            desc: "Маневр: Получите усталость (макс = ранг). Повысьте сложность дальних атак по вам на это число до след. раунда.", 
+            links: [] 
+        },
+        { 
+            id: "hunter_3_2", row: 3, col: 2, cost: 15, 
+            name: "Keen Eyed", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> из Внимания/Готовности. Время поиска -50%.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "hunter_3_3", row: 3, col: 3, cost: 15, 
+            name: "Natural Hunter", passive: false, 
+            desc: "Раз в сессию: Перебросьте проверку Внимательности или Готовности.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "hunter_3_4", row: 3, col: 4, cost: 15, 
+            name: "Uncanny Reactions", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> за ранг таланта к Готовности.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "hunter_4_1", row: 4, col: 1, cost: 20, 
+            name: "Rapid Recovery", passive: true, 
+            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "hunter_4_2", row: 4, col: 2, cost: 20, 
+            name: "Soft Spot", passive: false, 
+            desc: "После успешной атаки: Переверните Жетон Судьбы, чтобы добавить урон, равный Смекалке.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "hunter_4_3", row: 4, col: 3, cost: 20, 
+            name: "Sixth Sense", passive: true, 
+            desc: "+1 к Защите от дальних атак.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "hunter_4_4", row: 4, col: 4, cost: 20, 
+            name: "Rapid Recovery", passive: true, 
+            desc: "При восстановлении усталости после сцены лечите +1 усталость за ранг таланта.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "hunter_5_1", row: 5, col: 1, cost: 25, 
+            name: "Side Step", passive: false, 
+            desc: "Маневр: Получите усталость (макс = ранг). Повысьте сложность дальних атак по вам на это число до след. раунда.", 
+            links: [] 
+        },
+        { 
+            id: "hunter_5_2", row: 5, col: 2, cost: 25, 
             name: "Dedication", passive: true, 
             desc: "+1 к характеристике (макс 6).", 
             links: ["right"] 
         },
         { 
-            id: "niman_5_2", row: 5, col: 2, cost: 25, 
-            name: "Force Assault", passive: true, 
-            desc: "При промахе Световым мечом: потратьте Триумф или 3 Успеха, чтобы применить Силу Move как маневр.", 
-            links: ["left"] 
+            id: "hunter_5_3", row: 5, col: 3, cost: 25, 
+            name: "Intuitive Shot", passive: true, 
+            desc: "Добавьте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг Силы) к Дальней атаке. Тратьте <span class='text-white font-bold'>○</span> на Успех или Преимущество.", 
+            links: ["left", "right"] 
         },
         { 
-            id: "niman_5_3", row: 5, col: 3, cost: 25, 
+            id: "hunter_5_4", row: 5, col: 4, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рангу Силы.", 
+            links: ["left"] 
+        },
+    ],
+"aggressor": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "aggressor_1_1", row: 1, col: 1, cost: 5, 
+            name: "Intimidating", passive: false, 
+            desc: "Активный: Получите 1 усталость за ранг. Усильте (Upgrade) проверку Запугивания или сложность проверки противника, если запугивают вас.", 
+            links: ["down"] 
+        },
+        { 
+            id: "aggressor_1_2", row: 1, col: 2, cost: 5, 
+            name: "Plausible Deniability", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Запугивания и Обмана.", 
+            links: ["down"] 
+        },
+        { 
+            id: "aggressor_1_3", row: 1, col: 3, cost: 5, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down"] 
+        },
+        { 
+            id: "aggressor_1_4", row: 1, col: 4, cost: 5, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "aggressor_2_1", row: 2, col: 1, cost: 10, 
+            name: "Fearsome", passive: true, 
+            desc: "Когда враг вступает в бой (Engaged): Проверка Страха (Сложн. = ранг таланта). Провал = штрафы.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "aggressor_2_2", row: 2, col: 2, cost: 10, 
+            name: "Intimidating", passive: false, 
+            desc: "Активный: Получите 1 усталость за ранг. Усильте (Upgrade) проверку Запугивания или сложность проверки противника, если запугивают вас.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "aggressor_2_3", row: 2, col: 3, cost: 10, 
+            name: "Prey on the Weak", passive: true, 
+            desc: "+1 урон по дезориентированным целям за каждый ранг таланта.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "aggressor_2_4", row: 2, col: 4, cost: 10, 
+            name: "Sense Advantage", passive: false, 
+            desc: "Раз в сессию: добавьте <span class='text-slate-500 font-bold text-[12px]'>■■</span> к проверке NPC.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "aggressor_3_1", row: 3, col: 1, cost: 15, 
+            name: "Fearsome", passive: true, 
+            desc: "Когда враг вступает в бой (Engaged): Проверка Страха (Сложн. = ранг таланта). Провал = штрафы.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "aggressor_3_2", row: 3, col: 2, cost: 15, 
+            name: "Terrify", passive: false, 
+            desc: "Действие: Проверка Запугивания (Сложн. <span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>). Добавь <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг). Успех: Дезориентация (Средняя дист). <span class='text-white font-bold'>○</span>: Обездвиживание.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "aggressor_3_3", row: 3, col: 3, cost: 15, 
+            name: "Crippling Blow", passive: false, 
+            desc: "Увеличьте сложность атаки на 1. При попадании: цель получает 1 усталость каждый раз, когда двигается.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "aggressor_3_4", row: 3, col: 4, cost: 15, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "aggressor_4_1", row: 4, col: 1, cost: 20, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "aggressor_4_2", row: 4, col: 2, cost: 20, 
+            name: "Improved Terrify", passive: true, 
+            desc: "Снижает сложность Terrify до Средней (<span class='text-purple-400 font-bold text-[12px]'>◆◆</span>). <span class='text-yellow-400 font-bold text-[11px]'>❂</span>: Оглушение.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "aggressor_4_3", row: 4, col: 3, cost: 20, 
+            name: "Prey on the Weak", passive: true, 
+            desc: "+1 урон по дезориентированным целям за каждый ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "aggressor_4_4", row: 4, col: 4, cost: 20, 
+            name: "Heroic Fortitude", passive: false, 
+            desc: "Потратьте Очко Судьбы: игнорируйте эффекты Крит. ран (Сила/Ловкость) до конца сцены.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "aggressor_5_1", row: 5, col: 1, cost: 25, 
             name: "Force Rating", passive: true, 
             desc: "+1 к рейтингу Силы.", 
             links: ["right"] 
         },
         { 
-            id: "niman_5_4", row: 5, col: 4, cost: 25, 
-            name: "Improved Center of Being", passive: true, 
-            desc: "Маневр: Получите 1 усталость и используйте Center of Being как свободное действие.", 
+            id: "aggressor_5_2", row: 5, col: 2, cost: 25, 
+            name: "Fearsome", passive: true, 
+            desc: "Когда враг вступает в бой (Engaged): Проверка Страха (Сложн. = ранг таланта). Провал = штрафы.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "aggressor_5_3", row: 5, col: 3, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
             links: ["left"] 
+        },
+        { 
+            id: "aggressor_5_4", row: 5, col: 4, cost: 25, 
+            name: "Against All Odds", passive: false, 
+            desc: "Если выведены из строя: Проверка Стойкости (<span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>) + <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>. Восстановите раны = успехи + <span class='text-white font-bold'>○</span>.", 
+            links: [] 
+        },
+    ],
+"shicho": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "shicho_1_1", row: 1, col: 1, cost: 5, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shicho_1_2", row: 1, col: 2, cost: 5, 
+            name: "Second Wind", passive: false, 
+            desc: "Инцидент: Раз за столкновение восстановите усталость = рангу таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shicho_1_3", row: 1, col: 3, cost: 5, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shicho_1_4", row: 1, col: 4, cost: 5, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "shicho_2_1", row: 2, col: 1, cost: 10, 
+            name: "Second Wind", passive: false, 
+            desc: "Инцидент: Раз за столкновение восстановите усталость = рангу таланта.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shicho_2_2", row: 2, col: 2, cost: 10, 
+            name: "Conditioned", passive: true, 
+            desc: "Убирайте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из Атлетики/Координации. Снижает урон/усталость от падения.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "shicho_2_3", row: 2, col: 3, cost: 10, 
+            name: "Multiple Opponents", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к проверкам ближнего боя, если связаны боем с 2+ врагами.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shicho_2_4", row: 2, col: 4, cost: 10, 
+            name: "Durable", passive: true, 
+            desc: "Вычитайте 10 из любого броска Крит. раны по вам (мин. 1).", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "shicho_3_1", row: 3, col: 1, cost: 15, 
+            name: "Quick Draw", passive: false, 
+            desc: "Раз в раунд: Достать оружие или предмет свободным действием.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shicho_3_2", row: 3, col: 2, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shicho_3_3", row: 3, col: 3, cost: 15, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "shicho_3_4", row: 3, col: 4, cost: 15, 
+            name: "Defensive Training", passive: true, 
+            desc: "Оружие ближнего боя и Световые мечи получают свойство Защитное (ранг = ранг таланта).", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "shicho_4_1", row: 4, col: 1, cost: 20, 
+            name: "Natural Blademaster", passive: false, 
+            desc: "Раз в сессию: Перебросьте проверку Светового меча, Драки или Холодного оружия.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shicho_4_2", row: 4, col: 2, cost: 20, 
+            name: "Sarlacc Sweep", passive: false, 
+            desc: "Действие: Атака Световым мечом (Сложн. +1). Тратьте 2 <span class='text-blue-300 font-bold text-[11px]'>▲</span> для попадания по доп. цели (и т.д.).", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shicho_4_3", row: 4, col: 3, cost: 20, 
+            name: "Improved Parry", passive: true, 
+            desc: "При парировании: если атака врага дала <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 3 <span class='text-red-400 font-bold text-[11px]'>۞</span>, нанеси ответный удар (базовый урон) после его атаки.", 
+            links: ["right"] 
+        },
+        { 
+            id: "shicho_4_4", row: 4, col: 4, cost: 20, 
+            name: "Sum Djem", passive: true, 
+            desc: "При проверке Светового меча: потратьте <span class='text-yellow-400 font-bold text-[11px]'>❂</span> или 2 <span class='text-blue-300 font-bold text-[11px]'>▲</span>, чтобы обезоружить противника.", 
+            links: ["left"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "shicho_5_1", row: 5, col: 1, cost: 25, 
+            name: "Center of Being", passive: false, 
+            desc: "Маневр: До след. хода увеличьте крит. рейтинг атак по вам на 1 за каждый ранг таланта.", 
+            links: ["right"] 
+        },
+        { 
+            id: "shicho_5_2", row: 5, col: 2, cost: 25, 
+            name: "Durable", passive: true, 
+            desc: "Вычитайте 10 из любого броска Крит. раны по вам (мин. 1).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "shicho_5_3", row: 5, col: 3, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "shicho_5_4", row: 5, col: 4, cost: 25, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left"] 
+        },
+    ],
+"starfighter": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "starfighter_1_1", row: 1, col: 1, cost: 5, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down"] 
+        },
+        { 
+            id: "starfighter_1_2", row: 1, col: 2, cost: 5, 
+            name: "Skilled Jockey", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> из проверок Пилотирования.", 
+            links: ["down"] 
+        },
+        { 
+            id: "starfighter_1_3", row: 1, col: 3, cost: 5, 
+            name: "Rapid Reaction", passive: false, 
+            desc: "Получите усталость (макс = ранг), чтобы добавить столько же успехов к проверке Инициативы.", 
+            links: ["down"] 
+        },
+        { 
+            id: "starfighter_1_4", row: 1, col: 4, cost: 5, 
+            name: "Solid Repairs", passive: true, 
+            desc: "При ремонте корпуса корабля восстанавливайте +1 ед. урона за ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "starfighter_2_1", row: 2, col: 1, cost: 10, 
+            name: "Intuitive Evasion", passive: false, 
+            desc: "Маневр: Получите 1 усталость, зафиксируйте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг). Усильте сложность атак по кораблю на кол-во кубиков.", 
+            links: ["down"] 
+        },
+        { 
+            id: "starfighter_2_2", row: 2, col: 2, cost: 10, 
+            name: "Conditioned", passive: true, 
+            desc: "Убирайте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из Атлетики/Координации. Снижает урон/усталость от падения.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "starfighter_2_3", row: 2, col: 3, cost: 10, 
+            name: "Solid Repairs", passive: true, 
+            desc: "При ремонте корпуса корабля восстанавливайте +1 ед. урона за ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "starfighter_2_4", row: 2, col: 4, cost: 10, 
+            name: "Galaxy Mapper", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг из Астронавигации. Время расчетов -50%.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "starfighter_3_1", row: 3, col: 1, cost: 15, 
+            name: "Full Throttle", passive: false, 
+            desc: "Действие: Проверка Пилотирования (<span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>). Успех: +1 к Скорости на кол-во раундов = Смекалка.", 
+            links: [] 
+        },
+        { 
+            id: "starfighter_3_2", row: 3, col: 2, cost: 15, 
+            name: "Rapid Reaction", passive: false, 
+            desc: "Получите усталость (макс = ранг), чтобы добавить столько же успехов к проверке Инициативы.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "starfighter_3_3", row: 3, col: 3, cost: 15, 
+            name: "Exhaust Port", passive: false, 
+            desc: "Перед атакой корабля: Переверните Жетон Судьбы, чтобы игнорировать свойство 'Массивный' у цели.", 
+            links: [] 
+        },
+        { 
+            id: "starfighter_3_4", row: 3, col: 4, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "starfighter_4_1", row: 4, col: 1, cost: 20, 
+            name: "Intuitive Strike", passive: true, 
+            desc: "При атаке планетарного масштаба: добавьте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>. Тратьте 2 <span class='text-white font-bold'>○</span> на 1 Успех или Преимущество.", 
+            links: ["down"] 
+        },
+        { 
+            id: "starfighter_4_2", row: 4, col: 2, cost: 20, 
+            name: "Touch of Fate", passive: false, 
+            desc: "Раз в сессию: Добавьте <span class='text-blue-400 font-bold text-[12px]'>■■</span> к любой проверке.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "starfighter_4_3", row: 4, col: 3, cost: 20, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "starfighter_4_4", row: 4, col: 4, cost: 20, 
+            name: "Skilled Jockey", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> из проверок Пилотирования.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "starfighter_5_1", row: 5, col: 1, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рейтингу Силы.", 
+            links: [] 
+        },
+        { 
+            id: "starfighter_5_2", row: 5, col: 2, cost: 25, 
+            name: "Tricky Target", passive: true, 
+            desc: "При стрельбе из корабля считайте его силуэт на 1 меньше.", 
+            links: ["right"] 
+        },
+        { 
+            id: "starfighter_5_3", row: 5, col: 3, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "starfighter_5_4", row: 5, col: 4, cost: 25, 
+            name: "Intuitive Evasion", passive: false, 
+            desc: "Маневр: Получите 1 усталость, зафиксируйте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг). Усильте сложность атак по кораблю на кол-во кубиков.", 
+            links: ["left"] 
+        },
+    ],
+"artisan": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "artisan_1_1", row: 1, col: 1, cost: 5, 
+            name: "Solid Repairs", passive: true, 
+            desc: "При ремонте корпуса корабля восстанавливайте +1 ед. урона за ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "artisan_1_2", row: 1, col: 2, cost: 5, 
+            name: "Fine Tuning", passive: true, 
+            desc: "Уменьшайте системную перегрузку (System Strain) корабля на 1 за каждый ранг таланта.", 
+            links: ["down"] 
+        },
+        { 
+            id: "artisan_1_3", row: 1, col: 3, cost: 5, 
+            name: "Mental Tools", passive: true, 
+            desc: "Всегда считаетесь имеющим нужные инструменты для проверок Механики.", 
+            links: ["down"] 
+        },
+        { 
+            id: "artisan_1_4", row: 1, col: 4, cost: 5, 
+            name: "Technical Aptitude", passive: true, 
+            desc: "Сокращает время выполнения компьютерных задач на 25% за ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "artisan_2_1", row: 2, col: 1, cost: 10, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "artisan_2_2", row: 2, col: 2, cost: 10, 
+            name: "Solid Repairs", passive: true, 
+            desc: "При ремонте корпуса корабля восстанавливайте +1 ед. урона за ранг таланта.", 
+            links: ["left", "down", "right"] 
+        },
+        { 
+            id: "artisan_2_3", row: 2, col: 3, cost: 10, 
+            name: "Fine Tuning", passive: true, 
+            desc: "Уменьшайте системную перегрузку (System Strain) корабля на 1 за каждый ранг таланта.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "artisan_2_4", row: 2, col: 4, cost: 10, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "artisan_3_1", row: 3, col: 1, cost: 15, 
+            name: "Inventor", passive: true, 
+            desc: "При создании/модификации предметов: добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> или уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "artisan_3_2", row: 3, col: 2, cost: 15, 
+            name: "Imbue Item", passive: false, 
+            desc: "Маневр: Получи 1 усталость, зафиксируй <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>. Бонус предмету: +1 урон, +1 защита или -1 крит. Получай 1 усталость каждый ход.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "artisan_3_3", row: 3, col: 3, cost: 15, 
+            name: "Natural Tinkerer", passive: false, 
+            desc: "Раз в сессию: Перебросьте проверку Механики.", 
+            links: ["left", "right"] 
+        },
+        { 
+            id: "artisan_3_4", row: 3, col: 4, cost: 15, 
+            name: "Defensive Slicing", passive: true, 
+            desc: "При защите компьютера: добавьте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта к проверкам врагов.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "artisan_4_1", row: 4, col: 1, cost: 20, 
+            name: "Solid Repairs", passive: true, 
+            desc: "При ремонте корпуса корабля восстанавливайте +1 ед. урона за ранг таланта.", 
+            links: ["down", "right"] 
+        },
+        { 
+            id: "artisan_4_2", row: 4, col: 2, cost: 20, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рейтингу Силы.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "artisan_4_3", row: 4, col: 3, cost: 20, 
+            name: "Defensive Slicing", passive: true, 
+            desc: "При защите компьютера: добавьте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта к проверкам врагов.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "artisan_4_4", row: 4, col: 4, cost: 20, 
+            name: "Mental Fortress", passive: false, 
+            desc: "Потратьте Жетон Судьбы: игнорируйте эффекты Крит. ран (Интеллект/Смекалка) до конца сцены.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "artisan_5_1", row: 5, col: 1, cost: 25, 
+            name: "Master Artisan", passive: false, 
+            desc: "Раз в раунд (свободное): Получите 2 усталости, уменьшите сложность след. проверки Механики на 1 (мин <span class='text-purple-400 font-bold text-[12px]'>◆</span>).", 
+            links: ["right"] 
+        },
+        { 
+            id: "artisan_5_2", row: 5, col: 2, cost: 25, 
+            name: "Intuitive Improvements", passive: true, 
+            desc: "При создании/ремонте: добавьте <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> (макс = ранг). Тратьте 2 <span class='text-white font-bold'>○</span>, чтобы увеличить Hard Points предмета на 1 (макс +2).", 
+            links: ["left"] 
+        },
+        { 
+            id: "artisan_5_3", row: 5, col: 3, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: ["right"] 
+        },
+        { 
+            id: "artisan_5_4", row: 5, col: 4, cost: 25, 
+            name: "Comprehend Technology", passive: false, 
+            desc: "Действие: Проверка Знаний (<span class='text-purple-400 font-bold text-[12px]'>◆◆</span>). При успехе можете использовать Ранг Силы вместо ранга навыка для использования предмета.", 
+            links: ["left"] 
+        },
+    ],
+"shadow": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "shadow_1_1", row: 1, col: 1, cost: 5, 
+            name: "Sleight of Mind", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к проверкам Скрытности против целей, невосприимчивых к Силе.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shadow_1_2", row: 1, col: 2, cost: 5, 
+            name: "Street Smarts", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Уличного чутья или Знания (Преступный мир).", 
+            links: ["down"] 
+        },
+        { 
+            id: "shadow_1_3", row: 1, col: 3, cost: 5, 
+            name: "Codebreaker", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг из проверок взлома/дешифровки. Снизьте сложность проверки на 1.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shadow_1_4", row: 1, col: 4, cost: 5, 
+            name: "Indistinguishable", passive: true, 
+            desc: "Усильте (Upgrade) сложность проверок на опознание вашего персонажа на 1 за каждый ранг таланта.", 
+            links: [] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "shadow_2_1", row: 2, col: 1, cost: 10, 
+            name: "Well Rounded", passive: true, 
+            desc: "Выберите 2 любых навыка. Они становятся для вас карьерными.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shadow_2_2", row: 2, col: 2, cost: 10, 
+            name: "Mental Fortress", passive: false, 
+            desc: "Потратьте Жетон Судьбы: игнорируйте эффекты Крит. ран (Интеллект/Смекалка) до конца сцены.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shadow_2_3", row: 2, col: 3, cost: 10, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shadow_2_4", row: 2, col: 4, cost: 10, 
+            name: "Indistinguishable", passive: true, 
+            desc: "Усильте (Upgrade) сложность проверок на опознание вашего персонажа на 1 за каждый ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "shadow_3_1", row: 3, col: 1, cost: 15, 
+            name: "Shroud", passive: false, 
+            desc: "Маневр: Переверните Жетон Судьбы. Станьте невидимым для Силы и скройте свои способности Силы до конца сцены.", 
+            links: [] 
+        },
+        { 
+            id: "shadow_3_2", row: 3, col: 2, cost: 15, 
+            name: "Dodge", passive: false, 
+            desc: "Реакция: Получи усталость (макс = ранг), чтобы увеличить сложность атаки на столько же.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shadow_3_3", row: 3, col: 3, cost: 15, 
+            name: "Sleight of Mind", passive: true, 
+            desc: "Добавьте <span class='text-blue-400 font-bold text-[12px]'>■</span> к проверкам Скрытности против целей, невосприимчивых к Силе.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shadow_3_4", row: 3, col: 4, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "shadow_4_1", row: 4, col: 1, cost: 20, 
+            name: "Slippery Minded", passive: false, 
+            desc: "Действие: Если под действием Силы, пройдите проверку Обмана (<span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>), чтобы прекратить эффект.", 
+            links: [] 
+        },
+        { 
+            id: "shadow_4_2", row: 4, col: 2, cost: 20, 
+            name: "Codebreaker", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг из проверок взлома. Снизьте сложность проверки на 1.", 
+            links: ["left", "right", "down"] 
+        },
+        { 
+            id: "shadow_4_3", row: 4, col: 3, cost: 20, 
+            name: "Now You See Me", passive: false, 
+            desc: "Действие: Проверка Обмана (<span class='text-purple-400 font-bold text-[12px]'>◆◆◆</span>). Успех: Враги (кол-во = Смекалка) в ср. дистанции забывают о вас.", 
+            links: ["left", "right", "down"] 
+        },
+        { 
+            id: "shadow_4_4", row: 4, col: 4, cost: 20, 
+            name: "Dodge", passive: false, 
+            desc: "Реакция: Получи усталость (макс = ранг), чтобы увеличить сложность атаки на столько же.", 
+            links: ["left"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "shadow_5_1", row: 5, col: 1, cost: 25, 
+            name: "Force Rating", passive: true, 
+            desc: "+1 к рангу Силы.", 
+            links: [] 
+        },
+        { 
+            id: "shadow_5_2", row: 5, col: 2, cost: 25, 
+            name: "Anatomy Lessons", passive: false, 
+            desc: "После успешной атаки: Переверните Жетон Судьбы, чтобы добавить урон, равный Интеллекту.", 
+            links: ["left"] 
+        },
+        { 
+            id: "shadow_5_3", row: 5, col: 3, cost: 25, 
+            name: "Master of Shadows", passive: true, 
+            desc: "Раз в раунд: Получите 2 усталости, чтобы снизить сложность след. проверки Скрытности или Обмана на 1.", 
+            links: ["right"] 
+        },
+        { 
+            id: "shadow_5_4", row: 5, col: 4, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: [] 
+        },
+    ],
+"shien": [
+        // --- РЯД 1 (5 XP) ---
+        { 
+            id: "shien_1_1", row: 1, col: 1, cost: 5, 
+            name: "Side Step", passive: false, 
+            desc: "Маневр: Получите усталость (макс = ранг). Повысьте сложность дальних атак по вам на это число до след. раунда.", 
+            links: [] 
+        },
+        { 
+            id: "shien_1_2", row: 1, col: 2, cost: 5, 
+            name: "Conditioned", passive: true, 
+            desc: "Убирайте <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из Атлетики/Координации. Снижает урон/усталость от падения.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shien_1_3", row: 1, col: 3, cost: 5, 
+            name: "Street Smarts", passive: true, 
+            desc: "Уберите <span class='text-slate-500 font-bold text-[12px]'>■</span> за ранг таланта из проверок Уличного чутья или Знания (Преступный мир).", 
+            links: ["down"] 
+        },
+        { 
+            id: "shien_1_4", row: 1, col: 4, cost: 5, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: [] 
+        },
+
+        // --- РЯД 2 (10 XP) ---
+        { 
+            id: "shien_2_1", row: 2, col: 1, cost: 10, 
+            name: "Toughened", passive: true, 
+            desc: "+2 к порогу ран.", 
+            links: ["down"] 
+        },
+        { 
+            id: "shien_2_2", row: 2, col: 2, cost: 10, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shien_2_3", row: 2, col: 3, cost: 10, 
+            name: "Shien Technique", passive: true, 
+            desc: "Используйте Смекалку (Cunning) вместо Силы для проверок Светового меча.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shien_2_4", row: 2, col: 4, cost: 10, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["down"] 
+        },
+
+        // --- РЯД 3 (15 XP) ---
+        { 
+            id: "shien_3_1", row: 3, col: 1, cost: 15, 
+            name: "Parry", passive: false, 
+            desc: "Реакция: Получи 3 усталости при ударе в ближнем бою. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shien_3_2", row: 3, col: 2, cost: 15, 
+            name: "Counterstrike", passive: true, 
+            desc: "При промахе по вам: потратьте <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 2 <span class='text-red-400 font-bold text-[11px]'>۞</span>, чтобы усилить (Upgrade) вашу следующую атаку по цели.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shien_3_3", row: 3, col: 3, cost: 15, 
+            name: "Grit", passive: true, 
+            desc: "+1 к порогу усталости.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shien_3_4", row: 3, col: 4, cost: 15, 
+            name: "Improved Reflect", passive: true, 
+            desc: "При отражении: если атака врага дала <span class='text-red-500 font-bold text-[11px]'>Ø</span> или 3 <span class='text-red-400 font-bold text-[11px]'>۞</span>, нанеси ответный удар (базовый урон) по цели.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 4 (20 XP) ---
+        { 
+            id: "shien_4_1", row: 4, col: 1, cost: 20, 
+            name: "Djem So Deflection", passive: false, 
+            desc: "После Reflect: Потратьте Очко Судьбы, чтобы сблизиться с врагом (Engage) как инцидент.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shien_4_2", row: 4, col: 2, cost: 20, 
+            name: "Defensive Stance", passive: false, 
+            desc: "Маневр: Получите усталость (макс = ранг). Повысьте сложность входящих атак ближнего боя на это число.", 
+            links: ["left", "down"] 
+        },
+        { 
+            id: "shien_4_3", row: 4, col: 3, cost: 20, 
+            name: "Saber Throw", passive: false, 
+            desc: "Действие: Атака Световым мечом (Средняя). Добавь <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span> к урону. <span class='text-white font-bold'>○</span>: меч возвращается в руку.", 
+            links: ["right", "down"] 
+        },
+        { 
+            id: "shien_4_4", row: 4, col: 4, cost: 20, 
+            name: "Reflect", passive: false, 
+            desc: "Реакция: Получи 3 усталости при попадании дальнего боя. Уменьши урон на 2 + ранг таланта.", 
+            links: ["left", "down"] 
+        },
+
+        // --- РЯД 5 (25 XP) ---
+        { 
+            id: "shien_5_1", row: 5, col: 1, cost: 25, 
+            name: "Falling Avalanche", passive: false, 
+            desc: "Получите 2 усталости: Добавьте Физ. силу (Brawn) к урону следующей атаки Световым мечом.", 
+            links: [] 
+        },
+        { 
+            id: "shien_5_2", row: 5, col: 2, cost: 25, 
+            name: "Dedication", passive: true, 
+            desc: "+1 к характеристике (макс 6).", 
+            links: [] 
+        },
+        { 
+            id: "shien_5_3", row: 5, col: 3, cost: 25, 
+            name: "Disruptive Strike", passive: false, 
+            desc: "Действие: Атака Световым мечом + <span class='bg-white text-black rounded px-0.5 text-[9px] font-bold'>●</span>. За 1 <span class='text-white font-bold'>○</span> добавьте <span class='text-purple-400 font-bold text-[11px]'>▼</span> к следующей атаке врага по вам.", 
+            links: [] 
+        },
+        { 
+            id: "shien_5_4", row: 5, col: 4, cost: 25, 
+            name: "Supreme Reflect", passive: true, 
+            desc: "Если вы не атаковали в прошлом ходу, стоимость Reflect снижается до 1 усталости.", 
+            links: [] 
         },
     ],
 
