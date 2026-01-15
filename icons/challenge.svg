@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ffd800;
+        stroke: #000;
+        stroke-linejoin: round;
+        stroke-width: 1px;
+        fill-rule: evenodd;
+        filter: url(#filter);
+      }
+    </style>
+    <filter id="filter" x="0" y="-2" width="32" height="36" filterUnits="userSpaceOnUse">
+      <feFlood result="flood" flood-color="#fd0b0b"/>
+      <feComposite result="composite" operator="in" in2="SourceGraphic"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g style="fill: #ffd800; filter: url(#filter)">
+    <path id="Challange" class="cls-1" d="M29,23.5L16,31,3,23.5V8.5L16,1,29,8.5v15Z" style="stroke: inherit; filter: none; fill: inherit"/>
+  </g>
+  <use xlink:href="#Challange" style="stroke: #000; filter: none; fill: none"/>
+</svg>

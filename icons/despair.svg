@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #000;
+        stroke-linejoin: round;
+        stroke-width: 1px;
+        fill-rule: evenodd;
+        filter: url(#filter);
+      }
+    </style>
+    <filter id="filter" x="-1" y="-1" width="34" height="34" filterUnits="userSpaceOnUse">
+      <feFlood result="flood" flood-color="red"/>
+      <feComposite result="composite" operator="in" in2="SourceGraphic"/>
+      <feBlend result="blend" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g style="fill: #fff; filter: url(#filter)">
+    <path id="No_Access_1" data-name="No Access 1" class="cls-1" d="M27.05,7.424l0.088-.085L24.663,4.864l-0.088.085A13.986,13.986,0,0,0,4.949,24.576l-0.088.085,2.475,2.475,0.088-.085A13.986,13.986,0,0,0,27.05,7.424ZM5.5,16A10.482,10.482,0,0,1,22.074,7.452L7.451,22.074A10.426,10.426,0,0,1,5.5,16ZM16,26.5a10.431,10.431,0,0,1-6.075-1.952L24.548,9.926A10.482,10.482,0,0,1,16,26.5Z" style="stroke: inherit; filter: none; fill: inherit"/>
+  </g>
+  <use xlink:href="#No_Access_1" style="stroke: #000; filter: none; fill: none"/>
+</svg>
