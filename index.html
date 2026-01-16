@@ -83,10 +83,12 @@ input[type="text"], input[type="number"] {
                     </h1>
                 </div>
                 <div class="flex bg-slate-800 rounded-md p-0.5">
-                    <button onclick="switchTab('generator')" id="btn-generator" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow">Лист</button>
-<button onclick="switchTab('talents')" id="btn-talents" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">Таланты</button>
-                    <button onclick="switchTab('editor')" id="btn-editor" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">База</button>
-                </div>
+    <button onclick="switchTab('generator')" id="btn-generator" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all bg-slate-700 text-white shadow">Лист</button>
+    <button onclick="switchTab('talents')" id="btn-talents" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">Таланты</button>
+    
+    <button onclick="switchTab('notes')" id="btn-notes" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">Заметки</button>
+    <button onclick="switchTab('editor')" id="btn-editor" class="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400">База</button>
+</div>
             </div>
             
             <!-- Config Bar (Responsive Grid/Flex) -->
@@ -295,9 +297,21 @@ input[type="text"], input[type="number"] {
                 <div id="talent-tree-container" class="grid grid-cols-4 gap-4 min-w-[600px] mx-auto max-w-4xl relative p-4"></div>
             </div>
         </div>
-
+<div id="tab-notes" class="hidden fade-in h-full">
+    <div class="bg-slate-900 border border-slate-800 rounded p-4 h-[calc(100vh-140px)] flex flex-col shadow-lg shadow-black/20">
+        <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-2">
+            <h3 class="text-xs font-bold uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                <span>📝</span> Личные записи
+            </h3>
+            <span class="text-[10px] text-green-500 font-mono opacity-0 transition-opacity duration-500" id="notes-save-indicator">Сохранено</span>
+        </div>
+        <textarea id="player-notes" 
+            class="flex-grow w-full bg-slate-950/50 border border-slate-700 rounded p-4 text-sm text-slate-300 focus:border-yellow-500 focus:bg-slate-950 outline-none resize-none custom-scrollbar leading-relaxed placeholder-slate-700 transition-all" 
+            placeholder="Имена NPC, текущие квесты, список лута, координаты планет..."></textarea>
+    </div>
+</div>
         <div id="tab-generator" class="fade-in space-y-6 sm:space-y-8">
-            
+        
             <div>
                 <div class="section-divider"><span class="section-title">Характеристики</span></div>
                 <div id="gen-stats-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"></div>
@@ -344,13 +358,18 @@ input[type="text"], input[type="number"] {
                         </span>
                     </span>
                 </div>
-                
+                <div id="active-talents-mobile-wrapper" class="hidden lg:hidden">
+                <div class="section-divider"><span class="section-title">Активные способности</span></div>
+                <div id="active-talents-list-mobile" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+            <div> <div class="section-divider"><span class="section-title">Навыки
                 <div id="skill-mobile-tabs" class="flex lg:hidden bg-slate-900 rounded p-1 border border-slate-800 mb-2">
                     <button onclick="toggleMobileSkills('gen')" id="tab-btn-gen" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded bg-slate-700 text-white shadow transition">Общие</button>
                     <button onclick="toggleMobileSkills('com')" id="tab-btn-com" class="flex-1 py-1.5 text-[10px] font-bold uppercase rounded hover:bg-slate-800 text-slate-400 transition">Боевые</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-auto min-h-[600px] lg:h-[calc(100vh-500px)]">
+                    
                     <div id="view-skills-gen" class="lg:col-span-2 bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-[400px] lg:h-auto block lg:flex">
                         <div class="bg-slate-950 border-b border-slate-800 flex items-center text-[10px] uppercase font-bold text-slate-400 sticky top-0 z-10 h-9 pr-2">
                             <div class="w-6 text-center flex-shrink-0"></div> <div class="flex-grow px-2 flex items-center gap-3">
@@ -370,21 +389,41 @@ input[type="text"], input[type="number"] {
                         </div>
                     </div>
 
-                    <div id="view-skills-com" class="bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-auto lg:h-auto hidden lg:flex">
-                        <div class="bg-red-950/20 border-b border-red-900/20 flex items-center text-[10px] uppercase font-bold text-red-400/70 sticky top-0 z-10 h-9 pr-2">
-                            <div class="w-6 text-center flex-shrink-0"></div>
-                            <div class="flex-grow px-2 flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                                <span class="tracking-widest text-[10px] text-red-400">Боевые</span>
+                    <div class="flex flex-col gap-4 h-fit lg:col-span-1">
+                        
+                        <div id="view-skills-com" class="bg-slate-900 rounded border border-slate-800 flex flex-col overflow-hidden shadow-lg shadow-black/20 h-auto lg:h-fit hidden lg:flex">
+                            <div class="bg-red-950/20 border-b border-red-900/20 flex items-center text-[10px] uppercase font-bold text-red-400/70 sticky top-0 z-10 h-9 pr-2">
+                                <div class="w-6 text-center flex-shrink-0"></div>
+                                <div class="flex-grow px-2 flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                    <span class="tracking-widest text-[10px] text-red-400 hidden sm:inline">Боевые</span>
+                                    
+                                    <select onchange="setLightsaberChar(this.value)" id="ls-char-select" class="bg-slate-900 border border-red-700 text-[10px] rounded text-white focus:outline-none focus:border-red-500 cursor-pointer ml-auto sm:ml-2 font-bold shadow-sm">
+                                        <option value="brawn">Сила</option>
+                                        <option value="agility">Ловкость</option>
+                                        <option value="intellect">Интеллект</option>
+                                        <option value="cunning">Смекалка</option>
+                                        <option value="willpower">Воля</option>
+                                        <option value="presence">Харизма</option>
+                                    </select>
+                                </div>
+                                <div class="w-20 pl-2 flex-shrink-0">Ранг</div>
+                                <div class="w-24 text-right pr-4 flex-shrink-0">Пул</div>
                             </div>
-                            <div class="w-20 pl-2 flex-shrink-0">Ранг</div>
-                            <div class="w-24 text-right pr-4 flex-shrink-0">Пул</div>
+                            <div class="overflow-y-auto flex-grow custom-scrollbar">
+                                <table class="w-full text-xs text-left border-collapse">
+                                    <tbody id="gen-skills-combat-body" class="divide-y divide-slate-800/50"></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="overflow-y-auto flex-grow custom-scrollbar">
-                            <table class="w-full text-xs text-left border-collapse">
-                                <tbody id="gen-skills-combat-body" class="divide-y divide-slate-800/50"></tbody>
-                            </table>
+
+                        <div id="active-talents-pc-wrapper" class="hidden lg:block bg-slate-900 rounded border border-slate-800 shadow-lg shadow-black/20 p-2 self-start w-full">
+                            <div class="text-[10px] font-bold uppercase text-slate-500 mb-2 tracking-widest text-center border-b border-slate-800 pb-1">Активные способности</div>
+                            <div id="active-talents-list-pc" class="grid grid-cols-2 gap-2"></div>
                         </div>
+
+                    </div>
+                </div>
                     </div>
                 </div>
             </div> </div> <div id="tab-editor" class="hidden fade-in h-full">
@@ -2253,19 +2292,16 @@ let currentTreeMode = 'spec';
 
         window.onload = function() { loadDatabase(); initGenerator(); switchTab('generator'); updateMorality(50); };
 
-        function switchTab(tab) {
-    // 1. Скрываем все вкладки
-    const tabGen = document.getElementById('tab-generator');
-    if (tabGen) tabGen.classList.add('hidden');
-    
-    const tabEdit = document.getElementById('tab-editor');
-    if (tabEdit) tabEdit.classList.add('hidden');
-    
-    const tabTalents = document.getElementById('tab-talents');
-    if (tabTalents) tabTalents.classList.add('hidden');
+        // === ОБНОВЛЕННАЯ ФУНКЦИЯ switchTab ===
+function switchTab(tab) {
+    // 1. Скрываем все вкладки (добавил tab-notes)
+    ['tab-generator', 'tab-editor', 'tab-talents', 'tab-notes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
 
-    // 2. Сбрасываем стили кнопок
-    ['btn-generator', 'btn-editor', 'btn-talents'].forEach(id => {
+    // 2. Сбрасываем стили кнопок (добавил btn-notes)
+    ['btn-generator', 'btn-editor', 'btn-talents', 'btn-notes'].forEach(id => {
         const btn = document.getElementById(id);
         if(btn) btn.className = "px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-bold transition-all hover:bg-slate-700 text-slate-400";
     });
@@ -2281,6 +2317,7 @@ let currentTreeMode = 'spec';
     if(tab === 'talents') initTalentTree();
     if(tab === 'generator') updateGeneratorUI();
     if(tab === 'editor') setEditorMode('races');
+    // Для заметок специальная инициализация не нужна
 }
 
         function loadDatabase() { const saved = localStorage.getItem('swrpg_db_v3'); if (saved) { try { db = JSON.parse(saved); } catch(e) { db = JSON.parse(JSON.stringify(DEFAULT_DB)); } } }
@@ -2479,13 +2516,27 @@ initTalentTree();
         }
 
         // === ЗАМЕНИТЬ ФУНКЦИЮ renderSkillRow ЦЕЛИКОМ ===
-        // === ЗАМЕНИТЬ ФУНКЦИЮ renderSkillRow ЦЕЛИКОМ ===
     function renderSkillRow(skill, finalStats, isCareer, isSpec) {
-        const charVal = finalStats[skill.char];
+        // === ЛОГИКА СВЕТОВОГО МЕЧА ===
+        let effectiveCharKey = skill.char;
+        
+        // Если это световой меч — берем выбранную характеристику
+        if (skill.name === "Световой меч") {
+            effectiveCharKey = lightsaberChar;
+        }
+
+        const charVal = finalStats[effectiveCharKey];
         const rank = skillRanks[skill.name] || 0;
+        
+        // Дальше используем effectiveCharKey для отображения названия стата
+        const statLabel = STAT_CONFIG[effectiveCharKey].t;
+        // =============================
+
         const totalPool = Math.max(charVal, rank);
         const yellow = Math.min(charVal, rank);
         const green = totalPool - yellow;
+        
+        // ... (код значков badgesHtml и чекбокса selectionCheckbox остается без изменений) ...
         
         // --- 1. КРАСИВЫЕ ЗНАЧКИ (BADGES) ---
         // Собираем значки в вертикальную стопку слева
@@ -2587,7 +2638,7 @@ initTalentTree();
                 <td class="p-2 text-xs font-medium text-slate-300 flex-grow">
                     <div class="flex flex-col leading-none">
                         <span>${skill.name}</span>
-                        <span class="text-[8px] text-slate-500 mt-0.5 uppercase">${STAT_CONFIG[skill.char].t} (${charVal})</span>
+                        <span class="text-[8px] text-slate-500 mt-0.5 uppercase">${statLabel} (${charVal})</span>
                     </div>
                 </td>
                 
@@ -2597,7 +2648,88 @@ initTalentTree();
             </tr>
         `;
     }
+// === ОБНОВЛЕННАЯ ФУНКЦИЯ (РЕНДЕРИТ И МОБИЛЬНУЮ, И ПК ВЕРСИЮ) ===
+    function renderActiveTalents() {
+        // Определяем оба контейнера
+        const targets = [
+            { wrapper: document.getElementById('active-talents-mobile-wrapper'), list: document.getElementById('active-talents-list-mobile') },
+            { wrapper: document.getElementById('active-talents-pc-wrapper'), list: document.getElementById('active-talents-list-pc') }
+        ];
 
+        // Сбор данных (как и раньше)
+        const groups = {};
+        const collectTalent = (t) => {
+            if (purchasedTalents.includes(t.id) && !t.passive) {
+                if (!groups[t.name]) {
+                    groups[t.name] = { name: t.name, desc: t.desc, ids: [], rank: 0 };
+                }
+                groups[t.name].rank++;
+                groups[t.name].ids.push(t.id);
+            }
+        };
+
+        Object.values(TALENTS_DB).forEach(tree => tree.forEach(t => collectTalent(t)));
+        Object.values(FORCE_DB).forEach(tree => tree.forEach(t => collectTalent(t)));
+
+        const activeGroups = Object.values(groups);
+        const hasTalents = activeGroups.length > 0;
+
+        // Проходим по обоим контейнерам (Mobile и PC)
+        targets.forEach(target => {
+            if (!target.wrapper || !target.list) return;
+
+            if (!hasTalents) {
+                target.wrapper.classList.add('hidden'); // Скрываем, если пусто
+            } else {
+                target.wrapper.classList.remove('hidden'); // Показываем (классы lg:hidden/lg:block сами решат, где именно)
+                target.list.innerHTML = "";
+
+                activeGroups.forEach(group => {
+                    const isUsed = group.ids.some(id => usedTalents.includes(id));
+                    const masterId = group.ids[0];
+                    let btnClass = isUsed 
+                        ? "bg-slate-950 border-slate-800 text-slate-600 grayscale opacity-60" 
+                        : "bg-slate-900 border-slate-700 hover:border-yellow-500 text-slate-300 hover:text-white shadow-lg shadow-black/20";
+                    let icon = isUsed ? "✕" : "⚡";
+                    const rankBadge = group.rank > 1 
+                        ? `<span class="ml-2 bg-yellow-600 text-white text-[9px] px-1.5 py-0.5 rounded-[2px] font-black shadow-sm">Ранг ${group.rank}</span>` 
+                        : "";
+
+                    const html = `
+                    <button onclick="toggleTalentUse('${masterId}')" class="flex flex-col text-left p-1.5 rounded border transition-all duration-200 group relative overflow-hidden ${btnClass}">
+                        <div class="flex justify-between items-start w-full mb-0.5">
+                            <div class="flex items-center overflow-hidden pr-1">
+                                <span class="text-[9px] font-bold uppercase tracking-wider text-yellow-500/90 group-hover:text-yellow-400 truncate">${group.name}</span>
+                                ${rankBadge}
+                            </div>
+                            <span class="text-[9px] opacity-50 font-mono flex-shrink-0">${icon}</span>
+                        </div>
+                        <div class="text-[8px] leading-tight opacity-70 line-clamp-2 w-full font-sans text-slate-400 group-hover:text-slate-200">${formatDesc(group.desc)}</div>
+                        ${isUsed ? '<div class="absolute inset-0 bg-black/10 pointer-events-none"></div>' : ''}
+                    </button>
+                    `;
+                    target.list.innerHTML += html;
+                });
+            }
+        });
+    }
+
+    // Функция переключения состояния (Использовано / Готово)
+    function toggleTalentUse(id) {
+        const idx = usedTalents.indexOf(id);
+        if (idx > -1) {
+            usedTalents.splice(idx, 1); // Убрать из использованных
+        } else {
+            usedTalents.push(id); // Добавить в использованные
+        }
+        renderActiveTalents(); // Перерисовать кнопки
+        saveSession(); // Сохранить
+    }
+function setLightsaberChar(val) {
+        lightsaberChar = val;
+        updateGeneratorUI(); // Перерисовываем, чтобы обновить кубики
+        saveSession();
+    }
         function updateGeneratorUI() {
             const race = db.races.find(r => r.id === document.getElementById('gen-race').value);
             const career = db.careers.find(c => c.id === document.getElementById('gen-career').value);
@@ -2732,13 +2864,15 @@ initTalentTree();
 // ===========================================
 // === ГЛАВНЫЙ СКРИПТ (ИСПРАВЛЕННЫЙ) ===
 // ===========================================
-
     let isSaveReady = false; 
     let charAvatar = ""; 
     let forceRating = 1;
     let criticalInjuries = []; 
     let purchasedTalents = [];
-    let selectedCareerSkills = []; // Перенесли объявление наверх
+    let selectedCareerSkills = [];
+let playerNotes = "";
+let usedTalents = [];
+let lightsaberChar = "brawn";
 
     // ============================================================
     // === ПОЛНЫЙ БЛОК ЛОГИКИ НАВЫКОВ ===
@@ -3185,7 +3319,9 @@ else if (action === 'refund_stat') { xpData.spent -= val; logEntry = `<span clas
             statMods: statMods, thresholdMods: thresholdMods, currentStatus: currentStatus,
             purchasedTalents: purchasedTalents,
             xpData: xpData, xpHistory: xpHistory, xpLog: xpLog, skillRanks: skillRanks, morality: morality, 
-            selectedCareerSkills: selectedCareerSkills // Теперь с запятой перед этой строкой!
+            selectedCareerSkills: selectedCareerSkills,
+playerNotes: document.getElementById('player-notes').value,
+usedTalents: usedTalents,lightsaberChar: lightsaberChar,
         };
         localStorage.setItem('swrpg_autosave_v1', JSON.stringify(session));
     }
@@ -3216,6 +3352,12 @@ else if (action === 'refund_stat') { xpData.spent -= val; logEntry = `<span clas
             if(s.skillRanks) skillRanks = s.skillRanks;
             if (s.purchasedTalents) purchasedTalents = s.purchasedTalents;
             if (s.selectedCareerSkills) selectedCareerSkills = s.selectedCareerSkills;
+if (s.usedTalents) usedTalents = s.usedTalents;
+if (s.playerNotes !== undefined) { 
+    playerNotes = s.playerNotes; 
+    document.getElementById('player-notes').value = playerNotes;
+if (s.lightsaberChar) lightsaberChar = s.lightsaberChar; 
+}
             
             updateMorality(s.morality || 50);
             updateGeneratorUI();
@@ -3224,11 +3366,18 @@ else if (action === 'refund_stat') { xpData.spent -= val; logEntry = `<span clas
     }
 
     const originalUpdateUI = updateGeneratorUI;
-    updateGeneratorUI = function() { renderXPLogDisplay(); originalUpdateUI(); saveSession(); };
+    updateGeneratorUI = function() { renderXPLogDisplay(); renderActiveTalents(); originalUpdateUI(); saveSession(); };
 
     document.getElementById('char-name').addEventListener('input', saveSession);
     document.getElementById('morality-val').addEventListener('input', () => { updateMorality(document.getElementById('morality-val').value); saveSession(); });
     window.addEventListener('click', (e) => { const m = document.getElementById('avatar-menu'); if (m && !m.classList.contains('hidden') && !e.target.closest('#avatar-display')) m.classList.add('hidden'); });
+// Автосохранение заметок при вводе
+document.getElementById('player-notes').addEventListener('input', () => {
+    saveSession();
+    // Маленькая анимация "Сохранено"
+    const ind = document.getElementById('notes-save-indicator');
+    if(ind) { ind.classList.remove('opacity-0'); setTimeout(()=>ind.classList.add('opacity-0'), 1000); }
+});
     
     const originalOnLoad = window.onload;
     window.onload = function() { if(originalOnLoad) originalOnLoad(); setTimeout(loadSession, 100); };
