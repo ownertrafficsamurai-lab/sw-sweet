@@ -2601,7 +2601,7 @@ initTalentTree();
                     <div class="stat-card relative flex flex-col items-center p-2 rounded border bg-slate-900 ${borderClass} overflow-hidden group">
                         <span class="text-[9px] uppercase font-black opacity-90 mb-0 leading-none ${conf.color}">${conf.t}</span>
                         <div class="flex items-center gap-2 z-20 mt-1">
-                            <button onclick="modifyStat('${key}', -1)" class="w-4 h-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center font-bold text-[10px] shadow border border-slate-700 transition" title="Исправить">-</button>
+                            <button onclick="tryRefundStat('${key}')" class="w-4 h-4 rounded bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white flex items-center justify-center font-bold text-[10px] shadow border border-slate-700 transition" title="Вернуть XP">-</button>
                             <span class="text-4xl font-black ${valueColor} z-10 w-8 text-center leading-none tracking-tighter transition-colors">${val}</span>
                             <button onclick="tryBuyStat('${key}')" class="w-4 h-4 rounded bg-slate-800 hover:bg-green-600 text-slate-400 hover:text-white flex items-center justify-center font-bold text-[10px] shadow border border-slate-700 transition" title="Купить">+</button>
                         </div>
@@ -2799,6 +2799,60 @@ initTalentTree();
             if (skillRanks[skillName] === 0) delete skillRanks[skillName]; // Если 0, удаляем из базы
             
             applyXP('refund_skill', refundAmount, `Навык ${skillName} ${rankToRefund}`);
+        }
+    }
+function tryBuyStat(statKey) {
+        const race = db.races.find(r => r.id === document.getElementById('gen-race').value);
+        if (!race) return;
+        
+        const currentVal = race.stats[statKey] + (statMods[statKey] || 0);
+        const nextVal = currentVal + 1;
+        
+        // Ограничение (обычно 6)
+        if (nextVal > 6) {
+            alert("Максимальное значение характеристики — 6.");
+            return; 
+        }
+
+        // Формула: Новое значение * 10
+        const cost = nextVal * 10;
+        const totalXP = race.startXP + xpData.earned;
+        const availXP = totalXP - xpData.spent;
+
+        if (availXP < cost) {
+            alert(`Недостаточно XP! Для повышения до ${nextVal} нужно ${cost} XP.`);
+            return;
+        }
+
+        if (confirm(`Повысить ${STAT_CONFIG[statKey].t} до ${nextVal} за ${cost} XP?`)) {
+            statMods[statKey] = (statMods[statKey] || 0) + 1;
+            applyXP('buy_stat', cost, `${STAT_CONFIG[statKey].t} ${nextVal}`);
+        }
+    }
+// === ВОЗВРАТ ХАРАКТЕРИСТИКИ (ПРОДАЖА) ===
+    function tryRefundStat(statKey) {
+        const race = db.races.find(r => r.id === document.getElementById('gen-race').value);
+        if (!race) return;
+
+        // Проверяем, есть ли купленные улучшения
+        const currentMod = statMods[statKey] || 0;
+        if (currentMod <= 0) {
+            alert("Нельзя уменьшить характеристику ниже базовой расовой!");
+            return;
+        }
+
+        // Текущее значение (которое мы "продаем")
+        const currentVal = race.stats[statKey] + currentMod;
+        
+        // Формула возврата: Текущее значение * 10
+        // (Например, откат с 3 на 2 вернет 30 XP)
+        const refundAmount = currentVal * 10;
+
+        if (confirm(`Понизить ${STAT_CONFIG[statKey].t} до ${currentVal - 1} и вернуть ${refundAmount} XP?`)) {
+            statMods[statKey]--;
+            if (statMods[statKey] === 0) delete statMods[statKey]; // Чистим объект
+            
+            applyXP('refund_stat', refundAmount, `${STAT_CONFIG[statKey].t} ${currentVal}`);
         }
     }
     // ============================================================
@@ -3013,6 +3067,7 @@ initTalentTree();
             else if (action === 'buy_skill') { xpData.spent += val; logEntry = `<span class="text-slate-300">-${val} ${desc || 'Навык'}</span>`; }
             else if (action === 'buy_stat') { xpData.spent += val; logEntry = `<span class="text-red-400">-${val} ${desc || 'Стат'}</span>`; }
 else if (action === 'refund_skill') { xpData.spent -= val; logEntry = `<span class="text-green-400">+${val} Отмена</span>`; }
+else if (action === 'refund_stat') { xpData.spent -= val; logEntry = `<span class="text-green-400">+${val} Отмена</span>`; }
 
             if (amountOverride === null && input) input.value = '';
             xpLog.unshift(logEntry); if (xpLog.length > 5) xpLog.pop();
