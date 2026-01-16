@@ -2479,45 +2479,72 @@ initTalentTree();
         }
 
         // === ЗАМЕНИТЬ ФУНКЦИЮ renderSkillRow ЦЕЛИКОМ ===
-        function renderSkillRow(skill, finalStats, isCareer, isSpec) {
+        // === ЗАМЕНИТЬ ФУНКЦИЮ renderSkillRow ЦЕЛИКОМ ===
+    function renderSkillRow(skill, finalStats, isCareer, isSpec) {
         const charVal = finalStats[skill.char];
         const rank = skillRanks[skill.name] || 0;
         const totalPool = Math.max(charVal, rank);
         const yellow = Math.min(charVal, rank);
         const green = totalPool - yellow;
         
-        // Чекбокс выбора карьеры
+        // --- 1. КРАСИВЫЕ ЗНАЧКИ (BADGES) ---
+        // Собираем значки в вертикальную стопку слева
+        let badgesHtml = `<div class="flex flex-col gap-0.5 items-center justify-center w-4 mr-1">`;
+        
+        if (isCareer) {
+            // Зеленый значок [К]
+            badgesHtml += `<div class="w-3 h-3 flex items-center justify-center rounded-[2px] border border-green-800 bg-green-950 text-[7px] font-black text-green-500 select-none" title="Карьерный навык">К</div>`;
+        }
+        
+        if (isSpec) {
+            // Синий значок [С]
+            badgesHtml += `<div class="w-3 h-3 flex items-center justify-center rounded-[2px] border border-blue-800 bg-blue-950 text-[7px] font-black text-blue-500 select-none" title="Навык специализации">С</div>`;
+        }
+        badgesHtml += `</div>`;
+
+        // --- 2. ЛОГИКА ЧЕКБОКСА (ВЫБОР 3-Х) ---
         let selectionCheckbox = "";
+        
+        // Базовый стиль строки (прозрачный)
         let rowClass = "hover:bg-slate-800/50 transition border-l-2 border-transparent"; 
 
+        // Если это карьерный навык — добавляем чекбокс для скидки
         if (isCareer) {
             const isSelected = selectedCareerSkills.includes(skill.name);
             const isDisabled = !isSelected && selectedCareerSkills.length >= 3;
-            const checkColor = isSelected ? "text-green-500 border-green-500" : "text-slate-600 border-slate-700";
+            
+            // Стиль чекбокса: если выбран — Золотой, если нет — Серый
+            const checkBorder = isSelected ? "border-yellow-500 bg-yellow-500" : "border-slate-700 bg-slate-900 group-hover/chk:border-slate-500";
+            const checkIcon = isSelected ? `<span class="text-[8px] text-black font-bold">✓</span>` : "";
             
             selectionCheckbox = `
-            <label class="cursor-pointer ml-1 relative group/chk">
+            <label class="cursor-pointer relative group/chk flex items-center justify-center h-full w-4">
                 <input type="checkbox" class="peer sr-only" 
                     onchange="toggleCareerSelection('${skill.name}')" 
                     ${isSelected ? 'checked' : ''} 
                     ${isDisabled ? 'disabled' : ''}>
-                <div class="w-3 h-3 border ${isDisabled ? 'opacity-20 cursor-not-allowed' : ''} ${checkColor} rounded-[2px] flex items-center justify-center peer-checked:bg-green-900/50 transition-colors">
-                    ${isSelected ? '✓' : ''}
+                
+                <div class="w-3 h-3 border ${isDisabled ? 'opacity-20 cursor-not-allowed' : ''} ${checkBorder} rounded-[2px] flex items-center justify-center transition-all shadow-sm">
+                    ${checkIcon}
                 </div>
             </label>`;
             
+            // Если навык ВЫБРАН ГАЛОЧКОЙ — подсвечиваем строку золотым оттенком
             if (isSelected) {
-                 rowClass = "bg-green-900/10 border-l-2 border-green-500 hover:bg-slate-800/50 transition";
-            } else {
-                 rowClass = "bg-green-900/5 border-l-2 border-green-900/30 hover:bg-slate-800/50 transition";
+                 rowClass = "bg-yellow-900/10 border-l-2 border-yellow-500 hover:bg-slate-800/50 transition";
+            } 
+            // Если просто карьерный (но не выбран) — легкий зеленый оттенок
+            else {
+                 rowClass = "bg-green-900/5 border-l-2 border-green-900/20 hover:bg-slate-800/50 transition";
             }
         }
         
-        if (isSpec) {
-             rowClass = "bg-blue-900/10 border-l-2 border-blue-500 hover:bg-slate-800/50 transition";
+        // Если это навык специализации (и не выбран как карьерный) — подсвечиваем синим
+        if (isSpec && !selectedCareerSkills.includes(skill.name)) {
+             rowClass = "bg-blue-900/5 border-l-2 border-blue-500 hover:bg-slate-800/50 transition";
         }
 
-        // ГЕНЕРАЦИЯ КВАДРАТИКОВ
+        // --- 3. ГЕНЕРАЦИЯ КВАДРАТИКОВ РАНГА ---
         let rankHtml = '<div class="flex gap-0.5">';
         for(let i=1; i<=5; i++) {
             const filled = i <= rank;
@@ -2527,30 +2554,24 @@ initTalentTree();
             let title = `Ранг ${i}`;
 
             if (filled) {
-                // Если это КУПЛЕННЫЙ ранг
                 bg = "bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.5)] border-yellow-600";
-                
-                // Если это ПОСЛЕДНИЙ купленный ранг - его можно вернуть
                 if (i === rank) {
                     cursor = "cursor-pointer hover:bg-red-500 hover:border-red-600 transition-colors";
                     clickAction = `onclick="refundSkillRank('${skill.name}', ${i})"`;
                     title = "Нажмите для возврата XP";
                 }
             } else {
-                // Если это ПУСТОЙ ранг
-                // Его можно купить, только если это следующий по порядку (rank + 1)
                 if (i === rank + 1) {
                     cursor = "cursor-pointer hover:bg-slate-600";
                     clickAction = `onclick="buySkillRank('${skill.name}', ${i}, ${isCareer}, ${isSpec})"`;
                     title = "Купить ранг";
                 }
             }
-
             rankHtml += `<div ${clickAction} class="rank-box w-2 h-3 rounded-[1px] border ${bg} ${cursor}" title="${title}"></div>`;
         }
         rankHtml += '</div>';
 
-        // Пул кубиков
+        // --- 4. ПУЛ КУБИКОВ ---
         let poolHtml = '<div class="flex gap-0.5 items-center justify-end h-full">';
         for(let i=0; i<yellow; i++) poolHtml += `<div class="shape-hex w-3 h-3 bg-yellow-400 border border-yellow-600"></div>`;
         for(let i=0; i<green; i++) poolHtml += `<div class="shape-rhombus w-3 h-3 bg-green-500 border border-green-600" style="transform: scale(1.15);"></div>`;
@@ -2558,17 +2579,20 @@ initTalentTree();
 
         return `
             <tr class="${rowClass}">
-                <td class="p-2 text-center w-8 flex-shrink-0 flex items-center justify-center gap-1">
-                    ${isCareer || isSpec ? '<span class="text-[8px] font-bold opacity-50">К</span>' : ''}
+                <td class="p-2 w-10 flex-shrink-0 flex items-center justify-start">
+                    ${badgesHtml}
                     ${selectionCheckbox}
                 </td>
+                
                 <td class="p-2 text-xs font-medium text-slate-300 flex-grow">
                     <div class="flex flex-col leading-none">
                         <span>${skill.name}</span>
                         <span class="text-[8px] text-slate-500 mt-0.5 uppercase">${STAT_CONFIG[skill.char].t} (${charVal})</span>
                     </div>
                 </td>
+                
                 <td class="p-2 w-20 flex-shrink-0">${rankHtml}</td>
+                
                 <td class="p-2 w-24 text-right flex-shrink-0 pr-4">${poolHtml}</td>
             </tr>
         `;
