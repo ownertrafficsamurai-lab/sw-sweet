@@ -2,7 +2,7 @@
 // кэш — без сети», запросы к Supabase и не-GET не перехватываются. Без сети открывается index.html из кэша,
 // и приложение показывает «Нет сети». Версия кэша в репозитории — swrpg-dev; scripts/publish.mjs ставит
 // swrpg-<отпечаток содержимого>, поэтому любой релиз меняет байты sw.js и браузер ставит новый SW сам.
-const CACHE_NAME = 'swrpg-8c025731bbfd';
+const CACHE_NAME = 'swrpg-c472d9ff1f1a';
 
 // Список ведётся руками; scripts/tests/app-files.test.mjs и scripts/publish.mjs сверяют его с файлами app/
 // APP_FILES:begin
