@@ -1,0 +1,46 @@
+# База не засыпает (релиз v2): scripts/publish.mjs кладёт этот файл в sw-sweet как
+# .github/workflows/keepalive.yml. Дважды в день — настоящий запрос к базе (rpc/keepalive, число рас) с
+# publishable-ключом приложения: бесплатный проект Supabase засыпает после ~7 дней без запросов.
+# GitHub выключает расписания публичного репозитория после 60 дней без активности, поэтому, если
+# последний коммит старше 50 дней, расписание само коммитит дату в .github/keepalive.txt.
+# Запуск вручную: GitHub → Actions → keepalive → Run workflow.
+name: keepalive
+
+on:
+  schedule:
+    - cron: '23 4,16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the database
+        run: |
+          curl -fsS -X POST "https://owtvbvyscopoejavinmj.supabase.co/rest/v1/rpc/keepalive" \
+            -H "apikey: sb_publishable_OL3JDDAfKycES03VvRLPHg_jTjEQPSb" \
+            -H "Content-Type: application/json" \
+            -d '{}'
+          echo
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Keep the schedule alive
+        run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          if [ $((now - last)) -gt $((50 * 86400)) ]; then
+            date -u +%Y-%m-%dT%H:%M:%SZ > .github/keepalive.txt
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/keepalive.txt
+            git commit -m "chore: keepalive"
+            git push
+          else
+            echo "Last commit is $(( (now - last) / 86400 )) days old — nothing to do"
+          fi

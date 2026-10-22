@@ -1,0 +1,1366 @@
+/* Переменные тем (А3, часть 3). index.html подключает themes.css и сам, но страница из кэша
+   прежнего service worker подключает только style.css — без этого импорта фон, шапка и панели
+   стали бы прозрачными до смены service worker */
+@import url("themes.css");
+
+/* ================================================================
+   А3 — ШКАЛА ШРИФТА И РАЗМЕР ТЕКСТА (спека 2026-09-28-readability-type-scale.md, разделы 1–2)
+   База — на <html>: 15 px при ширине экрана ≤ 360 px, плавно до 17 px при ≥ 1440 px (от шрифта
+   браузера 16 px: если человек его увеличил, база растёт вместе с ним), умноженная на ступень
+   переключателя (data-text-size m / l / xl → ×1 / ×1.15 / ×1.3; js/text-size.js). Текст — только
+   уровни ниже (мельче «подписи» ничего нет); отступы и ширины — в rem/em, поэтому всё растёт
+   вместе с базой.
+   ================================================================ */
+:root {
+    --text-k: 1;
+    --fs-cap: 0.8rem;       /* подпись: ПОГЛ., РАНЫ, «ЛОВ (4)», заголовки разделов, подписи полей */
+    --fs-small: 0.875rem;   /* мелкий: вторичный текст, описания талантов, журнал XP */
+    --fs-body: 1rem;        /* основной: названия навыков, текст, поля ввода, кнопки */
+    --fs-title: 1.15rem;    /* заголовок: имя персонажа, заголовки панелей */
+    --fs-num: 1.35rem;      /* число: раны, усталость, поглощение, XP */
+    --fs-num-lg: 1.6rem;    /* крупное число: характеристики */
+}
+html[data-text-size="l"] { --text-k: 1.15; }
+html[data-text-size="xl"] { --text-k: 1.3; }
+html { font-size: calc(clamp(0.9375rem, 0.8958rem + 0.1852vw, 1.0625rem) * var(--text-k)); }
+/* Печать — всегда на «Обычном» */
+@media print { :root, html[data-text-size="l"], html[data-text-size="xl"] { --text-k: 1; } }
+
+.fs-cap { font-size: var(--fs-cap); }
+.fs-small { font-size: var(--fs-small); }
+.fs-body { font-size: var(--fs-body); }
+.fs-title { font-size: var(--fs-title); }
+.fs-num { font-size: var(--fs-num); }
+.fs-num-lg { font-size: var(--fs-num-lg); }
+
+/* Переключатель «А · А+ · А++» — в меню ☰ и во всплывающем меню «Aa» (компьютер) */
+.ts-btn { flex: 1; min-height: 2.4rem; display: flex; align-items: center; justify-content: center; border-radius: .4rem; border: 1px solid rgb(var(--slate-800)); background: rgb(var(--slate-900) / .5); color: rgb(var(--slate-400)); font-weight: 800; line-height: 1; transition: color .15s, border-color .15s; }
+.ts-btn:hover { color: rgb(var(--sw-white)); border-color: rgb(var(--slate-600)); }
+.ts-btn[aria-pressed="true"] { color: var(--sw-gold); border-color: var(--sw-gold-dim); background: var(--sw-gold-glow); }
+.hud-aa { font-family: var(--sw-font-ui); font-size: var(--fs-body); font-weight: 800; letter-spacing: .02em; }
+
+/* Выбор темы (А3, часть 3) — плитки-превью 2×3 в меню ☰: сверху полоска с фоном, узором и
+   акцентом своей темы (цвета полоски не зависят от текущей темы), снизу полное название.
+   Выбранная — рамка и название цвета акцента текущей темы (aria-pressed, theme.js) */
+.theme-tile { display: block; min-width: 0; text-align: left; border-radius: .4rem; border: 1px solid rgb(var(--slate-800)); background: rgb(var(--slate-900) / .5); color: rgb(var(--slate-400)); overflow: hidden; transition: color .15s, border-color .15s; }
+.theme-tile:hover { color: rgb(var(--sw-white)); border-color: rgb(var(--slate-600)); }
+.theme-tile[aria-pressed="true"] { color: rgb(var(--accent-300)); border-color: var(--sw-gold); box-shadow: 0 0 0 1px var(--sw-gold); }
+.theme-pv { display: flex; align-items: center; gap: .3rem; height: 1.6rem; padding: 0 .45rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+.theme-pv i { display: block; height: .4rem; border-radius: 2px; }
+.theme-pv i:first-child { width: 1.4rem; background: var(--pv-accent); }
+.theme-pv i:last-child { flex: 1; background: var(--pv-text); opacity: .55; }
+.theme-name { display: block; padding: .3rem .45rem .35rem; font-size: var(--fs-small); font-weight: 700; line-height: 1.2; overflow-wrap: break-word; }
+.theme-pv-jedi { background: #030811; --pv-accent: #D4A200; --pv-text: #cbd5e1; }
+.theme-pv-sith { background: #120709; --pv-accent: #DC2626; --pv-text: #cbd5e1; }
+.theme-pv-imperial { background-color: #0b0e17; background-image: linear-gradient(rgba(51,56,78,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(51,56,78,.5) 1px, transparent 1px); background-size: 8px 8px; --pv-accent: #94A3B8; --pv-text: #cbd5e1; }
+.theme-pv-rebel { background: #15171d repeating-linear-gradient(135deg, rgba(249,115,22,.10) 0 5px, transparent 5px 10px); --pv-accent: #F97316; --pv-text: #e7e5e4; }
+.theme-pv-mando { background: #11161a radial-gradient(ellipse 60% 90% at 10% 100%, rgba(45,212,191,.25), transparent 70%); --pv-accent: #2DD4BF; --pv-text: #cbd5e1; }
+.theme-pv-light { background: #f1f5f9; border-bottom-color: #cbd5e1; --pv-accent: #A16207; --pv-text: #334155; }
+
+        /* Dark Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgb(var(--slate-900)); }
+        ::-webkit-scrollbar-thumb { background: rgb(var(--slate-700)); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgb(var(--slate-600)); }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+        /* Стили для иконок кубиков */
+        .dice-icon {
+            height: 1.1em; /* Чуть больше высоты шрифта */
+            width: auto;
+            vertical-align: text-bottom; /* Выравнивание по тексту */
+            display: inline-block;
+            margin: 0 1px;
+        }
+        /* Custom Shapes */
+        .shape-hex { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+        .shape-rhombus { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); transform: scale(1.15); }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .rank-box { transition: all 0.1s ease; }
+        .rank-box:hover { transform: scale(1.2); z-index: 10; border-color: var(--sw-gold); }
+        /* Пустой ранг навыка — подложка темы (в «Ситхе» нейтральная: красный только у купленных) */
+        .rank-empty { background: var(--sw-track); border-color: var(--sw-track-edge); }
+        /* Бесплатный первый ранг расового навыка (race-skills.js): не покупается и не возвращается */
+        .rank-box.rank-race { background: rgb(var(--purple-400)); border-color: rgb(var(--purple-500)); cursor: default; }
+        .rank-box.rank-race:hover { transform: none; border-color: rgb(var(--purple-500)); }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        /* «−» / «+» порогов в «Состоянии» и обязательств. Раньше стиль задавался через @apply,
+           которое браузер игнорирует (Tailwind CDN не обрабатывает внешний CSS), — кнопки были
+           голым текстом. */
+        .mini-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 1.6rem; height: 1.6rem; padding: 0 .3rem; border-radius: .35rem; background: rgb(var(--slate-700)); border: 1px solid rgb(var(--slate-600)); color: rgb(var(--sw-white)); font-size: var(--fs-body); font-weight: 700; line-height: 1; cursor: pointer; transition: background-color .15s; }
+        .mini-btn:hover { background: rgb(var(--slate-600)); }
+        .compact-select { @apply bg-slate-900 border-none text-xs font-bold text-yellow-500 focus:ring-0 cursor-pointer hover:bg-slate-800 rounded px-2 py-1 transition w-full sm:w-auto; appearance: none; text-align-last: center; sm:text-align-last: right; }
+
+        /* Section Divider */
+        .section-divider { @apply relative flex py-2 items-center; }
+        .section-divider::before, .section-divider::after { content: ''; @apply flex-grow border-t border-slate-800; }
+        .section-title { @apply mx-2 sm:mx-4 text-[10px] uppercase tracking-widest font-bold text-slate-400 bg-slate-950 px-2 font-mono flex items-center gap-2 whitespace-nowrap; }
+/* === ИСПРАВЛЕНИЕ ЦВЕТОВ SELECT === */
+        
+.compact-select {
+    background-color: rgb(var(--slate-900)) !important; /* bg-slate-900 */
+    color: rgb(var(--accent-500)) !important;            /* text-yellow-500 */
+    border: 1px solid rgb(var(--slate-800)) !important; /* border-slate-800 */
+    border-radius: 4px;
+    padding: .15rem .3rem;
+    font-size: var(--fs-small);
+    font-weight: bold;
+    cursor: pointer;
+}
+.compact-select option {
+    background-color: rgb(var(--slate-900));
+    color: rgb(var(--accent-500));
+}
+input[type="text"], input[type="number"] {
+            transition: all 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            background-color: rgb(var(--slate-800)); /* bg-slate-800 */
+            border-color: rgb(var(--accent-500)); /* yellow-500 */
+        }
+        /* Modal overlay */
+        #modal-overlay { backdrop-filter: blur(4px); }
+
+        /* Dice pool hover animation */
+        @keyframes diceRoll {
+            0%   { transform: scale(1.15) rotate(0deg); }
+            30%  { transform: scale(1.35) rotate(-20deg); }
+            60%  { transform: scale(1.35) rotate(20deg); }
+            100% { transform: scale(1.15) rotate(0deg); }
+        }
+        @keyframes hexRoll {
+            0%   { transform: scale(1) rotate(0deg); }
+            30%  { transform: scale(1.2) rotate(-20deg); }
+            60%  { transform: scale(1.2) rotate(20deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        tr:hover .dice-pool-anim .shape-rhombus { animation: diceRoll 0.35s ease-in-out; }
+        tr:hover .dice-pool-anim .shape-hex     { animation: hexRoll  0.35s ease-in-out; }
+
+        /* Print stylesheet */
+        @media print {
+            body { background: #fff !important; color: #111 !important; }
+            header { position: static !important; background: #f5f5f5 !important; border-bottom: 1px solid #ccc !important; box-shadow: none !important; }
+            #tab-talents, #tab-notes, #tab-editor, #tab-abilities { display: none !important; }
+            #tab-generator, #tab-equipment { display: block !important; }
+            .bg-slate-900, .bg-slate-950, .bg-slate-800 { background: #f9f9f9 !important; }
+            .text-slate-300, .text-slate-400, .text-slate-200 { color: #333 !important; }
+            .text-white { color: #000 !important; }
+            .border-slate-800, .border-slate-700, .border-slate-600 { border-color: #ddd !important; }
+            .text-yellow-500, .text-yellow-400, .text-game-yellow-400 { color: #b45309 !important; }
+            .text-red-500, .text-red-400 { color: #b91c1c !important; }
+            .text-blue-400, .text-blue-300 { color: #1d4ed8 !important; }
+            .text-green-500, .text-green-400 { color: #15803d !important; }
+            .shadow-lg, .shadow-xl, .shadow-2xl, .drop-shadow-md { box-shadow: none !important; }
+            #menu-btn, #text-size-btn, #text-size-menu, #tab-talents, #tab-notes, #tab-editor, #tab-abilities,
+            #stat-panel, #equipment-summary, #xp-panel, #char-setup-modal, #catalog-picker, #choice-picker, #race-skill-picker,
+            #desk-tabs, #bottom-nav, #hud-mini, #hud-dim, #hud-shade-handle, .hud-side-slot,
+            button[onclick*="switchTab"], button[onclick*="toggleSystemMenu"],
+            #system-menu, .system-menu { display: none !important; }
+            /* Порядок: карточка → «Состояние» и «Сила» как обычные блоки → лист и инвентарь */
+            #hud-slot { order: 1; height: auto !important; }
+            #condition-panel, #force-panel { order: 2; display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+            main { order: 3; }
+            #condition-panel .sheet-body, #force-panel .sheet-body { max-height: none !important; max-width: none !important; overflow: visible !important; border: 1px solid #ddd !important; border-radius: 0 !important; margin-top: 8px; box-shadow: none !important; background: #f9f9f9 !important; }
+            #condition-panel button, #force-panel button, .sheet-grab { display: none !important; }
+            /* Блоки, которые печать показывает (вкладка «Снаряжение», «Состояние», «Сила» — .fade-in),
+               иначе начинают анимацию появления, и печать снимает её первый кадр — прозрачный */
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+            /* Сетка и полосы фона — только для экрана: без «Фона» Chrome печатает верхний слой (z 9998)
+               белым листом поверх страницы */
+            body::before, body::after { display: none !important; }
+            /* Навыки: портретная страница (~718 px) уже 1024 px и получает раскладку телефона — здесь
+               все три таблицы целиком, без вкладок и рамки 27rem с прокруткой. «Знания» — своей таблицей,
+               если лист разложил их так (компьютер), иначе они уже в «Общих» по алфавиту */
+            #skill-mobile-tabs { display: none !important; }
+            #skills-cols { min-height: 0 !important; }
+            #view-skills-gen, #view-skills-know, #view-skills-com { display: flex !important; height: auto !important; }
+            #view-skills-know:not(:has(tr)) { display: none !important; }
+            #skills-cols .sk-scroll { overflow: visible !important; }
+            .shape-hex   { background: #555 !important; }
+            .shape-rhombus { background: #888 !important; }
+            .bg-yellow-500, .bg-yellow-600 { background: #b45309 !important; }
+            .bg-green-500  { background: #15803d !important; }
+            a { display: none !important; }
+            @page { margin: 1cm; }
+        }
+
+        /* ================================================================
+           STAR WARS DATAPAD — UI OVERHAUL
+           ================================================================ */
+
+        /* Цвета темы (--sw-gold, --sw-bg, поверхности, шкалы) — в css/themes.css */
+        :root {
+            --sw-font-ui:    'Rajdhani', system-ui, sans-serif;
+            --sw-font-mono:  'Share Tech Mono', monospace;
+        }
+
+        /* ── Background ── */
+        body {
+            background-color: var(--sw-bg) !important;
+            background-image: var(--sw-bg-img);
+        }
+
+        /* Grid overlay */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(var(--sw-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--sw-grid) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Scanlines */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,              transparent 3px,
+                var(--sw-scan) 3px,  var(--sw-scan) 4px
+            );
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        main, header { position: relative; z-index: 1; }
+
+        /* ── Typography ── */
+        h1, .section-title, #talent-tree-title {
+            font-family: var(--sw-font-ui) !important;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--sw-topbar) !important;
+            border-bottom: 1px solid rgb(var(--sw-gold-rgb) / .18) !important;
+            box-shadow: var(--sw-header-shadow) !important;
+        }
+
+        /* Title accent bar — glow */
+        header h1 .text-yellow-500 {
+            text-shadow: 0 0 22px rgb(var(--sw-gold-rgb) / 0.45);
+        }
+
+        /* ── Tab Buttons ── */
+        .flex.bg-slate-800.rounded-md {
+            background: rgb(var(--sw-panel-rgb) / 0.92) !important;
+            border: 1px solid var(--sw-border) !important;
+        }
+
+        #btn-generator, #btn-abilities, #btn-talents, #btn-equipment, #btn-notes, #btn-editor {
+            font-family: var(--sw-font-ui) !important;
+            font-weight: 700 !important;
+            font-size: var(--fs-cap) !important;
+            letter-spacing: 0.04em !important;
+            position: relative;
+            transition: all 0.2s !important;
+        }
+
+        /* Active tab — gold underline indicator */
+        .sw-tab-active {
+            position: relative;
+        }
+        .sw-tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 20%; right: 20%;
+            height: 2px;
+            background: var(--sw-gold);
+            box-shadow: 0 0 8px var(--sw-gold), 0 0 16px var(--sw-gold-dim);
+            border-radius: 1px;
+        }
+
+        /* ── Character Name ── */
+        #char-name {
+            font-family: var(--sw-font-ui) !important;
+            font-size: var(--fs-title) !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.04em !important;
+            transition: color 0.2s, text-shadow 0.2s !important;
+        }
+        #char-name:focus {
+            color: var(--sw-gold) !important;
+            text-shadow: 0 0 22px var(--sw-gold-glow) !important;
+        }
+
+        /* ── Compact selects ── */
+        .compact-select {
+            border: 1px solid rgb(var(--sw-border-rgb) / 0.9) !important;
+            transition: border-color 0.2s !important;
+        }
+        .compact-select:hover {
+            border-color: rgb(var(--sw-gold-rgb) / 0.3) !important;
+        }
+        .compact-select:focus {
+            border-color: rgb(var(--sw-gold-rgb) / 0.55) !important;
+            outline: none !important;
+        }
+
+        /* ── Panels ── */
+        .bg-slate-900  { background: rgb(var(--sw-panel-rgb) / 0.96) !important; }
+        .bg-slate-950  { background: rgb(var(--sw-deep-rgb) / 0.98)  !important; }
+
+        /* ── Section dividers ── */
+        .section-title {
+            font-family: var(--sw-font-ui) !important;
+            font-size: var(--fs-cap) !important;
+            letter-spacing: 0.04em !important;
+            color: rgb(var(--slate-400)) !important;
+            background: transparent !important;
+        }
+        .section-divider::before, .section-divider::after {
+            border-color: rgb(var(--sw-border-rgb) / 0.55) !important;
+        }
+
+        /* ── Stat Cards — corner brackets ── */
+        .stat-card {
+            background: rgb(var(--sw-panel-rgb) / 0.9) !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            position: relative;
+            overflow: visible !important;
+        }
+        .stat-card::before, .stat-card::after {
+            content: '';
+            position: absolute;
+            width: 7px; height: 7px;
+            border-color: rgb(var(--sw-gold-rgb) / 0.22);
+            border-style: solid;
+            transition: all 0.22s;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .stat-card::before { top: 3px;    left: 3px;   border-width: 1px 0 0 1px; }
+        .stat-card::after  { bottom: 3px; right: 3px;  border-width: 0 1px 1px 0; }
+        .stat-card:hover::before, .stat-card:hover::after {
+            border-color: rgb(var(--sw-gold-rgb) / 0.65);
+            width: 10px; height: 10px;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 22px var(--sw-gold-glow) !important;
+        }
+        /* Stat numbers */
+        .stat-card .text-4xl { font-family: var(--sw-font-mono) !important; }
+
+        /* ── Avatar ── */
+        #avatar-display {
+            border: 1px solid rgb(var(--sw-gold-rgb) / 0.22) !important;
+            box-shadow: 0 0 12px rgb(var(--sw-gold-rgb) / 0.07) !important;
+            transition: all 0.3s !important;
+        }
+        #avatar-display:hover {
+            border-color: rgb(var(--sw-gold-rgb) / 0.6) !important;
+            box-shadow: 0 0 20px rgb(var(--sw-gold-rgb) / 0.2) !important;
+        }
+
+        /* ── Mini buttons ── */
+        .mini-btn:hover {
+            box-shadow: 0 0 8px rgb(var(--sw-gold-rgb) / 0.28) !important;
+        }
+
+        /* ── Rank boxes ── */
+        .rank-box:hover {
+            border-color: var(--sw-gold) !important;
+            box-shadow: 0 0 8px var(--sw-gold-dim) !important;
+        }
+
+        /* ── Talent Tree ── */
+        #talent-tree-title {
+            font-family: var(--sw-font-ui) !important;
+            letter-spacing: 0.04em !important;
+        }
+        /* Bought talent — green glow */
+        #talent-tree-container .border-green-500 {
+            box-shadow: 0 0 16px rgb(var(--green-400) / 0.22), inset 0 0 28px rgb(var(--green-400) / 0.05) !important;
+        }
+        /* Talent name */
+        #talent-tree-container .uppercase.font-black {
+            font-family: var(--sw-font-ui) !important;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Input focus glow ── */
+        input[type="text"]:focus, input[type="number"]:focus {
+            background-color: rgb(var(--sw-panel-rgb) / 0.95) !important;
+            border-color: rgb(var(--sw-gold-rgb) / 0.5) !important;
+            box-shadow: 0 0 0 1px rgb(var(--sw-gold-rgb) / 0.14) !important;
+        }
+
+        /* ── Scrollbar — gold ── */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--sw-scroll-track); }
+        ::-webkit-scrollbar-thumb { background: rgb(var(--sw-gold-rgb) / 0.22); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgb(var(--sw-gold-rgb) / 0.44); }
+
+        /* ── Modal ── */
+        /* Экран загрузки (z 450) закрывает окна и уведомления (z 200 / 300). «Выйти» на нём спрашивает
+           другие вкладки («Надёжная запись», п. 3): надпись ожидания и окно «не записаны» — поверх него */
+        body:has(#app-loading:not(.hidden)) :is(#modal-overlay, #toast-container) { z-index: 460; }
+        #modal-overlay > div {
+            background: rgb(var(--sw-window-rgb) / 0.99) !important;
+            border: 1px solid rgb(var(--sw-gold-rgb) / 0.22) !important;
+            box-shadow: 0 0 60px rgba(0,0,0,0.85), 0 0 28px rgb(var(--sw-gold-rgb) / 0.08) !important;
+        }
+        #modal-message {
+            font-family: var(--sw-font-ui) !important;
+            font-size: var(--fs-body) !important;
+            letter-spacing: 0.03em !important;
+        }
+
+        /* ── System Menu ── */
+        #system-menu {
+            background: rgb(var(--sw-window-rgb) / 0.98) !important;
+            border: 1px solid rgb(var(--sw-border-rgb) / 0.9) !important;
+            backdrop-filter: blur(12px) !important;
+        }
+        #system-menu button, #system-menu label {
+            font-family: var(--sw-font-ui) !important;
+            letter-spacing: 0.04em !important;
+        }
+
+        /* ── Notes ── */
+        #player-notes {
+            font-family: var(--sw-font-mono) !important;
+            font-size: var(--fs-body) !important;
+            line-height: 1.75 !important;
+        }
+        #player-notes:focus {
+            border-color: rgb(var(--sw-gold-rgb) / 0.3) !important;
+            box-shadow: inset 0 0 30px rgb(var(--sw-gold-rgb) / 0.025) !important;
+        }
+
+        /* ── Button press ── */
+        button:active:not(:disabled) {
+            transform: scale(0.95) !important;
+        }
+
+        /* ── Hover on obligation rows ── */
+        #obligation-list > div:hover {
+            background: rgb(var(--sw-gold-rgb) / 0.025) !important;
+        }
+
+        /* ── Toast notifications ── */
+        /* Не шире экрана без отступов по 1rem (на 360 px при «Очень крупном» 20rem шире экрана).
+           Селектор по id перебивает .max-w-xs Tailwind при любом порядке загрузки. */
+        #toast-container { max-width: min(20rem, calc(100% - 2rem)); }
+        .sw-toast {
+            pointer-events: auto;
+            animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            font-family: var(--sw-font-ui);
+            letter-spacing: 0.04em;
+        }
+        .sw-toast.hiding {
+            animation: toastOut 0.25s ease-in forwards;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100%) scale(0.9); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0) scale(1); }
+            to   { opacity: 0; transform: translateX(60%) scale(0.9); }
+        }
+
+        /* ── Header HUD redesign ── */
+        .sw-tab-btn {
+            position: relative; padding: .55rem .7rem;
+            font-size: var(--fs-cap); font-weight: 800; text-transform: uppercase;
+            letter-spacing: .04em; transition: all 0.15s ease;
+            border-bottom: 2px solid transparent; white-space: nowrap; color: rgb(var(--slate-400));
+        }
+        .sw-tab-btn:hover:not(.active) { color: rgb(var(--slate-300)); border-bottom-color: rgb(var(--slate-700)); }
+        .sw-tab-btn.active { color: var(--sw-gold); border-bottom-color: var(--sw-gold); text-shadow: 0 0 10px rgb(var(--accent-500) / 0.35); }
+        /* Верхняя строка шапки (А3). Container query делает её слоем с собственным z-index — он
+           выше карточки, чтобы меню ☰ и «Aa» открывались поверх неё. Когда вкладкам на компьютере
+           не хватает ширины (узкое окно, крупный шрифт), значки прячутся, а длинные подписи
+           сокращаются («Способн.», «Снаряж.»). Порог в em растёт со ступенью шрифта; подобран
+           проверкой «вылезает» (scripts/overflow-check.mjs). */
+        .hud-toprow { position: relative; z-index: 2; container: toprow / inline-size; }
+        .tab-short { display: none; }
+        @container toprow (max-width: 50em) {
+            .tab-ico, .tab-full { display: none; }
+            .tab-short { display: inline; }
+        }
+
+        /* ── Collapsible sections ── */
+        .sw-section-body {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 9999px;
+            opacity: 1;
+        }
+        .sw-section-body.sw-collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+        }
+        .sw-section-chevron {
+            display: inline-block;
+            transition: transform 0.25s ease;
+            font-size: .75em;
+            margin-right: 4px;
+            color: rgba(100,116,140,0.6);
+        }
+        .sw-section-chevron.collapsed { transform: rotate(-90deg); }
+        .section-divider.sw-collapsible { cursor: pointer; }
+        .section-divider.sw-collapsible:hover .section-title { color: rgb(var(--sw-gold-rgb) / 0.8) !important; }
+        /* Заголовок раздела с клавиатуры (Tab) — видимая рамка фокуса */
+        .section-divider.sw-collapsible:focus-visible { outline: 2px solid rgb(var(--accent-500)); outline-offset: 2px; }
+
+        /* ── Skill filter ── */
+        #skill-filter-input { font-family: var(--sw-font-mono) !important; font-size: var(--fs-body) !important; }
+
+        /* Навыки (А3, раздел 3): строка навыка — четыре ячейки (character-generator.js renderSkillRow).
+           Когда таблице не хватает ширины (узкий телефон, крупный шрифт), строка встаёт в две:
+           сверху название и «ЛОВ (4)», снизу ранги и пул. Селекторы из двух классов — чтобы
+           перебить ширины Tailwind (его стили подключаются позже). Порог в em растёт со ступенью
+           шрифта; подобран проверкой «вылезает» (scripts/overflow-check.mjs). */
+        #view-skills-gen, #view-skills-know, #view-skills-com { container: skills / inline-size; }
+        @container skills (max-width: 23em) {
+            .sk-row { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "mark name name" "mark ranks pool"; align-items: center; }
+            .sk-row .sk-mark { grid-area: mark; align-self: stretch; }
+            .sk-row .sk-name { grid-area: name; padding-bottom: 0; }
+            .sk-row .sk-name > div { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: .5em; }
+            .sk-row .sk-ranks { grid-area: ranks; width: auto; padding-top: .35rem; }
+            .sk-row .sk-pool { grid-area: pool; width: auto; padding-top: .35rem; }
+            .sk-head-col { display: none; }
+        }
+        /* «Империя»: отметка карьерного навыка «К» — красная (галерея тем, раздел 9 спеки).
+           Атрибут темы в селекторе перебивает зелёные классы Tailwind */
+        html[data-theme="imperial"] .career-mark { color: rgb(var(--red-500)); border-color: rgb(var(--red-800)); background: rgb(var(--red-950)); }
+
+/* ================================================================
+   А2 — КАРТОЧКА ПЕРСОНАЖА, МИНИ-БЛОК, ШТОРКА, НИЖНЯЯ ПАНЕЛЬ, ПАНЕЛИ
+   Компьютер — (min-width: 1024px) and (min-height: 560px) (hud-math.js DESKTOP_QUERY): карточка
+   в боковой панели или компактной строкой (А3, часть 2, hud-place.js); всё остальное — раскладка
+   телефона. Размеры — уровни шкалы и rem/em (А3): растут вместе со
+   ступенью шрифта. Тонкие полосы, рамки и «язычки» остаются в px.
+   ================================================================ */
+.hud-num { font-family: var(--sw-font-mono, monospace); }
+#hud-top { position: relative; z-index: 50; }
+
+.hud-ico-btn { width: 2.25rem; height: 2.25rem; flex: 0 0 2.25rem; border-radius: .5rem; background: var(--sw-ico); border: 1px solid rgb(var(--slate-800)); color: rgb(var(--slate-400)); display: flex; align-items: center; justify-content: center; transition: color .15s, border-color .15s; }
+.hud-ico-btn svg { width: 1.1rem; height: 1.1rem; }
+.hud-ico-btn:hover { color: rgb(var(--sw-white)); border-color: rgb(var(--slate-700)); }
+.hud-ico-sm { width: 1.85rem; height: 1.85rem; flex-basis: 1.85rem; border-radius: .45rem; }
+.hud-ico-sm svg { width: .95rem; height: .95rem; }
+
+/* Карточка — контейнер для перестройки яруса (ниже); слой ниже верхней строки (.hud-toprow) */
+.hud-card { position: relative; z-index: 1; container: hud / inline-size; background: var(--sw-card); border: 1px solid rgb(var(--slate-700) / 0.8); border-top: 1px solid var(--sw-gold-dim); border-radius: .9rem; padding: .65rem; margin: .5rem 0 .65rem; }
+.hud-tier { display: flex; align-items: center; gap: .4rem; }
+.hud-tier + .hud-tier { margin-top: .6rem; }
+.hud-identity { flex: 1; min-width: 0; text-align: center; }
+/* Имя и «раса · карьера / специализация» переносятся, а не обрезаются (А3, раздел 3) */
+.hud-name { display: block; font-family: var(--sw-font-ui); font-size: var(--fs-title); font-weight: 700; letter-spacing: .04em; color: rgb(var(--slate-50)); line-height: 1.15; overflow-wrap: break-word; }
+.hud-sub { display: block; font-size: var(--fs-cap); color: rgb(var(--slate-400)); margin-top: .15rem; line-height: 1.3; overflow-wrap: break-word; }
+.hud-avatar-wrap { position: relative; width: 2.65rem; height: 2.65rem; flex: 0 0 2.65rem; z-index: 20; }
+
+.hud-tier-xp { width: 100%; text-align: left; }
+.hud-xp-badge { flex: 0 0 auto; display: inline-flex; align-items: baseline; white-space: nowrap; background: var(--sw-gold-glow); border: 1px solid var(--sw-gold-dim); border-radius: .4rem; padding: .1rem .45rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; color: var(--sw-gold); }
+.hud-xp-badge b { font-size: var(--fs-num); line-height: 1.1; margin-left: .25rem; letter-spacing: 0; }
+.hud-xp-bar { position: relative; flex: 1; min-width: 0; min-height: 1.35rem; display: flex; align-items: center; justify-content: center; background: rgb(var(--slate-950)); border: 1px solid rgb(var(--slate-800)); border-radius: .35rem; overflow: hidden; }
+.hud-xp-fill { position: absolute; top: 0; bottom: 0; left: 0; background: linear-gradient(90deg, var(--sw-gold-glow), var(--sw-gold-dim)); transition: width .3s; }
+.hud-xp-text { position: relative; text-align: center; font-size: var(--fs-cap); line-height: 1.25; padding: .1rem .3rem; color: rgb(var(--slate-300)); }
+
+.hud-tier-vit { align-items: stretch; }
+/* Колонки щита и Силы — не уже своей подписи (min-width, а не ширина) */
+.hud-shield, .hud-force { position: relative; min-width: 2.7rem; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
+.hud-shield svg { width: 2.25rem; height: 2.5rem; color: rgb(var(--slate-400)); }
+.hud-shield b { position: absolute; top: .55rem; left: 0; right: 0; text-align: center; font-size: var(--fs-num); line-height: 1; color: rgb(var(--slate-50)); }
+.hud-shield em, .hud-force em, .hud-vital em { font-style: normal; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; margin-top: .15rem; white-space: nowrap; }
+.hud-shield em, .hud-force em { color: rgb(var(--slate-400)); }
+.hud-force-ring { width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1px solid rgb(var(--force-rgb) / .5); background: rgb(var(--force-rgb) / .08); display: flex; align-items: center; justify-content: center; font-size: var(--fs-num); font-weight: 800; color: var(--force-text); margin-top: .15rem; }
+.hud-force em { margin-top: .25rem; }
+.hud-vital { flex: 1; min-width: 0; border-radius: .5rem; padding: .35rem .45rem .4rem; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+.hud-vital-top { display: flex; align-items: center; gap: .3rem; }
+.hud-vital svg { width: .95rem; height: .95rem; flex: 0 0 .95rem; }
+.hud-vital-val { font-size: var(--fs-num); font-weight: 800; color: rgb(var(--slate-50)); line-height: 1; white-space: nowrap; }
+.hud-vital-val small { font-size: .7em; color: rgb(var(--slate-400)); font-weight: 600; }
+.hud-vital-w { border: 1px solid rgb(var(--red-500) / .5); background: rgb(var(--red-500) / .08); color: rgb(var(--red-400)); }
+.hud-vital-s { border: 1px solid rgb(var(--blue-500) / .5); background: rgb(var(--blue-500) / .08); color: rgb(var(--blue-400)); }
+.hud-mini-bar { display: block; height: 3px; border-radius: 2px; background: rgb(var(--slate-800)); margin-top: .25rem; overflow: hidden; }
+.hud-mini-bar i { display: block; height: 100%; transition: width .3s; }
+
+/* Перестройка яруса по ширине карточки (А3, раздел 3): поглощение и Сила — плитками в ряд,
+   раны и усталость — двумя плитками на всю ширину. Порог — в em, то есть растёт со ступенью
+   шрифта; подобран проверкой «вылезает» (scripts/overflow-check.mjs). */
+@container hud (max-width: 19em) {
+    .hud-tier-vit { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+    .hud-shield, .hud-force { flex-direction: row; justify-content: flex-start; gap: .45rem; min-width: 0; padding: .3rem .5rem; border: 1px solid rgb(var(--slate-800)); border-radius: .5rem; }
+    .hud-shield b { left: .5rem; right: auto; width: 2.25rem; top: .85rem; }
+    .hud-shield em, .hud-force em, .hud-force-ring { margin-top: 0; }
+}
+
+/* Ряд характеристик в карточке (stat-panel.js renderStatStrip: подпись — fs-cap, значение — fs-num-lg) */
+.hud-card .stat-card { padding: .25rem 0 .2rem; }
+
+/* Мини-блок, затемнение и «язычок» шторки — включаются в hud-collapse.js */
+#hud-mini { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 70; align-items: center; gap: .45rem; padding: .4rem .75rem .65rem; background: rgb(var(--slate-950) / .97); border-bottom: 1px solid var(--sw-gold-dim); box-shadow: 0 8px 14px -8px rgba(0,0,0,.8); touch-action: none; cursor: pointer; }
+.hud-mini-avatar { width: 1.85rem; height: 1.85rem; flex: 0 0 1.85rem; border-radius: .45rem; background: radial-gradient(circle at 30% 30%, rgb(var(--slate-700)), rgb(var(--slate-900))) center / cover; border: 1px solid var(--sw-gold-dim); color: var(--sw-gold); font-size: var(--fs-cap); font-weight: 800; display: flex; align-items: center; justify-content: center; }
+/* Одна строка по определению: полное имя видно в шторке. Единственное многоточие (А3, раздел 3) */
+.hud-mini-name { flex: 1; min-width: 0; font-family: var(--sw-font-ui); font-size: var(--fs-body); font-weight: 700; color: rgb(var(--slate-50)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-pill { display: flex; flex: 0 0 auto; align-items: center; gap: .2rem; white-space: nowrap; border-radius: .4rem; padding: .1rem .4rem; font-size: var(--fs-small); font-weight: 800; }
+.hud-pill svg { width: .75rem; height: .75rem; }
+.hud-pill-w { color: rgb(var(--red-400)); border: 1px solid rgb(var(--red-500) / .45); background: rgb(var(--red-500) / .08); }
+.hud-pill-s { color: rgb(var(--blue-400)); border: 1px solid rgb(var(--blue-500) / .45); background: rgb(var(--blue-500) / .08); }
+.hud-mini-grab { position: absolute; left: 50%; bottom: 3px; width: 34px; height: 3px; margin-left: -17px; border-radius: 3px; background: rgb(var(--slate-700)); }
+#hud-dim { display: none; position: fixed; inset: 0; z-index: 80; background: rgba(2,6,23,.62); }
+.hud-shade-handle { display: none; width: 100%; flex-direction: column; align-items: center; gap: .2rem; padding: .15rem 0 .5rem; }
+.hud-shade-handle i { width: 40px; height: 4px; border-radius: 3px; background: rgb(var(--slate-600)); display: block; }
+.hud-shade-handle span { font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+
+/* Нижняя панель (телефон). Подписи — уровня «подпись»; когда пяти колонкам не хватает ширины
+   (узкий телефон, крупный шрифт), длинные подписи сокращаются, значки остаются. Порог в em —
+   подобран проверкой «вылезает». */
+#bottom-nav { container: bnav / inline-size; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: grid; grid-template-columns: repeat(5, 1fr); background: rgb(var(--slate-950) / .97); border-top: 1px solid rgb(var(--slate-800)); padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -8px 20px rgba(0,0,0,.5); }
+.bnav-btn { display: flex; flex-direction: column; align-items: center; gap: .1rem; min-width: 0; padding: .4rem .1rem .45rem; font-family: var(--sw-font-ui); font-size: var(--fs-cap); font-weight: 700; letter-spacing: .04em; line-height: 1.2; color: rgb(var(--slate-400)); }
+.bnav-ico { font-size: 1.15rem; line-height: 1.3; filter: grayscale(1) brightness(.8); }
+.bnav-btn.active { color: var(--sw-gold); }
+.bnav-btn.active .bnav-ico { filter: none; }
+.bnav-short { display: none; }
+@container bnav (max-width: 19.5em) {
+    .bnav-full { display: none; }
+    .bnav-short { display: inline; }
+}
+
+/* Панели: на телефоне — снизу, на компьютере — окно по центру (bottom-sheet.js). Размеры — уровни
+   шкалы и rem (А3); строки с кнопками переносятся, если не помещаются, а не вылезают. */
+.sheet-overlay { position: fixed; inset: 0; z-index: 190; background: rgba(0,0,0,.7); justify-content: center; align-items: flex-end; }
+.sheet-overlay:not(.hidden) { display: flex; }
+.sheet-body { width: 100%; max-height: 88vh; overflow-y: auto; background: var(--sw-sheet); border-top: 1px solid var(--sw-gold-dim); border-radius: 1rem 1rem 0 0; padding: .4rem .8rem calc(.9rem + env(safe-area-inset-bottom)); box-shadow: 0 -14px 30px rgba(0,0,0,.7); }
+.sheet-head { touch-action: none; padding-bottom: .4rem; }
+.sheet-grab { display: block; width: 40px; height: 4px; border-radius: 3px; background: rgb(var(--slate-600)); margin: 2px auto 8px; }
+.sheet-title { font-family: var(--sw-font-ui); font-size: var(--fs-title); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sw-gold); }
+.sheet-x { width: 2rem; height: 2rem; flex: 0 0 2rem; border-radius: .4rem; color: rgb(var(--slate-400)); font-size: 1.35rem; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.sheet-x:hover { color: rgb(var(--sw-white)); background: rgb(var(--slate-800)); }
+.sheet-track { border-radius: .6rem; padding: .45rem .5rem .5rem; margin-top: .4rem; }
+.sheet-track-w { border: 1px solid rgb(var(--red-500) / .45); background: rgb(var(--red-500) / .06); }
+.sheet-track-s { border: 1px solid rgb(var(--blue-500) / .45); background: rgb(var(--blue-500) / .06); }
+.sheet-track-top { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.sheet-track-w .sheet-track-top { color: rgb(var(--red-400)); }
+.sheet-track-s .sheet-track-top { color: rgb(var(--blue-400)); }
+.sheet-thr { margin-left: auto; color: rgb(var(--slate-400)); letter-spacing: .04em; display: flex; align-items: center; gap: .3rem; text-transform: none; font-size: var(--fs-cap); }
+.sheet-thr b { color: rgb(var(--slate-50)); min-width: 1.4em; text-align: center; font-size: var(--fs-body); }
+.sheet-track-mid { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .35rem; margin-top: .4rem; }
+.sheet-step { min-width: 2.2rem; min-height: 2.4rem; padding: 0 .45rem; border-radius: .5rem; border: 1px solid rgb(var(--slate-700)); background: rgb(var(--slate-950)); color: rgb(var(--slate-400)); font-size: var(--fs-small); font-weight: 800; display: inline-flex; align-items: center; justify-content: center; transition: transform .1s, color .15s; }
+.sheet-step:active { transform: scale(.92); }
+.sheet-step:disabled { opacity: .3; cursor: default; }
+.sheet-step-main { color: rgb(var(--slate-200)); font-size: var(--fs-body); }
+.sheet-val { font-size: 1.85rem; font-weight: 800; color: rgb(var(--slate-50)); min-width: 4.6rem; text-align: center; white-space: nowrap; }
+.sheet-val small { font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.sheet-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .6rem; padding-top: .5rem; border-top: 1px solid rgb(var(--slate-800)); font-size: var(--fs-small); color: rgb(var(--slate-300)); }
+.sheet-row b { color: rgb(var(--slate-50)); }
+.sheet-section { margin-top: .6rem; padding-top: .5rem; border-top: 1px solid rgb(var(--slate-800)); }
+.sheet-subtitle { display: block; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--slate-400)); margin: .65rem .15rem .25rem; }
+.sheet-stat { border: 1px solid rgb(var(--slate-800)); border-radius: .45rem; text-align: center; padding: .35rem .1rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: 0; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.sheet-stat b { display: block; font-size: var(--fs-num); color: rgb(var(--slate-50)); letter-spacing: 0; }
+.sheet-stat-gold { border-color: var(--sw-gold-dim); }
+.sheet-stat-gold b { color: var(--sw-gold); }
+.sheet-btn { flex: 1; min-height: 2.5rem; padding: .25rem .5rem; border-radius: .45rem; font-size: var(--fs-body); font-weight: 800; letter-spacing: .04em; line-height: 1.15; }
+.sheet-btn-add { border: 1px solid rgb(var(--green-500) / .5); color: rgb(var(--green-400)); background: rgb(var(--green-500) / .08); }
+.sheet-btn-sub { border: 1px solid rgb(var(--red-500) / .45); color: rgb(var(--red-400)); background: rgb(var(--red-500) / .06); }
+.sheet-undo { width: 100%; margin-top: .45rem; border: 1px solid rgb(var(--slate-800)); border-radius: .45rem; padding: .5rem .65rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); text-align: left; }
+.sheet-undo:hover:not(:disabled) { color: rgb(var(--sw-white)); border-color: rgb(var(--slate-700)); }
+.sheet-undo:disabled { opacity: .35; cursor: default; }
+.sheet-force-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; border: 1px solid rgb(var(--force-rgb) / .4); background: rgb(var(--force-rgb) / .05); border-radius: .6rem; padding: .5rem .65rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--force-text); }
+.sheet-morality-bar { position: relative; height: 8px; border-radius: 5px; background: linear-gradient(90deg, #7f1d1d, rgb(var(--slate-700)) 50%, #e0f2fe); margin-top: .65rem; }
+.sheet-morality-bar i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--sw-gold); box-shadow: 0 0 6px var(--sw-morality-glow); transition: left .3s; }
+
+/* «Настройка персонажа» (А3): когда окну не хватает ширины (узкий телефон, крупный шрифт),
+   подпись встаёт над полем, и список получает всю ширину. Селекторы с id — чтобы перебить
+   классы Tailwind. Порог в em подобран проверкой «вылезает». */
+#char-setup-modal .setup-body { container: setup / inline-size; }
+/* Список не шире строки: по умолчанию он не сжимается уже самого длинного пункта («Защита/
+   Высвобождение (Protect/Unleash)») и вылезал за окно; длинное название в закрытом списке
+   видно началом, целиком — в открытом */
+#char-setup-modal .setup-row > select { min-width: 0; }
+@container setup (max-width: 20em) {
+    #char-setup-modal .setup-row { flex-direction: column; align-items: stretch; gap: .25rem; }
+    #char-setup-modal .setup-row > label { width: auto; }
+}
+
+/* «Способности» (спека 2026-09-30-abilities-tab.md, раздел 2). Метки тира и «пассивное» — рядом
+   с жёлтой меткой ранга; пассивная плитка спокойнее активной; карточка Силы — синяя гамма «Силы 1/2».
+   Селекторы из одного класса: Tailwind на этих элементах задаёт только раскладку, не цвета */
+.abil-chip { display: inline-block; font-size: var(--fs-cap); font-weight: 700; line-height: 1.35; padding: 0 .3rem; border: 1px solid rgb(var(--slate-600)); border-radius: 3px; color: rgb(var(--slate-300)); white-space: nowrap; }
+.abil-chip-kind { border-color: rgb(var(--slate-800)); background: rgb(var(--slate-800)); }
+.abil-passive { background: var(--sw-passive); border-style: dashed; border-color: rgb(var(--slate-700)); }
+/* Плитка у края раздела: рамка фокуса внутри — снаружи её обрезал бы блок сворачивания (overflow: hidden) */
+.abil-tile:focus-visible { outline: 2px solid rgb(var(--accent-500)); outline-offset: -2px; }
+.abil-force { background: var(--force-card); border: 1px solid rgb(var(--blue-900)); border-radius: .4rem; padding: .45rem .6rem .6rem; }
+.abil-force-name { min-width: 0; font-size: var(--fs-small); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--blue-300)); overflow-wrap: break-word; hyphens: auto; }
+.abil-force-base { margin-top: .2rem; }
+.abil-force-base > summary { display: inline-block; cursor: pointer; font-size: var(--fs-small); color: rgb(var(--blue-400)); }
+.abil-force-base > summary::-webkit-details-marker { display: none; }
+.abil-force-base > summary::before { content: '▸ '; }
+.abil-force-base[open] > summary::before { content: '▾ '; }
+.abil-force-base[open] > summary { margin-bottom: .2rem; }
+.abil-upgrades { display: flex; flex-direction: column; gap: .5rem; margin-top: .4rem; padding-top: .45rem; border-top: 1px solid rgb(var(--slate-800)); }
+.abil-upgrade-name { min-width: 0; font-size: var(--fs-cap); font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: rgb(var(--slate-200)); overflow-wrap: break-word; }
+
+/* ── Инвентарь (подпроект Б1): разделы «Оружие», «Броня», «Снаряжение»; строка раскрывается на
+   месте (inventory-equipment.js). Цвета — переменные тем; размеры текста — ступени --fs-* ── */
+#inv-cols { display: grid; gap: .9rem; }
+.inv-col { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
+.inv-sec-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .4rem; }
+.inv-sec-title { font-size: var(--fs-cap); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.inv-list { display: flex; flex-direction: column; gap: .3rem; }
+.inv-empty { font-size: var(--fs-small); font-style: italic; color: rgb(var(--slate-400)); padding: .25rem 0; }
+.inv-item { background: rgb(var(--slate-950) / .5); border: 1px solid rgb(var(--slate-800)); border-radius: .4rem; transition: border-color .2s; }
+.inv-item.inv-open { border-color: rgb(var(--accent-500) / .55); }
+/* Кнопки расходника и брони — справа от верха строки; когда верху остаётся меньше 11rem (узкий
+   телефон, крупный шрифт), кнопки переходят под него */
+.inv-line { display: flex; flex-wrap: wrap; align-items: center; column-gap: .35rem; }
+.inv-spent .inv-head { opacity: .5; }
+.inv-head { flex: 1 1 14rem; min-width: 0; display: flex; align-items: center; gap: .5rem; padding: .4rem .55rem; cursor: pointer; border-radius: .4rem; }
+/* Иконки предметов (спека 2026-10-01-item-icons.md): контур — цветом текста, клинок светового меча — акцент темы */
+.inv-main { flex: 1; min-width: 0; }
+.inv-tile { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 2.4rem; height: 2.4rem; border-radius: .55rem; background: rgb(var(--slate-900)); border: 1px solid rgb(var(--slate-800)); color: rgb(var(--slate-300)); }
+.inv-tile-own { border-style: dashed; border-color: rgb(var(--purple-400) / .45); }
+.inv-tile .item-ico { width: 1.75rem; height: 1.75rem; }
+.picker-ico { flex: 0 0 auto; display: flex; color: rgb(var(--slate-300)); }
+.picker-ico .item-ico { width: 1.6rem; height: 1.6rem; }
+.item-ico { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.item-ico .hilt { stroke-width: 3.6; stroke-linecap: butt; }
+.item-ico .blade { stroke: rgb(var(--accent-400)); stroke-width: 2.6; }
+html[data-theme="light"] .item-ico .blade { stroke: rgb(var(--accent-700)); }
+.inv-head:hover { background: rgb(var(--sw-gold-rgb) / .025); }
+.inv-head:focus-visible { outline: 2px solid rgb(var(--accent-500)); outline-offset: -2px; }
+.inv-top { display: flex; align-items: baseline; gap: .4rem; }
+.inv-name { flex: 1; min-width: 0; font-size: var(--fs-body); font-weight: 600; color: rgb(var(--slate-200)); overflow-wrap: anywhere; }
+.inv-tag { flex: 0 0 auto; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--purple-300)); border: 1px solid rgb(var(--purple-400) / .45); border-radius: 3px; padding: 0 .3rem; }
+.inv-mult { flex: 0 0 auto; font-size: var(--fs-small); font-weight: 700; color: rgb(var(--slate-400)); }
+.inv-chev { flex: 0 0 auto; align-self: center; width: .45rem; height: .45rem; margin: 0 .2rem; border-right: 2px solid rgb(var(--slate-400)); border-bottom: 2px solid rgb(var(--slate-400)); transform: rotate(-45deg); transition: transform .2s; }
+.inv-open .inv-chev { transform: rotate(45deg); border-color: rgb(var(--accent-400)); }
+.inv-stats { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .55rem; margin-top: .2rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.inv-stats b { color: rgb(var(--red-400)); }
+.inv-stats i { font-style: normal; font-weight: 700; color: rgb(var(--game-yellow-400)); }
+.inv-pool { display: inline-flex; align-items: center; gap: .125rem; }
+.inv-ctrl { flex: 0 0 auto; display: flex; align-items: center; gap: .3rem; margin-left: auto; padding: .25rem .45rem; }
+.inv-btn { min-height: 2rem; min-width: 2rem; padding: 0 .55rem; border-radius: .4rem; border: 1px solid rgb(var(--slate-700)); background: rgb(var(--slate-900)); color: rgb(var(--slate-300)); font-size: var(--fs-small); font-weight: 700; }
+.inv-btn:hover:not(:disabled) { color: rgb(var(--sw-white)); border-color: rgb(var(--slate-600)); }
+.inv-btn:disabled { opacity: .35; cursor: default; }
+.inv-worn[aria-pressed="true"] { border-color: rgb(var(--green-500) / .6); background: rgb(var(--green-500) / .1); color: rgb(var(--green-400)); }
+/* «Исп.» / «Бросить» — главное действие строки расходника: сплошная зелёная кнопка (макет строк).
+   Текст --green-950: в тёмных темах тёмный, в «Светлой» светлый — там фон темнее (--green-700),
+   чтобы контраст был не ниже 4.5 : 1 */
+.inv-use { border-color: rgb(var(--green-600)); background: rgb(var(--green-500)); color: rgb(var(--green-950)); font-weight: 800; }
+.inv-use:hover:not(:disabled) { border-color: rgb(var(--green-400)); color: rgb(var(--green-950)); }
+html[data-theme="light"] .inv-use { border-color: rgb(var(--green-700)); background: rgb(var(--green-700)); }
+html[data-theme="light"] .inv-use:hover:not(:disabled) { border-color: rgb(var(--green-800)); }
+.inv-count { min-width: 1.5em; text-align: center; font-size: var(--fs-body); font-weight: 800; color: rgb(var(--slate-50)); }
+.inv-body { display: flex; flex-direction: column; gap: .45rem; padding: .45rem .55rem .5rem; border-top: 1px dashed rgb(var(--slate-800)); }
+.inv-qualities { display: flex; flex-direction: column; gap: .35rem; }
+.inv-chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+.inv-chip { font-size: var(--fs-cap); font-weight: 700; line-height: 1.5; color: rgb(var(--slate-200)); background: rgb(var(--slate-900)); border: 1px solid rgb(var(--slate-600)); border-radius: 999px; padding: 0 .55rem; overflow-wrap: anywhere; text-align: left; }
+button.inv-chip[aria-expanded="true"] { border-color: rgb(var(--accent-500)); color: rgb(var(--accent-300)); }
+.inv-chip-raw { border-style: dashed; color: rgb(var(--slate-400)); }
+.inv-chip-i { color: rgb(var(--slate-400)); }
+.inv-qdesc { font-size: var(--fs-small); line-height: 1.45; color: rgb(var(--slate-300)); background: rgb(var(--slate-900)); border: 1px solid rgb(var(--slate-800)); border-radius: .4rem; padding: .35rem .5rem; overflow-wrap: break-word; }
+.inv-qsrc { display: block; margin-top: .2rem; font-size: var(--fs-cap); color: rgb(var(--slate-400)); }
+.inv-facts { font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.inv-text { font-size: var(--fs-small); line-height: 1.45; color: rgb(var(--slate-300)); overflow-wrap: break-word; }
+.inv-r { display: inline-block; font-size: var(--fs-cap); font-weight: 800; line-height: 1.3; color: rgb(var(--red-400)); border: 1px solid rgb(var(--red-400) / .45); border-radius: 3px; padding: 0 .25rem; }
+.inv-fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .4rem .6rem; }
+.inv-field { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.inv-field-wide { width: 100%; }
+.inv-label { font-size: var(--fs-cap); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.inv-input { min-width: 0; max-width: 100%; background: rgb(var(--slate-900)); border: 1px solid rgb(var(--slate-700)); border-radius: .3rem; color: rgb(var(--slate-100)); font-size: var(--fs-body); padding: .2rem .4rem; }
+.inv-input:focus { outline: none; border-color: rgb(var(--accent-500)); }
+textarea.inv-input { resize: vertical; }
+input.inv-num { width: 4.5em; text-align: center; }
+.inv-check { display: flex; align-items: center; gap: .4rem; font-size: var(--fs-small); color: rgb(var(--slate-300)); cursor: pointer; }
+.inv-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.inv-actions .inv-btn { flex: 1 1 auto; }
+.inv-actions .inv-del { flex: 0 0 auto; color: rgb(var(--red-400)); border-color: rgb(var(--red-500) / .4); }
+.inv-fold { align-self: center; padding: .2rem .6rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.inv-fold:hover { color: rgb(var(--sw-white)); }
+
+/* Окно «+ Добавить» (catalog-picker.js): список прокручивается внутри, поиск остаётся наверху */
+.picker-body { display: flex; flex-direction: column; height: 88vh; overflow: hidden; }
+.picker-search { width: 100%; margin: .1rem 0 .45rem; background: rgb(var(--slate-950)); border: 1px solid rgb(var(--slate-700)); border-radius: .45rem; padding: .4rem .6rem; font-size: var(--fs-body); color: rgb(var(--slate-100)); }
+.picker-search:focus { outline: none; border-color: rgb(var(--accent-500)); }
+.picker-own { margin-bottom: .45rem; padding: .45rem .6rem; text-align: left; border: 1px dashed rgb(var(--purple-400) / .5); border-radius: .45rem; color: rgb(var(--purple-300)); font-size: var(--fs-body); font-weight: 600; }
+.picker-own:hover { background: rgb(var(--purple-500) / .08); }
+.picker-list { flex: 1; min-height: 0; overflow-y: auto; }
+.picker-group { margin: .55rem 0 .2rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.picker-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .4rem; border-radius: .35rem; }
+.picker-row:nth-child(odd) { background: rgb(var(--slate-950) / .6); }
+.picker-main { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .6rem; }
+.picker-name { min-width: 0; font-size: var(--fs-body); color: rgb(var(--slate-200)); overflow-wrap: anywhere; }
+.picker-stats { display: flex; flex-wrap: wrap; column-gap: .45rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.picker-stats b { color: rgb(var(--red-400)); }
+.picker-stats i { font-style: normal; font-weight: 700; color: rgb(var(--game-yellow-400)); }
+.picker-add { flex: 0 0 auto; width: 2.1rem; height: 2.1rem; border-radius: .4rem; background: rgb(var(--slate-800)); border: 1px solid rgb(var(--slate-700)); color: rgb(var(--accent-400)); font-size: var(--fs-body); font-weight: 800; }
+.picker-add.picker-done { background: rgb(var(--green-500) / .2); border-color: rgb(var(--green-500)); color: rgb(var(--green-300)); }
+.picker-empty { padding: .5rem 0; font-size: var(--fs-small); font-style: italic; color: rgb(var(--slate-400)); }
+
+/* ── Окна выбора расы, карьеры и специализации (подпроект 3b, choice-picker.js) ──
+   Поле-кнопка «Настройки персонажа»: вид прежнего поля, рамка акцентом, справа «›» */
+.setup-field { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: .4rem; text-align: left; background: rgb(var(--slate-950)); border: 1px solid var(--sw-gold-dim); border-radius: .25rem; padding: .375rem .5rem; font-size: var(--fs-body); color: rgb(var(--sw-white)); transition: border-color .15s; }
+.setup-field:hover, .setup-field:focus-visible { border-color: var(--sw-gold); outline: none; }
+.setup-field-name { min-width: 0; overflow-wrap: anywhere; }
+.setup-field-arrow { flex: 0 0 auto; color: rgb(var(--accent-400)); font-size: var(--fs-title); line-height: 1; }
+/* Расовые навыки (race-skill-picker.js): поле без выбора, напоминание над навыками, окно выбора.
+   Окно — по высоте содержимого: у грана и тви'лека в нём две строки */
+.setup-field.setup-field-warn { border-color: rgb(var(--accent-400)); color: rgb(var(--accent-400)); }
+.race-skills-reminder { display: block; width: 100%; margin: .25rem 0 .5rem; padding: .5rem .6rem; border: 1px solid rgb(var(--accent-400)); border-radius: .4rem; background: rgb(var(--accent-500) / .12); color: rgb(var(--accent-400)); font-size: var(--fs-small); font-weight: 700; text-align: left; overflow-wrap: anywhere; }
+.picker-body.race-skill-body { height: auto; max-height: 88vh; }
+.race-skill-row { display: flex; align-items: center; gap: .5rem; width: 100%; min-height: 2.75rem; padding: .35rem .5rem; border-bottom: 1px solid rgb(var(--slate-800)); text-align: left; font-size: var(--fs-body); color: rgb(var(--slate-200)); }
+.race-skill-row[aria-pressed="true"] { color: rgb(var(--accent-400)); font-weight: 700; }
+.race-skill-row:disabled { opacity: .55; }
+.race-skill-row[aria-pressed="true"]:disabled { opacity: 1; }
+.race-skill-check { flex: 0 0 1.15rem; height: 1.15rem; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgb(var(--slate-600)); border-radius: .2rem; font-size: var(--fs-cap); line-height: 1; }
+.race-skill-row[aria-pressed="true"] .race-skill-check { border-color: var(--sw-gold); background: var(--sw-gold); color: rgb(var(--sw-on-gold)); }
+.race-skill-name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.race-skill-note { flex: 0 1 auto; min-width: 0; font-size: var(--fs-cap); font-weight: 400; color: rgb(var(--slate-400)); text-align: right; overflow-wrap: anywhere; }
+.choice-pick:disabled { opacity: .4; cursor: default; }
+
+/* Окно: шапка, (поиск), блок «Сейчас выбрана» с заголовками столбцов — на месте; прокручивается
+   только список. Акцентный текст — --accent-400 (в «Ситхе» --sw-gold на панели ниже 4.5 : 1) */
+.choice-back { flex: 0 0 auto; padding: .2rem .45rem .2rem .1rem; border-radius: .35rem; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; color: rgb(var(--accent-400)); }
+.choice-back:hover { text-decoration: underline; }
+.choice-cols { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.choice-left { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; container: choice / inline-size; font-size: 1rem; }
+.choice-current { flex: 0 0 auto; }
+.choice-list { flex: 1; min-height: 0; overflow-y: auto; }
+.choice-detail { display: none; }
+.choice-cap { padding: .55rem .35rem .15rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--slate-400)); overflow-wrap: anywhere; }
+.choice-cap-now { color: rgb(var(--accent-400)); }
+.choice-none { padding: .45rem .35rem .2rem; font-size: var(--fs-small); font-style: italic; color: rgb(var(--slate-400)); }
+/* Строка: название (остаток ширины) и шесть колонок по 2.25rem — СИЛ, ЛОВ, ИНТ, СМК, ВОЛ, ОБА */
+.choice-row { display: grid; grid-template-columns: minmax(0, 1fr) repeat(6, 2.25rem); align-items: center; width: 100%; min-height: 2.6rem; padding: .2rem .25rem; text-align: left; border-left: 2px solid transparent; border-bottom: 1px solid rgb(var(--slate-800) / .7); font-size: var(--fs-body); font-variant-numeric: tabular-nums; color: rgb(var(--slate-200)); }
+button.choice-row:hover { background: rgb(var(--slate-800) / .4); }
+.choice-head { min-height: 1.75rem; font-size: var(--fs-cap); font-weight: 800; color: rgb(var(--slate-400)); border-bottom-color: rgb(var(--slate-700)); }
+.choice-name { min-width: 0; line-height: 1.2; overflow-wrap: anywhere; }
+.choice-note { display: block; margin-top: .05rem; font-size: var(--fs-cap); font-weight: 400; color: rgb(var(--slate-400)); }
+.choice-note-low { color: rgb(var(--slate-200)); }
+.choice-note-high { color: rgb(var(--accent-400)); font-weight: 800; }
+.choice-cell { text-align: center; }
+.choice-dim { color: rgb(var(--slate-400)); }
+.choice-strong { font-weight: 800; }
+.choice-c-brawn { color: rgb(var(--red-400)); }
+.choice-c-agility { color: rgb(var(--green-400)); }
+.choice-c-intellect { color: rgb(var(--blue-400)); }
+.choice-c-cunning { color: rgb(var(--game-yellow-400)); }
+.choice-c-willpower { color: rgb(var(--purple-400)); }
+.choice-c-presence { color: rgb(var(--orange-400)); }
+.choice-pinned { margin: .25rem 0 .1rem; border: 1px solid var(--sw-gold-dim); border-radius: .5rem; background: var(--sw-gold-glow); }
+.choice-active { background: var(--sw-gold-glow); border-left-color: var(--sw-gold); }
+.choice-active .choice-name { color: rgb(var(--sw-white)); }
+/* Недоступная строка (основная / вторая специализация) — бледная, без цветных цифр; текст остаётся читаемым */
+.choice-off, .choice-off .choice-cell, .choice-off .choice-note { color: rgb(var(--slate-400)); font-weight: 400; }
+/* Подробности раскрытой строки (телефон) */
+.choice-inline { padding: .15rem .5rem .75rem; border-left: 2px solid var(--sw-gold); border-bottom: 1px solid rgb(var(--slate-800) / .7); background: var(--sw-gold-glow); font-size: var(--fs-small); line-height: 1.45; }
+.choice-thr { color: rgb(var(--slate-200)); }
+.choice-thr b, .choice-text b { color: rgb(var(--slate-50)); }
+.choice-thr small { font-size: var(--fs-cap); color: rgb(var(--slate-400)); }
+.choice-text { margin-top: .25rem; color: rgb(var(--slate-300)); overflow-wrap: break-word; }
+.choice-label { margin: .55rem 0 .2rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.choice-skills { display: flex; flex-wrap: wrap; gap: .25rem .7rem; color: rgb(var(--slate-200)); }
+.choice-skill { overflow-wrap: anywhere; }
+.choice-dot { display: inline-block; width: .5rem; height: .5rem; margin-right: .3rem; border-radius: 50%; background: currentColor; color: rgb(var(--slate-500)); }
+.choice-dot.choice-c-brawn { color: rgb(var(--red-400)); }
+.choice-dot.choice-c-agility { color: rgb(var(--green-400)); }
+.choice-dot.choice-c-intellect { color: rgb(var(--blue-400)); }
+.choice-dot.choice-c-cunning { color: rgb(var(--game-yellow-400)); }
+.choice-dot.choice-c-willpower { color: rgb(var(--purple-400)); }
+.choice-dot.choice-c-presence { color: rgb(var(--orange-400)); }
+.choice-pick { display: block; width: 100%; margin-top: .7rem; padding: .55rem .5rem; border-radius: .4rem; background: var(--sw-gold); color: rgb(var(--sw-on-gold)); font-size: var(--fs-body); font-weight: 800; letter-spacing: .04em; line-height: 1.2; overflow-wrap: anywhere; }
+.choice-pick:active { transform: scale(.98); }
+.choice-now { margin-top: .7rem; font-size: var(--fs-small); font-weight: 700; color: rgb(var(--accent-400)); }
+/* Обзорное дерево талантов в подробностях специализации (tree-preview.js). Сетка: столбец цен
+   рядов и четыре столбца талантов; ряд растёт под самое длинное название. Линии связей —
+   абсолютные полоски в промежутках между клетками (+2px — на рамки соседних клеток) */
+.choice-tree-toggle { display: flex; justify-content: space-between; align-items: center; gap: .5rem; width: 100%; margin-top: .6rem; padding: .5rem .6rem; border: 1px solid rgb(var(--slate-700)); border-radius: .4rem; font-size: var(--fs-small); font-weight: 700; text-align: left; color: rgb(var(--slate-200)); }
+.choice-tree-toggle[aria-expanded="true"] { border-color: var(--sw-gold-dim); }
+.choice-tree-toggle span { color: rgb(var(--accent-400)); }
+.choice-tree { --tree-gap: .45rem; margin-top: .5rem; }
+.choice-tree-grid { display: grid; grid-template-columns: auto repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(2.6rem, auto); gap: var(--tree-gap); }
+.choice-tree-cost { grid-column: 1; align-self: center; text-align: right; font-size: var(--fs-cap); font-variant-numeric: tabular-nums; color: rgb(var(--slate-400)); }
+.choice-tree-cell { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; padding: .15rem .1rem; border: 1px solid rgb(var(--slate-700)); border-radius: .35rem; background: rgb(var(--slate-950)); text-align: center; }
+.choice-tree-name { min-width: 0; max-width: 100%; font-size: var(--fs-cap); font-weight: 700; line-height: 1.1; color: rgb(var(--slate-200)); hyphens: auto; overflow-wrap: anywhere; }
+.choice-tree-cell.choice-tree-action { border-color: rgb(var(--red-500) / .6); }
+.choice-tree-action .choice-tree-name { color: rgb(var(--red-400)); }
+.choice-tree-link { position: absolute; background: rgb(var(--slate-600)); }
+.choice-tree-link-right { top: 50%; left: 100%; width: calc(var(--tree-gap) + 2px); height: 2px; margin-top: -1px; }
+.choice-tree-link-down { top: 100%; width: 2px; height: calc(var(--tree-gap) + 2px); transform: translateX(-50%); }
+.choice-tree-legend { display: flex; flex-wrap: wrap; gap: .15rem .8rem; margin-top: .4rem; font-size: var(--fs-cap); color: rgb(var(--slate-400)); }
+.choice-tree-key::before { content: ''; display: inline-block; width: .6rem; height: .6rem; margin-right: .3rem; border: 1px solid rgb(var(--slate-600)); border-radius: .15rem; }
+.choice-tree-key.choice-tree-action::before { border-color: rgb(var(--red-400)); }
+.choice-remove { padding: .35rem; font-size: var(--fs-small); text-align: left; color: rgb(var(--red-400)); }
+.choice-remove:hover { text-decoration: underline; }
+/* «Спека 2»: карьеры — сворачиваемые разделы */
+.choice-section { display: flex; align-items: center; justify-content: space-between; gap: .5rem; width: 100%; min-height: 2.75rem; padding: .5rem .35rem; text-align: left; border-bottom: 1px solid rgb(var(--slate-800)); font-size: var(--fs-body); font-weight: 600; color: rgb(var(--slate-200)); }
+.choice-section:hover, .choice-section[aria-expanded="true"] { background: rgb(var(--slate-800) / .45); }
+.choice-section-name { min-width: 0; overflow-wrap: anywhere; }
+.choice-own { font-size: var(--fs-cap); font-weight: 800; color: rgb(var(--accent-400)); }
+.choice-count { flex: 0 0 auto; white-space: nowrap; font-size: var(--fs-small); font-weight: 400; color: rgb(var(--slate-400)); }
+/* Узко (крупный текст на телефоне): колонке названия осталось бы меньше 5.5rem — строка в две
+   строки: название с припиской во всю ширину, под ним шесть цифр равными колонками */
+@container choice (max-width: 19.5em) {
+    .choice-row { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: .15rem; padding-top: .35rem; padding-bottom: .35rem; }
+    .choice-row > .choice-name { grid-column: 1 / -1; }
+    .choice-head > .choice-name { display: none; }
+    .choice-note { display: inline; margin: 0 0 0 .5rem; }
+}
+
+/* «ЗАЩ N» под «ПОГЛ.» на щите карточки и «→ Снаряжение» в панели «Состояние» (подпроект Б1) */
+.hud-def { font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; white-space: nowrap; color: rgb(var(--slate-300)); }
+.cp-to-equipment { flex: 0 0 auto; white-space: nowrap; font-size: var(--fs-small); font-weight: 700; color: var(--sw-gold); }
+.cp-to-equipment:hover { text-decoration: underline; }
+
+/* Боковая панель — только на компьютере (ниже); на телефоне слот пуст и не занимает места */
+.hud-side-slot { display: none; }
+
+@media (min-width: 1024px) and (min-height: 560px) {
+    #hud-slot { position: sticky; top: 0; z-index: 50; }
+    .phone-only { display: none !important; }
+
+    /* ── Раскладка B (А3, часть 2): «Лист» и «Способности» — боковая панель 21rem слева, справа
+       содержимое. :not(.hidden) — чтобы не показать скрытую вкладку (Tailwind .hidden — тот же вес) */
+    .desk-split:not(.hidden) { display: grid; grid-template-columns: 21rem minmax(0, 1fr); column-gap: 1.2rem; align-items: stretch; }
+    /* Отступы space-y (у <main> — между вкладками, у «Листа» — между панелью и навыками) в сетке не
+       нужны: вкладка на экране одна, и все начинаются сразу под шапкой. Селекторы с id — вес
+       space-y Tailwind выше, чем у двух классов */
+    #tab-generator, #tab-talents, #tab-notes, #tab-equipment, #tab-generator > .desk-main { margin-top: 0; }
+    /* Карточка закреплена под шапкой (--hud-slot-h — её высота, hud-place.js); обязательства и
+       сводка снаряжения прокручиваются вместе со страницей и уходят под неё (фон слота непрозрачный).
+       Карточка выше окна (низкое окно, крупный шрифт) прокручивается сама; −1rem — нижний отступ
+       <main>, иначе у конца листа панель сдвигается вверх */
+    .hud-side-slot { display: block; position: sticky; top: var(--hud-slot-h, 3.25rem); z-index: 3; padding-top: .5rem; margin-top: -.5rem; max-height: calc(100vh - var(--hud-slot-h, 3.25rem) - 1rem); overflow-y: auto; background: var(--sw-bg); }
+    .hud-side-slot:empty { display: none; }
+    /* Вертикальная карточка: ярусы как на телефоне; поглощение, Сила, раны, усталость — сеткой 2×2
+       (те же плитки, что при перестройке узкой карточки — @container hud выше), характеристики — 3×2 */
+    .hud-side-slot .hud-card { margin: 0; padding: .8rem; }
+    .hud-side-slot .hud-tier-vit { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+    .hud-side-slot .hud-shield, .hud-side-slot .hud-force { flex-direction: row; justify-content: flex-start; gap: .45rem; min-width: 0; padding: .3rem .5rem; border: 1px solid rgb(var(--slate-800)); border-radius: .5rem; }
+    .hud-side-slot .hud-shield b { left: .5rem; right: auto; width: 2.25rem; top: .85rem; }
+    .hud-side-slot .hud-shield em, .hud-side-slot .hud-force em, .hud-side-slot .hud-force-ring { margin-top: 0; }
+    .hud-side-slot #stat-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .35rem; }
+    /* Обязательство в узкой панели — в две строки: тип, значение, «×»; под ними описание */
+    #obligation-list > div { flex-wrap: wrap; }
+    #obligation-list > div > input[type="text"] { order: 1; flex-basis: 100%; }
+    /* «Способности»: плитки по ширине правой колонки; карточки Силы — не больше двух колонок (как
+       на макете): две, когда правой колонке хватает на две карточки не уже 18rem и зазор. Порог
+       в em растёт со ступенью шрифта */
+    #abil-active-list, #abil-passive-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+    #tab-abilities > .desk-main { container: abilmain / inline-size; }
+    #abil-force-list { align-items: start; }
+    @container abilmain (min-width: 36.5em) {
+        #abil-force-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    /* Навыки: три таблицы без внутренней прокрутки — прокручивается страница. Две колонки
+       («Общие» | «Знания» и «Боевые»), когда правой области хватает ширины на две таблицы
+       с однострочными строками (2 × 23em — порог перестройки строки выше — и зазор); иначе одна
+       под другой. Порог в em растёт со ступенью шрифта. Селекторы с id перебивают h-[27rem],
+       hidden и overflow-y-auto телефона */
+    #tab-generator > .desk-main { container: sheetmain / inline-size; }
+    #skills-cols { min-height: 0; }
+    #view-skills-gen, #view-skills-know, #view-skills-com { display: flex; height: auto; }
+    #skills-cols .sk-scroll { overflow: visible; }
+    @container sheetmain (min-width: 48em) {
+        #skills-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    }
+
+    /* «Снаряжение»: две колонки («Оружие + Броня» | «Снаряжение»), когда вкладке хватает 48 em
+       (порог как у колонок навыков «Листа»); иначе одна */
+    #tab-equipment { container: invtab / inline-size; }
+    @container invtab (min-width: 48em) {
+        #inv-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+    }
+    .picker-body { height: min(88vh, 40rem); }
+    .picker-body.race-skill-body { height: auto; max-height: min(88vh, 40rem); }
+
+    .sheet-overlay { align-items: center; padding: 1rem; }
+    .sheet-body { max-width: 28rem; border-radius: .8rem; border: 1px solid rgb(var(--slate-700) / .8); border-top-color: var(--sw-gold-dim); padding-bottom: .9rem; }
+    .sheet-grab { display: none; }
+
+    /* Окно выбора (3b): широкое, список слева, панель подробностей справа — прокручиваются отдельно */
+    .sheet-body.choice-body { max-width: 52rem; height: min(88vh, 44rem); }
+    .choice-cols { flex-direction: row; }
+    .choice-left { flex: 0 0 25rem; padding-right: .6rem; border-right: 1px solid rgb(var(--slate-800)); }
+    .choice-detail { display: block; flex: 1; min-width: 0; overflow-y: auto; padding: .4rem .2rem .2rem .9rem; }
+    .choice-panel { display: flex; flex-direction: column; min-height: 100%; font-size: var(--fs-small); line-height: 1.5; }
+    .choice-panel-name { margin-bottom: .5rem; font-size: var(--fs-num); font-weight: 700; line-height: 1.2; color: rgb(var(--sw-white)); overflow-wrap: anywhere; }
+    .choice-tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .35rem; margin-bottom: .6rem; }
+    .choice-tile { padding: .3rem .1rem; border: 1px solid rgb(var(--slate-800)); border-radius: .45rem; background: rgb(var(--slate-950)); text-align: center; font-size: var(--fs-cap); font-weight: 800; line-height: 1.2; }
+    .choice-tile b { display: block; font-size: var(--fs-num); color: rgb(var(--slate-50)); }
+    .choice-panel .choice-pick, .choice-panel .choice-now { margin-top: auto; }
+    /* Дерево в панели: клетки шире, названия в одну-две строки; «Выбрать» отступает от дерева */
+    .choice-panel .choice-tree { --tree-gap: .55rem; margin: .1rem 0 .8rem; }
+    .choice-panel .choice-tree-grid { grid-auto-rows: minmax(2.4rem, auto); }
+}
+@media screen and (min-width: 1024px) and (min-height: 560px) {
+    /* ── Компактная строка: карточка в шапке на «Талантах», «Снаряжении», «Заметках» — аватар, имя,
+       XP с полосой, раны и усталость одной строкой (ярусы переносятся, если не помещаются). Подпись
+       «раса · карьера», значок «Персонажи» (имя само открывает «Настройку персонажа») и «потрачено
+       N из M» (видно в панели XP) — только в полной карточке. Только на экране: при печати
+       (в том числе альбомной, шире 1024 px) карточка печатается целиком */
+    #hud-card-home .hud-card { display: flex; flex-wrap: wrap; align-items: center; row-gap: .5rem; padding: .5rem .8rem; margin: .4rem 0 .5rem; }
+    #hud-card-home .hud-tier + .hud-tier { margin-top: 0; margin-left: .9rem; padding-left: .9rem; border-left: 1px solid rgb(var(--slate-800)); }
+    #hud-card-home .hud-tier-id { flex: 1 1 14rem; min-width: 10rem; }
+    #hud-card-home .hud-tier-id .hud-avatar-wrap { order: -1; }
+    #hud-card-home .hud-tier-id #avatar-menu { left: 0; right: auto; }
+    #hud-card-home .hud-tier-id .hud-identity { text-align: left; }
+    #hud-card-home .hud-tier-xp { flex: 0 1 12rem; min-width: 8rem; width: auto; }
+    #hud-card-home .hud-tier-vit { flex: 0 0 auto; }
+    #hud-card-home .hud-tier-vit .hud-vital { flex: 0 0 auto; min-width: 6.5rem; }
+    #hud-card-home .hud-tier-id > .hud-ico-btn, #hud-card-home .hud-sub, #hud-card-home .hud-xp-text,
+    #hud-card-home .hud-shield, #hud-card-home .hud-force, #hud-card-home .hud-tier-stats,
+    #hud-card-home .destiny-row { display: none; }
+}
+@media not all and (min-width: 1024px) and (min-height: 560px) {
+    .desk-only { display: none !important; }
+    body { padding-bottom: calc(3.9rem + env(safe-area-inset-bottom)); }
+    #toast-container { bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important; }
+    body.hud-collapsed:not(.hud-shade-open) #hud-mini { display: flex; }
+    body.hud-shade-open #hud-dim { display: block; }
+    body.hud-shade-open #hud-top { position: fixed; top: 0; left: 0; right: 0; z-index: 90; max-height: 100vh; max-height: 100dvh; touch-action: none; border-radius: 0 0 1rem 1rem; border-bottom: 1px solid var(--sw-gold-dim); box-shadow: 0 18px 30px -6px rgba(0,0,0,.85); animation: hudShadeIn .2s ease-out; }
+    body.hud-shade-open #hud-top.hud-shade-scroll { touch-action: pan-y; overscroll-behavior: contain; overflow-y: auto; }
+    body.hud-shade-open .hud-shade-handle { display: flex; }
+    .sheet-body { max-width: 32rem; }
+}
+@keyframes hudShadeIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+/* ── Персонаж в базе (подпроект 4б) ── */
+/* Окно «Персонажи» (character-list.js): строки — кнопка с кружком инициалов и «⋯»; меню «⋯»
+   раскрывается под строкой (всплывающее обрезал бы край прокручиваемого списка) */
+.charlist-body { display: flex; flex-direction: column; }
+.charlist-body:focus { outline: none; }
+.charlist-rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: .4rem; margin-top: .3rem; }
+.charlist-item { border: 1px solid rgb(var(--slate-800)); border-radius: .45rem; background: rgb(var(--slate-950)); }
+.charlist-item.charlist-current { border-color: var(--sw-gold-dim); background: rgb(var(--accent-500) / .06); }
+.charlist-head { display: flex; align-items: center; }
+.charlist-row { flex: 1; min-width: 0; display: flex; align-items: center; gap: .6rem; padding: .45rem .5rem; text-align: left; border-radius: .45rem; }
+.charlist-row:hover:not(:disabled) { background: rgb(var(--slate-800) / .5); }
+.charlist-av { flex: 0 0 2.1rem; width: 2.1rem; height: 2.1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgb(var(--slate-800)); border: 1px solid rgb(var(--slate-600)); color: rgb(var(--slate-300)); font-size: var(--fs-cap); font-weight: 800; }
+.charlist-current .charlist-av { border-color: var(--sw-gold); color: var(--sw-gold); }
+.charlist-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .05rem; }
+.charlist-name { font-size: var(--fs-body); font-weight: 700; color: rgb(var(--sw-white)); overflow-wrap: anywhere; }
+.charlist-sub { font-size: var(--fs-small); color: rgb(var(--slate-400)); overflow-wrap: anywhere; }
+.charlist-tag { font-size: var(--fs-cap); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--sw-gold); }
+.charlist-more { flex: 0 0 2.6rem; align-self: stretch; min-height: 2.6rem; font-size: 1.2rem; color: rgb(var(--slate-400)); border-radius: .45rem; }
+.charlist-more:hover:not(:disabled), .charlist-more[aria-expanded="true"] { color: rgb(var(--sw-white)); background: rgb(var(--slate-800) / .6); }
+.charlist-menu { display: flex; flex-direction: column; border-top: 1px solid rgb(var(--slate-800)); }
+.charlist-menu-btn { padding: .55rem .8rem; text-align: left; font-size: var(--fs-small); font-weight: 700; color: rgb(var(--slate-300)); }
+.charlist-menu-btn + .charlist-menu-btn { border-top: 1px solid rgb(var(--slate-800)); }
+.charlist-menu-btn:hover:not(:disabled) { background: rgb(var(--slate-800) / .5); }
+.charlist-danger { color: rgb(var(--red-400)); }
+.charlist-empty { padding: 1.2rem .5rem; text-align: center; font-size: var(--fs-body); color: rgb(var(--slate-400)); line-height: 1.5; }
+.charlist-limit { margin-top: .6rem; text-align: center; font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.charlist-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
+.charlist-btn { flex: 1 1 8rem; padding: .6rem .5rem; border-radius: .4rem; border: 1px solid rgb(var(--slate-600)); color: rgb(var(--slate-200)); font-size: var(--fs-body); font-weight: 800; letter-spacing: .02em; line-height: 1.2; text-align: center; }
+.charlist-btn-pri { background: var(--sw-gold); border-color: var(--sw-gold); color: rgb(var(--sw-on-gold)); }
+.charlist-btn:disabled, .charlist-row:disabled, .charlist-more:disabled, .charlist-menu-btn:disabled { opacity: .45; cursor: default; }
+.charlist-rows > .charlist-btn { flex: none; align-self: center; padding-left: 1.5rem; padding-right: 1.5rem; }
+/* Перенос из браузера на пределе (мелочи 4б, п. 3, макет — вариант B): счётчик в заголовке и подсказка над списком */
+.charlist-count { margin-left: .5rem; font-size: var(--fs-small); font-weight: 600; letter-spacing: 0; text-transform: none; color: rgb(var(--slate-400)); white-space: nowrap; }
+.charlist-hint { flex: none; margin-top: .3rem; padding: .6rem .7rem; border: 1px solid var(--sw-gold-dim); border-radius: .45rem; background: rgb(var(--accent-500) / .06); font-size: var(--fs-small); line-height: 1.45; color: rgb(var(--slate-200)); overflow-wrap: anywhere; }
+.charlist-hint .charlist-actions { margin-top: .55rem; }
+
+/* Полоса «Нет сети» (net-status.js) — над шапкой: на телефоне шапка уходит при прокрутке, полоса
+   остаётся. --net-h — её высота (0, когда сеть есть): отступ страницы, мини-блока и шапки */
+.net-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 95; padding: .4rem .9rem; text-align: center; font-size: var(--fs-small); font-weight: 700; color: rgb(var(--orange-400)); background: linear-gradient(rgb(var(--orange-400) / .14), rgb(var(--orange-400) / .14)), var(--sw-sheet); border-bottom: 1px solid rgb(var(--orange-400) / .45); }
+body { padding-top: var(--net-h, 0px); }
+#hud-mini { top: var(--net-h, 0px); }
+
+/* Плашка «Не удалось сохранить» (character-session.js) — внизу, над нижней панелью телефона */
+.save-failed { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 180; max-width: 26rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem .8rem; border-radius: .45rem; border: 1px solid rgb(var(--red-500) / .45); background: linear-gradient(rgb(var(--red-950) / .9), rgb(var(--red-950) / .9)), var(--sw-sheet); color: rgb(var(--red-400)); font-size: var(--fs-small); font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,.6); }
+.save-failed.hidden { display: none; }
+.save-failed-retry { flex: 0 0 auto; white-space: nowrap; font-weight: 800; text-decoration: underline; color: rgb(var(--red-400)); }
+@media (min-width: 1024px) and (min-height: 560px) {
+    #hud-slot { top: var(--net-h, 0px); }
+    .hud-side-slot { top: calc(var(--hud-slot-h, 3.25rem) + var(--net-h, 0px)); max-height: calc(100vh - var(--hud-slot-h, 3.25rem) - var(--net-h, 0px) - 1rem); }
+    .charlist-body { max-height: min(88vh, 40rem); }
+}
+@media not all and (min-width: 1024px) and (min-height: 560px) {
+    body.hud-shade-open #hud-top { top: var(--net-h, 0px); max-height: calc(100dvh - var(--net-h, 0px)); }
+    .save-failed { bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+}
+@media print {
+    .net-banner, .save-failed, .camp-screen { display: none !important; }
+    body { padding-top: 0 !important; }
+}
+
+/* ── Кампании (4.1) ── */
+/* Экран «Кампании» (campaigns-screen.js): на весь экран поверх листа, колонка до 40rem по центру.
+   z 175 — над шапкой и полосой «Нет сети», под плашкой «Не удалось сохранить» (180), окнами снизу
+   (190) и сообщениями (200) */
+.camp-screen { position: fixed; inset: 0; z-index: 175; overflow-y: auto; overscroll-behavior: contain; background: var(--sw-bg); }
+.camp-screen.hidden { display: none; }
+.camp-panel { max-width: 40rem; margin: 0 auto; padding: 0 1rem calc(1.5rem + env(safe-area-inset-bottom)); }
+.camp-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .7rem 0 .6rem; background: var(--sw-bg); border-bottom: 1px solid rgb(var(--slate-800)); }
+.camp-offline { display: none; margin-top: .6rem; padding: .4rem .7rem; border-radius: .4rem; text-align: center; font-size: var(--fs-small); font-weight: 700; color: rgb(var(--orange-400)); border: 1px solid rgb(var(--orange-400) / .45); background: rgb(var(--orange-400) / .1); }
+body.read-only .camp-offline { display: block; }
+.camp-body { display: flex; flex-direction: column; gap: .6rem; padding-top: .8rem; }
+/* Жест «потянуть вниз» (этап 5, макет live-states.html): высоту задаёт pull-refresh.js, круг и
+   надпись прижаты к низу — содержимое сдвигается вниз */
+.camp-pull { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: .25rem; overflow: hidden; color: rgb(var(--sw-gold-rgb)); font-size: var(--fs-cap); font-weight: 700; }
+.camp-pull[hidden] { display: none; }
+.camp-pull-ring { flex: 0 0 auto; width: 1.9rem; height: 1.9rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--sw-gold-dim); background: rgb(var(--sw-gold-rgb) / .1); }
+.camp-pull-ring svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transform: rotate(var(--pull-turn, 0deg)); }
+.camp-pull-text { display: none; white-space: nowrap; }
+.camp-pull-ready:not(.camp-pull-busy) .camp-pull-text { display: block; }
+.camp-pull-busy .camp-pull-ring svg { animation: camp-pull-spin .8s linear infinite; }
+@keyframes camp-pull-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .camp-pull-busy .camp-pull-ring svg { animation: none; } }
+.camp-switch { display: flex; flex-wrap: wrap; gap: .4rem; }
+.camp-tab { flex: 1 1 9rem; min-width: 0; padding: .45rem .6rem; border-radius: .4rem; border: 1px solid rgb(var(--slate-600)); color: rgb(var(--slate-200)); font-size: var(--fs-small); font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.camp-tab[aria-pressed="true"] { background: var(--sw-gold); border-color: var(--sw-gold); color: rgb(var(--sw-on-gold)); }
+.camp-ok { padding: .55rem .7rem; border-radius: .45rem; border: 1px solid rgb(var(--green-500) / .45); background: rgb(var(--green-500) / .08); color: rgb(var(--green-400)); font-size: var(--fs-small); font-weight: 700; overflow-wrap: anywhere; }
+.camp-title-row { display: flex; align-items: flex-start; gap: .4rem; }
+.camp-name { flex: 1; min-width: 0; font-size: var(--fs-title); font-weight: 800; color: rgb(var(--sw-white)); line-height: 1.25; overflow-wrap: anywhere; }
+.camp-edit { flex: 0 0 2.4rem; height: 2.4rem; border-radius: .4rem; color: rgb(var(--slate-400)); font-size: 1rem; }
+.camp-edit:hover:not(:disabled) { color: rgb(var(--sw-white)); background: rgb(var(--slate-800)); }
+.camp-sub { margin-top: -.35rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); overflow-wrap: anywhere; }
+.camp-warn { padding: .6rem .7rem; border-radius: .45rem; border: 1px solid rgb(var(--orange-400) / .45); background: rgb(var(--orange-400) / .08); color: rgb(var(--orange-300)); font-size: var(--fs-body); line-height: 1.45; }
+.camp-code { border: 1px dashed var(--sw-gold-dim); border-radius: .55rem; padding: .6rem .7rem; background: rgb(var(--accent-500) / .05); }
+.camp-code-label { display: block; font-size: var(--fs-cap); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.camp-code-value { display: block; margin: .15rem 0 .5rem; font-family: var(--sw-font-mono); font-size: 1.6rem; font-weight: 800; letter-spacing: .12em; color: var(--sw-gold); }
+.camp-code .charlist-actions { margin-top: 0; }
+.camp-sec { margin-top: .3rem; font-size: var(--fs-cap); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.camp-roster { display: flex; flex-direction: column; gap: .4rem; }
+.camp-member .charlist-row { cursor: default; }
+.camp-member .charlist-row:hover { background: none; }
+.camp-empty { padding: 1rem .5rem; text-align: center; font-size: var(--fs-body); color: rgb(var(--slate-400)); line-height: 1.5; }
+/* «Удалить кампанию», «Выйти из кампании», «Удалить навсегда» — красные, как в макете */
+.charlist-btn.charlist-danger { color: rgb(var(--red-400)); border-color: rgb(var(--red-500) / .5); }
+.camp-actions { display: flex; flex-wrap: wrap; gap: .5rem; padding-top: .8rem; margin-top: .2rem; border-top: 1px solid rgb(var(--slate-800)); }
+.camp-actions .charlist-btn, .camp-body > .charlist-actions .charlist-btn { flex: 1 1 10rem; }
+.camp-trash { display: flex; flex-direction: column; gap: .4rem; }
+.camp-trash-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; padding: .5rem .6rem; border: 1px solid rgb(var(--slate-800)); border-radius: .45rem; background: rgb(var(--slate-950)); }
+.camp-trash-text { flex: 1 1 12rem; min-width: 0; display: flex; flex-direction: column; }
+.camp-trash-row .charlist-btn { flex: 0 1 auto; padding: .45rem .7rem; font-size: var(--fs-small); }
+/* Окна «Название» и «Вступить по коду» (bottom-sheet.js) */
+.camp-sheet:focus { outline: none; }
+.camp-label { display: block; margin: .3rem 0 .3rem; font-size: var(--fs-cap); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.camp-input { width: 100%; padding: .55rem .7rem; border-radius: .4rem; border: 1px solid rgb(var(--slate-600)); background: rgb(var(--slate-950)); color: rgb(var(--sw-white)); font-size: var(--fs-body); outline: none; }
+.camp-input:focus { border-color: var(--sw-gold); }
+.camp-code-input { font-family: var(--sw-font-mono); font-size: 1.35rem; letter-spacing: .12em; text-transform: uppercase; }
+.camp-hint { margin-top: .4rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); line-height: 1.4; }
+.camp-error { margin-top: .5rem; font-size: var(--fs-small); font-weight: 700; color: rgb(var(--red-400)); overflow-wrap: anywhere; }
+.camp-error.hidden { display: none; }
+.camp-found { display: flex; flex-direction: column; gap: .1rem; padding: .55rem .7rem; border-radius: .45rem; border: 1px solid var(--sw-gold-dim); background: rgb(var(--accent-500) / .06); }
+.camp-found-name { font-size: var(--fs-body); font-weight: 800; color: rgb(var(--sw-white)); overflow-wrap: anywhere; }
+.camp-found-sub { font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.camp-pick { display: flex; flex-direction: column; gap: .4rem; }
+.camp-pick-row { display: flex; align-items: center; gap: .6rem; padding: .45rem .55rem; border: 1px solid rgb(var(--slate-800)); border-radius: .45rem; background: rgb(var(--slate-950)); cursor: pointer; }
+.camp-pick-row:has(input:checked) { border-color: var(--sw-gold-dim); background: rgb(var(--accent-500) / .06); }
+.camp-pick-row:has(input:disabled) { opacity: .5; cursor: default; }
+.camp-pick-row input { flex: 0 0 auto; width: 1.1rem; height: 1.1rem; accent-color: var(--sw-gold); }
+/* Метка кампании в строке окна «Персонажи» */
+.charlist-camp { font-size: var(--fs-small); font-weight: 700; color: var(--sw-gold); overflow-wrap: anywhere; }
+
+/* ── Дашборд мастера (4.2, campaigns-screen.js; макет dashboard-layout.html — вариант A) ── */
+/* «вы мастер · N персонажей» и справа отметка «на 19:42 ↻» */
+.camp-sub-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .3rem .5rem; margin-top: -.35rem; }
+.camp-sub-row .camp-sub { flex: 1 1 10rem; margin-top: 0; }
+.camp-fresh { flex: 0 0 auto; min-height: 2.25rem; padding: .15rem .7rem; border-radius: 1.2rem; border: 1px solid rgb(var(--slate-800)); color: rgb(var(--slate-400)); font-size: var(--fs-cap); font-weight: 700; white-space: nowrap; }
+.camp-fresh:hover:not(:disabled) { color: rgb(var(--sw-white)); border-color: rgb(var(--slate-600)); }
+/* Отметка живого дашборда (этап 5, макет live-states.html — A): «● Актуально» / «● нет связи · с 19:42» */
+.camp-fresh { display: inline-flex; align-items: center; gap: .35rem; }
+.camp-fresh-dot { flex: 0 0 auto; width: .45rem; height: .45rem; border-radius: 50%; background: currentColor; }
+.camp-fresh-live { color: rgb(var(--green-400)); border-color: rgb(var(--green-500) / .35); }
+.camp-fresh-live .camp-fresh-dot { box-shadow: 0 0 6px rgb(var(--green-500)); }
+.camp-fresh-lost { color: rgb(var(--orange-400)); border-color: rgb(var(--orange-500) / .5); background: rgb(var(--orange-500) / .08); }
+.camp-fresh[aria-busy="true"] .camp-fresh-dot { animation: camp-fresh-pulse .8s ease-in-out infinite alternate; }
+@keyframes camp-fresh-pulse { to { opacity: .25; } }
+/* Карточки группы — маленькие копии карточки листа: на телефоне две колонки, шире — больше
+   (колонка не уже 11rem); подсказка «✚» — над карточкой во всю ширину сетки */
+.party-grid { position: relative; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(11rem, calc(50% - .225rem)), 1fr)); gap: .45rem; }
+.party-card { position: relative; min-width: 0; display: flex; container: pcard / inline-size; }
+.party-open { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .45rem; padding: .5rem; text-align: left; border-radius: .65rem; background: var(--sw-card); border: 1px solid rgb(var(--slate-700) / .8); border-top-color: var(--sw-gold-dim); }
+.party-open:hover:not(:disabled) { border-color: var(--sw-gold-dim); }
+.party-open:focus-visible, .party-crit:focus-visible, .camp-fold:focus-visible { outline: 2px solid rgb(var(--accent-500)); outline-offset: 2px; }
+/* С 80 % порога рамка окрашивается: раны (и обе) — красная, усталость — оранжевая */
+.party-hot-w .party-open { border-color: rgb(var(--red-500) / .6); box-shadow: 0 0 0 1px rgb(var(--red-500) / .25), 0 0 14px rgb(var(--red-500) / .12); }
+.party-hot-s .party-open { border-color: rgb(var(--orange-500) / .6); box-shadow: 0 0 0 1px rgb(var(--orange-500) / .25), 0 0 14px rgb(var(--orange-500) / .12); }
+.party-dim .party-open { opacity: .6; }
+/* Вспышка изменившейся карточки (этап 5, п. 3): ~1 с золотом темы (--sw-gold-rgb) и обратно к обычной или красной /
+   оранжевой рамке; --flash-at — сколько уже прошло (перерисовка посреди вспышки) */
+.party-flash .party-open { animation: party-flash 1s ease-out var(--flash-at, 0ms); }
+@keyframes party-flash { from { border-color: rgb(var(--sw-gold-rgb) / .9); box-shadow: 0 0 0 2px rgb(var(--sw-gold-rgb) / .35), 0 0 18px rgb(var(--sw-gold-rgb) / .35); } }
+@media (prefers-reduced-motion: reduce) {
+    /* Без плавности: рамка подсвечена всю секунду и гаснет сразу */
+    .party-flash .party-open { animation-name: party-flash-still; animation-timing-function: linear; }
+    .camp-fresh[aria-busy="true"] .camp-fresh-dot { animation: none; opacity: .5; }
+}
+@keyframes party-flash-still { from, to { border-color: rgb(var(--sw-gold-rgb) / .9); box-shadow: 0 0 0 2px rgb(var(--sw-gold-rgb) / .35), 0 0 18px rgb(var(--sw-gold-rgb) / .35); } }
+.party-id { display: flex; align-items: center; gap: .45rem; min-width: 0; }
+.party-av { flex: 0 0 2rem; width: 2rem; height: 2rem; border-radius: .45rem; display: flex; align-items: center; justify-content: center; background: rgb(var(--slate-800)) center / cover no-repeat; border: 1px solid var(--sw-gold-dim); color: rgb(var(--slate-300)); font-size: var(--fs-cap); font-weight: 800; }
+.party-nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.party-name { font-size: var(--fs-small); font-weight: 800; color: rgb(var(--sw-white)); line-height: 1.2; overflow-wrap: anywhere; hyphens: auto; }
+.party-sub { font-size: var(--fs-cap); color: rgb(var(--slate-400)); line-height: 1.25; overflow-wrap: anywhere; hyphens: auto; }
+.party-vt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .3rem; }
+/* Узкая карточка (320 px, крупный шрифт) — раны и усталость одна под другой */
+@container pcard (max-width: 10em) { .party-vt { grid-template-columns: minmax(0, 1fr); } }
+.party-v { min-width: 0; border-radius: .4rem; padding: .25rem .3rem .3rem; }
+.party-v-w { border: 1px solid rgb(var(--red-500) / .45); background: rgb(var(--red-500) / .07); color: rgb(var(--red-400)); }
+.party-v-s { border: 1px solid rgb(var(--blue-500) / .45); background: rgb(var(--blue-500) / .07); color: rgb(var(--blue-400)); }
+.party-v-top { display: flex; align-items: center; gap: .25rem; }
+.party-v-top svg { width: .8rem; height: .8rem; flex: 0 0 .8rem; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.party-v-val { font-family: var(--sw-font-mono); font-size: var(--fs-body); font-weight: 800; color: rgb(var(--slate-50)); line-height: 1; white-space: nowrap; }
+.party-v-val small { font-size: .75em; font-weight: 600; color: rgb(var(--slate-400)); }
+.party-bar { display: block; height: 3px; margin-top: .3rem; border-radius: 2px; background: rgb(var(--slate-800)); overflow: hidden; }
+.party-bar i { display: block; height: 100%; }
+.party-foot { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .6rem; font-size: var(--fs-cap); font-weight: 700; letter-spacing: .03em; color: rgb(var(--slate-400)); }
+/* Место под «✚» справа внизу — кнопка лежит рядом с карточкой, а не внутри неё */
+.party-card:has(.party-crit) .party-foot { min-height: 2.75rem; padding-right: 3.25rem; }
+.party-stat b { margin-left: .25rem; font-family: var(--sw-font-mono); color: rgb(var(--slate-50)); }
+/* Строка запасов (этап 5, макет party-consumables.html — A): рамки переносятся, карточка растёт */
+.party-sup { display: flex; flex-wrap: wrap; gap: .25rem; min-width: 0; }
+.party-sup-chip { display: inline-flex; align-items: center; gap: .2rem; max-width: 100%; padding: .1rem .3rem .1rem .25rem; border-radius: .4rem; border: 1px solid rgb(var(--slate-800)); background: rgb(var(--slate-400) / .05); color: rgb(var(--slate-300)); }
+.party-sup-chip .item-ico { width: 1rem; height: 1rem; flex: 0 0 1rem; }
+.party-sup-chip b { font-family: var(--sw-font-mono); font-size: var(--fs-small); font-weight: 800; color: rgb(var(--slate-50)); line-height: 1.1; }
+.party-sup-name { min-width: 0; font-size: var(--fs-cap); font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
+.party-sup-out { border-color: rgb(var(--red-500) / .5); background: rgb(var(--red-500) / .1); color: rgb(var(--red-400)); }
+.party-sup-out b { color: rgb(var(--red-400)); }
+.party-out { font-weight: 800; text-transform: uppercase; color: rgb(var(--red-400)); }
+.party-note { font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+.party-crit { position: absolute; right: .35rem; bottom: .35rem; min-width: 2.75rem; min-height: 2.75rem; padding: 0 .45rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .5rem; border: 1px solid rgb(var(--red-500) / .45); background: rgb(var(--red-500) / .12); color: rgb(var(--red-300)); font-size: var(--fs-small); font-weight: 800; white-space: nowrap; }
+.party-crit[aria-expanded="true"] { background: rgb(var(--red-500) / .25); border-color: rgb(var(--red-500) / .7); }
+.party-hint { position: absolute; left: 0; right: 0; z-index: 5; padding: .6rem .75rem; border-radius: .6rem; border: 1px solid rgb(var(--red-500) / .5); background: var(--sw-sheet); box-shadow: 0 10px 24px rgba(0,0,0,.55); font-size: var(--fs-small); line-height: 1.4; color: rgb(var(--slate-200)); }
+.party-hint-title { display: block; margin-bottom: .3rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: rgb(var(--red-400)); }
+.party-hint-list { list-style: disc; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .2rem; overflow-wrap: anywhere; }
+.party-hint-bonus { margin-top: .45rem; color: rgb(var(--slate-400)); }
+/* «Приглашение · K7M-2QX ▸»: раскрывает «Копировать ссылку», «Сменить код» и состав группы */
+.camp-fold { width: 100%; display: flex; align-items: center; gap: .6rem; padding: .55rem .75rem; border-radius: .55rem; border: 1px dashed var(--sw-gold-dim); background: rgb(var(--accent-500) / .05); color: rgb(var(--slate-300)); font-size: var(--fs-small); text-align: left; }
+.camp-fold-label { flex: 1; min-width: 0; }
+.camp-fold-code { font-family: var(--sw-font-mono); font-size: var(--fs-body); letter-spacing: .1em; color: var(--sw-gold); }
+.camp-fold-arrow { color: rgb(var(--slate-400)); }
+.camp-fold-body { display: flex; flex-direction: column; gap: .5rem; }
+.camp-fold-body > .charlist-actions { margin-top: 0; }
+.camp-kick { flex: 0 0 auto; align-self: center; margin-right: .4rem; padding: .4rem .65rem; font-size: var(--fs-small); }
+
+/* ── Просмотр листа игрока (4.2, party-view.js; макет sheet-view.html — вариант B) ── */
+/* Шапка просмотра — в верхней строке шапки вместо логотипа и ☰ (body.sheet-viewing). Напоминание
+   о расовых навыках и подпись в «Заметках» — для игрока, в просмотре скрыты */
+.view-head { display: none; flex: 1 1 auto; min-width: 0; align-items: center; gap: .4rem; padding: .45rem 0; }
+body.sheet-viewing .view-head { display: flex; }
+body.sheet-viewing #hud-brand, body.sheet-viewing #menu-btn, body.sheet-viewing #hud-mini-menu,
+body.sheet-viewing #race-skills-reminder, body.sheet-viewing #notes-campaign-note { display: none !important; }
+.view-back { flex: 0 0 auto; min-height: 2.5rem; padding: .3rem .6rem; border-radius: .5rem; border: 1px solid rgb(var(--sw-gold-rgb) / .55); color: var(--sw-gold); font-size: var(--fs-small); font-weight: 800; white-space: nowrap; }
+.view-arr { flex: 0 0 2.5rem; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: .5rem; border: 1px solid rgb(var(--slate-800)); background: var(--sw-ico); color: rgb(var(--slate-200)); font-size: 1.25rem; font-weight: 800; line-height: 1; }
+.view-arr:disabled { opacity: .35; cursor: default; }
+.view-arr[hidden], .view-dots[hidden] { display: none; }
+.view-back:focus-visible, .view-arr:focus-visible { outline: 2px solid rgb(var(--accent-500)); outline-offset: 2px; }
+.view-who { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: .1rem; text-align: center; }
+.view-name { font-size: var(--fs-small); font-weight: 800; line-height: 1.2; color: rgb(var(--sw-white)); overflow-wrap: anywhere; hyphens: auto; }
+.view-ro { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; font-size: var(--fs-cap); font-weight: 700; color: var(--sw-gold); }
+.view-ro svg { width: .85rem; height: .85rem; flex: 0 0 .85rem; }
+.view-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: .3rem; padding-top: .1rem; }
+.view-dots i { width: 5px; height: 5px; border-radius: 50%; background: rgb(var(--slate-700)); }
+.view-dots i.on { background: var(--sw-gold); }
+/* Узкая строка (телефон 320–360 px, крупный шрифт): «← Группа» и ‹ › — первой строкой, имя,
+   «только просмотр» и точки — второй, во всю ширину. Порог в em растёт со ступенью шрифта */
+@container toprow (max-width: 22em) {
+    body.sheet-viewing .view-head { flex-wrap: wrap; row-gap: .2rem; }
+    .view-back { margin-right: auto; }
+    .view-who { order: 3; flex: 1 1 100%; }
+}
+/* Подпись в «Заметках» персонажа из активной кампании (character-session.js) */
+.notes-campaign-note { margin: -.2rem 0 .5rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); }
+@media (min-width: 1024px) and (min-height: 560px) {
+    /* Компьютер: вкладки посередине и «Aa» остаются; шапка просмотра — слева, 24rem. Не помещается
+       вместе с вкладками (окно 1024 px, крупный шрифт) — вкладки и «Aa» уходят второй строкой */
+    body.sheet-viewing .hud-toprow { flex-wrap: wrap; }
+    body.sheet-viewing .view-head { flex: 0 0 24rem; max-width: 100%; }
+}
+/* В просмотре вкладкам места меньше — короткие подписи раньше, чем обычно (обычно с 50em) */
+@container toprow (max-width: 62em) {
+    body.sheet-viewing .tab-ico, body.sheet-viewing .tab-full { display: none; }
+    body.sheet-viewing .tab-short { display: inline; }
+}
+/* ── Пул Судьбы стола (этап 5, часть 2, destiny-pool.js; макеты pool-placement.html, pool-gm.html,
+   pool-who.html — A) ── Строка «Судьба» — в карточке персонажа между ранами и характеристиками и на
+   дашборде мастера над карточками группы; светлые жетоны — белые с голубым, тёмные — чёрные с
+   красным, порядок светлые | тёмные (не только цвет: подписи «Светлая» / «Тёмная» в панели) */
+.destiny-row[hidden], #destiny-panel [hidden], #destiny-set [hidden], .destiny-bar-undo[hidden], .destiny-bar-tks[hidden] { display: none !important; }
+.destiny-row { width: 100%; display: flex; align-items: center; gap: .4rem; min-height: 2.1rem; padding: .3rem .55rem; border: 1px solid rgb(var(--slate-800)); border-radius: .5rem; background: rgb(var(--slate-400) / .05); text-align: left; }
+.destiny-row:hover { border-color: rgb(var(--slate-600)); }
+.destiny-label { font-style: normal; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: rgb(var(--slate-400)); }
+.destiny-tks { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem; min-width: 0; }
+.destiny-split { width: 1px; height: .9rem; margin: 0 .2rem; background: rgb(var(--slate-700)); }
+.destiny-num { margin-left: auto; font-family: var(--sw-font-mono, ui-monospace, monospace); font-size: var(--fs-body); font-weight: 800; color: rgb(var(--slate-50)); white-space: nowrap; }
+.destiny-unset { flex: 1; min-width: 0; font-size: var(--fs-small); color: rgb(var(--slate-400)); overflow-wrap: break-word; }
+.destiny-chev { flex: 0 0 auto; color: rgb(var(--slate-500)); }
+.destiny-tk { flex: 0 0 auto; width: .75rem; height: .75rem; border-radius: 50%; }
+.destiny-tk-l { background: radial-gradient(circle at 40% 35%, #fff, rgb(var(--blue-100)) 60%, rgb(var(--blue-300))); border: 1px solid rgb(var(--blue-300)); box-shadow: 0 0 5px rgb(var(--blue-300) / .6); }
+.destiny-tk-d { background: radial-gradient(circle at 40% 35%, #3f1d2b, #12060c 70%); border: 1.5px solid rgb(var(--red-600)); box-shadow: 0 0 4px rgb(var(--red-600) / .45); }
+.camp-body > .destiny-row { margin-top: -.1rem; }
+/* Чужое действие — вспышка ~1 с, как у карточки группы (.party-flash) */
+.destiny-flash { animation: party-flash 1s ease-out var(--flash-at, 0ms); }
+@media (prefers-reduced-motion: reduce) {
+    .destiny-flash { animation-name: party-flash-still; animation-timing-function: linear; }
+}
+/* Панель «Судьба стола». Заголовок, «×» и отметка; не помещаются в строку (узкий экран, крупный
+   шрифт, «нет связи · с 21:40») — отметка уходит второй строкой */
+.destiny-head { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .5rem; }
+.destiny-head .sheet-title { order: 1; flex: 1 1 auto; }
+.destiny-head .sheet-x { order: 2; }
+#destiny-live { order: 3; margin-left: auto; }
+.destiny-sub { margin: -.1rem 0 .6rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); overflow-wrap: break-word; }
+.destiny-side { border-radius: .6rem; padding: .5rem .65rem; margin-bottom: .5rem; }
+.destiny-side-l { border: 1px solid rgb(var(--blue-300) / .35); background: rgb(var(--blue-300) / .06); }
+.destiny-side-d { border: 1px solid rgb(var(--red-600) / .4); background: rgb(var(--red-600) / .06); }
+.destiny-side-top { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.destiny-side-l .destiny-side-top { color: rgb(var(--blue-300)); }
+.destiny-side-d .destiny-side-top { color: rgb(var(--red-400)); }
+.destiny-side-top b { font-size: var(--fs-num); color: rgb(var(--slate-50)); }
+.destiny-big { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .35rem; }
+.destiny-big .destiny-tk { width: 1.5rem; height: 1.5rem; }
+.destiny-big .destiny-tk-d { border-width: 2px; }
+.destiny-unset-big { margin: .3rem 0 .7rem; font-size: var(--fs-body); color: rgb(var(--slate-300)); }
+.destiny-spend { width: 100%; margin-top: .2rem; min-height: 2.75rem; padding: .6rem; display: flex; align-items: center; justify-content: center; gap: .45rem; border: 1px solid rgb(var(--slate-100)); border-radius: .5rem; background: rgb(var(--slate-100)); color: rgb(var(--slate-900)); font-size: var(--fs-body); font-weight: 800; letter-spacing: .02em; }
+.destiny-spend-dark { border-color: rgb(var(--red-600)); background: rgb(var(--red-950)); color: rgb(var(--red-200)); }
+.destiny-spend:disabled { opacity: .4; }
+.destiny-set-open { width: 100%; margin-top: .5rem; }
+.destiny-set-open:disabled { opacity: .4; }
+.destiny-hint { margin-top: .5rem; font-size: var(--fs-small); color: rgb(var(--orange-400)); text-align: center; }
+.destiny-note { margin-top: .6rem; font-size: var(--fs-small); color: rgb(var(--slate-400)); text-align: center; overflow-wrap: break-word; }
+.destiny-note:empty { display: none; }
+/* Окно «Задать пул»: два счётчика */
+.destiny-step { display: flex; align-items: center; justify-content: space-between; gap: .6rem; border-radius: .6rem; padding: .4rem .65rem; margin-top: .6rem; font-size: var(--fs-cap); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.destiny-step.destiny-side-l { color: rgb(var(--blue-300)); }
+.destiny-step.destiny-side-d { color: rgb(var(--red-400)); }
+.destiny-step-ctl { display: inline-flex; align-items: center; gap: .6rem; }
+.destiny-step-ctl b { min-width: 2ch; text-align: center; font-size: var(--fs-num); color: rgb(var(--slate-50)); }
+.destiny-step-ctl .sheet-step:disabled { opacity: .35; }
+.destiny-total { margin-top: .6rem; font-size: var(--fs-small); color: rgb(var(--slate-300)); text-align: center; }
+/* Плашка внизу экрана: над панелями снизу (190) и экраном «Кампании» (175), под сообщениями (200) */
+.destiny-bar { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 195; max-width: 26rem; margin: 0 auto; display: flex; align-items: center; gap: .6rem; padding: .55rem .8rem; border-radius: .6rem; border: 1px solid rgb(var(--slate-700)); background: var(--sw-sheet); color: rgb(var(--slate-100)); font-size: var(--fs-small); font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,.6); overflow-wrap: break-word; }
+.destiny-bar.hidden { display: none; }
+/* Макеты pool-who.html / pool-placement.html: жетоны «откуда → куда» у трат; полоска слева у чужих
+   действий — светлая у игроков, красная у мастера; имя — жирным */
+.destiny-bar-tks { flex: 0 0 auto; display: flex; align-items: center; gap: .3rem; }
+.destiny-bar-arr { color: rgb(var(--slate-500)); }
+.destiny-bar-player { border-left: 3px solid rgb(var(--blue-300)); }
+.destiny-bar-gm { border-left: 3px solid rgb(var(--red-600)); }
+#destiny-bar-text { font-weight: 500; }
+#destiny-bar-text b { font-weight: 800; }
+.destiny-bar-undo { flex: 0 0 auto; margin-left: auto; min-height: 2.25rem; padding: .2rem .7rem; border-radius: .4rem; border: 1px solid var(--sw-gold-dim); color: var(--sw-gold); font-weight: 800; white-space: nowrap; }
+@media print {
+    .destiny-bar, .destiny-row { display: none !important; }
+}
+
+@media not all and (min-width: 1024px) and (min-height: 560px) {
+    .destiny-bar { bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+}
+@media not all and (min-width: 1024px) and (min-height: 560px) {
+    /* Телефон: шапка просмотра не уходит при прокрутке — верхняя строка закреплена над карточкой,
+       место под ней держит отступ шапки (--view-h — её высота, party-view.js); мини-блок — под ней */
+    body.sheet-viewing .hud-toprow { position: fixed; top: var(--net-h, 0px); left: 0; right: 0; padding: 0 .75rem; background: var(--sw-topbar); }
+    body.sheet-viewing #hud-top { padding-top: var(--view-h, 0px); }
+    body.sheet-viewing #hud-mini { top: calc(var(--net-h, 0px) + var(--view-h, 0px)); }
+}
