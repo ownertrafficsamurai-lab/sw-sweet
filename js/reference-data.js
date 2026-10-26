@@ -16,7 +16,7 @@ export const CATALOG = { weapon: {}, armor: {}, gear: {}, qualities: [] };
 const TIMEOUT_MS = 20000;
 
 const TABLES = [
-    ['races', 'id, name, stats, base_wounds, base_strain, start_xp, abilities, skill_bonus'],
+    ['races', 'id, name, stats, base_wounds, base_strain, start_xp, abilities, skill_bonus, skill_discounts'],
     ['careers', 'id, name, career_skills, description'],
     ['specializations', 'id, career_id, name, bonus_skills, description'],
     ['talent_trees', 'spec_id, nodes'],

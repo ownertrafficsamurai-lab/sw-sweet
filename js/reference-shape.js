@@ -19,6 +19,7 @@ export function buildReferenceData({ races, careers, specializations, talentTree
             startXP: r.start_xp,
             special: r.abilities ?? '',
             skillBonus: r.skill_bonus ?? null,
+            skillDiscounts: r.skill_discounts ?? null,
         })).sort(byName),
         careers: careers.map(c => ({
             id: c.id,

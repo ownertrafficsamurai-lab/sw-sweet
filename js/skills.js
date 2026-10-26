@@ -55,6 +55,11 @@ export function isKnowledgeSkill(name) {
     return name.startsWith('Знание (');
 }
 
+// Цена ранга навыка в домашней схеме стола: со скидкой — 5×ранг, без — 5×ранг+5
+export function skillRankCost(rank, discounted) {
+    return rank * 5 + (discounted ? 0 : 5);
+}
+
 // Таблица листа для навыка: 'combat', 'knowledge' или 'general'. «Знания» — отдельная таблица
 // только на компьютере (split, А3 часть 2); на телефоне они в «Общих» по алфавиту, как раньше
 export function skillTable(name, split) {

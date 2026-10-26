@@ -13,8 +13,9 @@ import { updateEncumbrance } from './inventory-equipment.js';
 import { updateCharInfoDisplay } from './char-setup-modal.js';
 import { renderStatStrip, refreshStatPanel } from './stat-panel.js';
 import { raceChangeResetsProgress, resetForRaceChange } from './race-change.js';
-import { raceBonus, raceSkillNames, grantRaceSkills, needsRaceChoice, raceChoiceLabel } from './race-skills.js';
-import { specRefund, resetForSpecChange, keptCareerSkills, specChangeMessage } from './spec-change.js';
+import { raceBonus, raceSkillNames, grantRaceSkills, needsRaceChoice, raceChoiceLabel, isRaceCheap } from './race-skills.js';
+import { discountContext, flagKind, canAddFlag, flagSummary, rankCost, trimFlags } from './skill-discount.js';
+import { specRefund, resetForSpecChange, specChangeMessage } from './spec-change.js';
 import { findSpec } from './choice-model.js';
 import { renderHudCard } from './hud-card.js';
 import { renderForcePanel } from './force-panel.js';
@@ -143,6 +144,17 @@ export function raceChoiceContext() {
     return { careerSkills: career?.careerSkills ?? [], specSkills: spec?.bonusSkills ?? [] };
 }
 
+// Флажки скидки по текущим расе, карьере и основной специализации (skill-discount.js)
+export function discountCtx() {
+    const { careerSkills, specSkills } = raceChoiceContext();
+    return discountContext(currentRace(), careerSkills, specSkills);
+}
+
+// Отметки, недопустимые после смены карьеры, специализации или расы, снимаются (trimFlags)
+function trimSelectedFlags() {
+    state.selectedCareerSkills = trimFlags(state.selectedCareerSkills, discountCtx(), state.skillRanks);
+}
+
 // Расовые навыки расы, которая была до события change скрытого списка (в списке уже новая)
 function committedRaceSkills() {
     const raceSel = document.getElementById('gen-race');
@@ -161,7 +173,9 @@ function requestRaceChange(next, onDone) {
         raceSel.dataset.committed = next;
         Object.assign(state, resetForRaceChange(state));
         // Фиксированные расовые навыки новой расы — сразу ранг 1 (покупок после сброса нет)
-        Object.assign(state, grantRaceSkills(state, raceBonus(state.db.races.find(r => r.id === next)).fixed));
+        const race = state.db.races.find(r => r.id === next);
+        Object.assign(state, grantRaceSkills(state, raceBonus(race).fixed, race));
+        trimSelectedFlags();
         updateGeneratorUI();
         initTalentTree();
         if (onDone) onDone();
@@ -204,11 +218,11 @@ export function chooseSpec(careerId, specId, onDone) {
     const apply = () => {
         Object.assign(state, resetForSpecChange(state, nodes));
         if (careerId !== prevCareer) {
-            state.selectedCareerSkills = keptCareerSkills(state.selectedCareerSkills, career.careerSkills);
             careerSel.value = careerId;
             fillSpecLists();
         }
         specSel.value = specId;
+        trimSelectedFlags();
         updateGeneratorUI();
         initTalentTree();
         if (onDone) onDone();
@@ -399,7 +413,10 @@ export function diceHtml({ yellow, green }) {
     return html;
 }
 
-export function renderSkillRow(skill, finalStats, isCareer, isSpec, isRacial = false) {
+// ctx — флажки скидки (discountCtx): значки «К» / «С», флажок и значок «Р» у Знаний расы со скидкой
+export function renderSkillRow(skill, finalStats, ctx, isRacial = false) {
+    const isCareer = ctx.career.has(skill.name);
+    const isSpec = ctx.spec.has(skill.name);
     // Характеристика, ранг и кубики — skillPool (skills.js); у светового меча характеристика —
     // выбранная игроком (state.lightsaberChar)
     const pool = skillPool(skill.name, { finalStats, skillRanks: state.skillRanks, lightsaberChar: state.lightsaberChar });
@@ -435,16 +452,23 @@ export function renderSkillRow(skill, finalStats, isCareer, isSpec, isRacial = f
     }
     badgesHtml += `</div>`;
 
-    // --- 2. ЛОГИКА ЧЕКБОКСА (ВЫБОР 3-Х) ---
+    // --- 2. ФЛАЖОК СКИДКИ (skill-discount.js) ---
     let selectionCheckbox = "";
 
     // Базовый стиль строки (прозрачный)
     let rowClass = "hover:bg-slate-800/50 transition border-l-2 border-transparent";
+    const kind = flagKind(skill.name, ctx);
+    const isSelected = kind !== null && state.selectedCareerSkills.includes(skill.name);
 
-    // Если это карьерный навык — добавляем чекбокс для скидки
-    if (isCareer) {
-        const isSelected = state.selectedCareerSkills.includes(skill.name);
-        const isDisabled = !isSelected && state.selectedCareerSkills.length >= 3;
+    // У Знаний расы со скидкой (цереане) — значок «Р» на месте флажка
+    if (isRaceCheap(skill.name, ctx.race)) {
+        const label = `${ctx.race.name}: все Знания со скидкой`;
+        selectionCheckbox = `<span class="race-cheap-mark" role="img" aria-label="${label}" title="${label}">Р</span>`;
+        rowClass = "race-cheap-row border-l-2 hover:bg-slate-800/50 transition";
+    }
+    // Флажок — у навыков «К» карьеры и «С» основной специализации
+    else if (kind !== null) {
+        const isDisabled = !isSelected && !canAddFlag(state.selectedCareerSkills, skill.name, ctx);
 
         // Стиль чекбокса: если выбран — Золотой, если нет — Серый
         const checkBorder = isSelected ? "border-yellow-500 bg-yellow-500" : "border-slate-700 bg-slate-900 group-hover/chk:border-slate-500";
@@ -466,15 +490,13 @@ export function renderSkillRow(skill, finalStats, isCareer, isSpec, isRacial = f
         if (isSelected) {
              rowClass = "bg-yellow-900/10 border-l-2 border-yellow-500 hover:bg-slate-800/50 transition";
         }
-        // Если просто карьерный (но не выбран) — легкий зеленый оттенок
+        // Если навык специализации (не выбран) — синим, просто карьерный — легкий зеленый оттенок
+        else if (isSpec) {
+             rowClass = "bg-blue-900/5 border-l-2 border-blue-500 hover:bg-slate-800/50 transition";
+        }
         else {
              rowClass = "bg-green-900/5 border-l-2 border-green-900/20 hover:bg-slate-800/50 transition";
         }
-    }
-
-    // Если это навык специализации (и не выбран как карьерный) — подсвечиваем синим
-    if (isSpec && !state.selectedCareerSkills.includes(skill.name)) {
-         rowClass = "bg-blue-900/5 border-l-2 border-blue-500 hover:bg-slate-800/50 transition";
     }
 
     // --- 3. ГЕНЕРАЦИЯ КВАДРАТИКОВ РАНГА ---
@@ -501,7 +523,7 @@ export function renderSkillRow(skill, finalStats, isCareer, isSpec, isRacial = f
         } else {
             if (i === rank + 1) {
                 cursor = "cursor-pointer hover:bg-slate-600";
-                clickAction = `onclick="buySkillRank('${skill.name}', ${i}, ${isCareer}, ${isSpec})"`;
+                clickAction = `onclick="buySkillRank('${skill.name}', ${i})"`;
                 title = "Купить ранг";
             }
         }
@@ -549,8 +571,6 @@ export function setLightsaberChar(val) {
 
 function updateGeneratorUIRaw() {
     const race = state.db.races.find(r => r.id === document.getElementById('gen-race').value);
-    const career = state.db.careers.find(c => c.id === document.getElementById('gen-career').value);
-    const spec = career ? career.specializations.find(s => s.id === document.getElementById('gen-spec').value) : null;
     renderSetupFields();
     if (!race) {
         // Без расы лента пустая, а открытая карточка закрывается (stat-panel.js)
@@ -573,14 +593,14 @@ function updateGeneratorUIRaw() {
     };
     Object.values(bodies).forEach(tbody => { tbody.innerHTML = ''; });
     const split = window.matchMedia(DESKTOP_QUERY).matches;
-    const careerSkills = new Set(career ? career.careerSkills : []);
-    const specSkills = new Set(spec ? spec.bonusSkills : []);
+    const ctx = discountCtx();
     const racialSkills = new Set(raceSkillNames(race, state.raceSkills));
 
     ALL_SKILLS.forEach(skill => {
-        const html = renderSkillRow(skill, finalStats, careerSkills.has(skill.name), specSkills.has(skill.name), racialSkills.has(skill.name));
+        const html = renderSkillRow(skill, finalStats, ctx, racialSkills.has(skill.name));
         bodies[skillTable(skill.name, split)].innerHTML += html;
     });
+    renderDiscountLine(ctx);
     // Строки нарисованы заново — фильтр из поля применяется и к ним
     filterSkills(document.getElementById('skill-filter-input').value);
 
@@ -599,6 +619,20 @@ function updateGeneratorUIRaw() {
     renderHudCard();
 }
 
+// Строка над навыками: «Со скидкой: N из M — карьерных до C, специализации до S» (+ «Р» у расы со
+// скидкой на Знания). Узлами: числа — в <b>
+function renderDiscountLine(ctx) {
+    const { used, total, career, spec, cheapKnowledge } = flagSummary(state.selectedCareerSkills, ctx);
+    const b = n => Object.assign(document.createElement('b'), { textContent: n });
+    const parts = ['Со скидкой: ', b(used), ' из ', b(total), ' — карьерных до ', b(career), ', специализации до ', b(spec)];
+    if (cheapKnowledge) {
+        const mark = Object.assign(document.createElement('span'), { className: 'race-cheap-mark', textContent: 'Р' });
+        mark.setAttribute('aria-hidden', 'true');
+        parts.push(' · ', mark, ' все Знания — от расы');
+    }
+    document.getElementById('skill-discount-line').replaceChildren(...parts);
+}
+
 export function updateGeneratorUI() {
     renderAbilities();
     updateGeneratorUIRaw();
@@ -608,28 +642,27 @@ export function updateGeneratorUI() {
 // ========== STEP 6: XP-PURCHASE AND MOBILE-TAB-TOGGLE FUNCTIONS ==========
 export function toggleCareerSelection(skillName) {
     const index = state.selectedCareerSkills.indexOf(skillName);
+    const ctx = discountCtx();
     if (index > -1) {
         state.selectedCareerSkills.splice(index, 1);
+    } else if (canAddFlag(state.selectedCareerSkills, skillName, ctx)) {
+        state.selectedCareerSkills.push(skillName);
     } else {
-        if (state.selectedCareerSkills.length >= 3) {
-            showAlert("Можно выбрать только 3 карьерных навыка для скидки!");
-        } else {
-            state.selectedCareerSkills.push(skillName);
-        }
+        const { total, career, spec } = flagSummary(state.selectedCareerSkills, ctx);
+        showAlert(`Навыков со скидкой не больше ${total}: карьерных до ${career}, специализации до ${spec}.`);
     }
     updateGeneratorUI();
     saveSession();
 }
 
 // 2. ПОКУПКА ранга (Buy)
-export function buySkillRank(skillName, targetRank, isCareerBase, isSpec) {
+export function buySkillRank(skillName, targetRank) {
     const currentRank = state.skillRanks[skillName] || 0;
     if (targetRank !== currentRank + 1) {
         showAlert(`Нужно покупать ранги по очереди! Сначала купите ранг ${currentRank + 1}.`);
         return;
     }
-    const isCheap = state.selectedCareerSkills.includes(skillName);
-    const cost = isCheap ? targetRank * 5 : (targetRank * 5) + 5;
+    const cost = rankCost(skillName, targetRank, state.selectedCareerSkills, discountCtx());
     const race = state.db.races.find(r => r.id === document.getElementById('gen-race').value);
     const totalXP = (race ? race.startXP : 0) + state.xpData.earned;
     const availXP = totalXP - state.xpData.spent;
@@ -648,8 +681,7 @@ export function refundSkillRank(skillName, rankToRefund) {
     if (rankToRefund !== currentRank) return;
     // Первый ранг расового навыка — бесплатный, возвращать нечего (race-skills.js)
     if (rankToRefund === 1 && raceSkillNames(currentRace(), state.raceSkills).includes(skillName)) return;
-    const isCheap = state.selectedCareerSkills.includes(skillName);
-    const refundAmount = isCheap ? rankToRefund * 5 : (rankToRefund * 5) + 5;
+    const refundAmount = rankCost(skillName, rankToRefund, state.selectedCareerSkills, discountCtx());
     showConfirm(`Вернуть ранг ${rankToRefund} навыка "${skillName}" и получить назад ${refundAmount} XP?`, () => {
         applyXP('refund_skill', refundAmount, `Навык ${skillName} ${rankToRefund}`, () => {
             state.skillRanks[skillName] = currentRank - 1;

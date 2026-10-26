@@ -818,6 +818,13 @@ input.inv-num { width: 4.5em; text-align: center; }
 .setup-field.setup-field-warn { border-color: rgb(var(--accent-400)); color: rgb(var(--accent-400)); }
 .race-skills-reminder { display: block; width: 100%; margin: .25rem 0 .5rem; padding: .5rem .6rem; border: 1px solid rgb(var(--accent-400)); border-radius: .4rem; background: rgb(var(--accent-500) / .12); color: rgb(var(--accent-400)); font-size: var(--fs-small); font-weight: 700; text-align: left; overflow-wrap: anywhere; }
 .picker-body.race-skill-body { height: auto; max-height: 88vh; }
+/* Флажки скидки (skill-discount.js): строка над навыками и значок «Р» у Знаний расы со скидкой —
+   цвета бесплатного расового ранга (.rank-race) */
+.skill-discount-line { margin: .25rem 0 .5rem; padding: .4rem .6rem; border: 1px solid rgb(var(--slate-800)); border-radius: .4rem; background: rgb(var(--slate-900)); color: rgb(var(--slate-400)); font-size: var(--fs-small); line-height: 1.4; overflow-wrap: anywhere; }
+.skill-discount-line b { color: rgb(var(--accent-400)); font-weight: 700; }
+.race-cheap-mark { display: inline-flex; align-items: center; justify-content: center; width: 1rem; height: 1rem; flex: 0 0 1rem; border: 1px solid rgb(var(--purple-500)); border-radius: 2px; background: rgb(var(--purple-400) / .12); color: rgb(var(--purple-400)); font-size: var(--fs-cap); font-weight: 900; line-height: 1; vertical-align: middle; user-select: none; }
+.sk-mark .race-cheap-mark { margin-left: .125rem; }
+.race-cheap-row { background: rgb(var(--purple-400) / .08); border-left-color: rgb(var(--purple-500)); }
 .race-skill-row { display: flex; align-items: center; gap: .5rem; width: 100%; min-height: 2.75rem; padding: .35rem .5rem; border-bottom: 1px solid rgb(var(--slate-800)); text-align: left; font-size: var(--fs-body); color: rgb(var(--slate-200)); }
 .race-skill-row[aria-pressed="true"] { color: rgb(var(--accent-400)); font-weight: 700; }
 .race-skill-row:disabled { opacity: .55; }

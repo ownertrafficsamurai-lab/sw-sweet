@@ -3,8 +3,8 @@ import { store } from './storage.js';
 import { makeSaveQueue } from './save-queue.js';
 import { SESSION_VERSION, checkSave, fixesMessage, sameSave } from './save-check.js';
 import { listCharacters, loadCharacter, createCharacter, updateCharacter, deleteCharacter, currentUserId } from './character-store.js';
-import { showSave, currentSession, saveReference, checkSaveText, characterFileText, downloadText, fileName, raceOf } from './persistence.js';
-import { withRaceRanks } from './race-skills.js';
+import { showSave, currentSession, saveReference, checkSaveText, characterFileText, downloadText, fileName, raceOf, skillListsOf } from './persistence.js';
+import { upgradeSave } from './skill-discount.js';
 import { unsavedNotice } from './unsaved-notice.js';
 import { NEW_KEY, importKey, needsCheck, afterFailedCreate, makePendingCreates } from './create-retry.js';
 import { randomId } from './random-id.js';
@@ -288,14 +288,15 @@ export function leaveView() {
 }
 
 // Новая строка в базе из проверенного сохранения (новый персонаж, импорт, перенос). true — создан и
-// открыт. Сохранение до версии 6 получает расовые ранги до записи: строка сразу создаётся с ними.
+// открыт. Старое сохранение обновляется до записи (upgradeSave: расовые ранги, Знания цереанина,
+// флажки скидки): строка сразу создаётся такой.
 // slot — где помнится id неясного создания этого действия ({ get, set, clear }, create-retry.js):
 // повтор идёт с тем же id и отправляет то же сохранение. Ответ не пришёл, «такой id уже есть» или
 // предел при повторе — строка ищется по id: нашлась — открывается, как созданная. onLimit — вместо
 // сообщения о пределе 20 (перенос из браузера)
 async function addCharacter(result, originalText, slot, onLimit = null) {
     if (!await saved()) return false;
-    const ready = withRaceRanks(result, raceOf(result.save));
+    const ready = upgradeSave(result, raceOf(result.save), skillListsOf(result.save));
     const retry = slot.get() !== null;
     const id = slot.get() ?? randomId();
     const created = await createCharacter(id, ready.save);

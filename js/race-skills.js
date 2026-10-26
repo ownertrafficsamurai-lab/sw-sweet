@@ -1,4 +1,4 @@
-import { ALL_SKILLS } from './skills.js';
+import { ALL_SKILLS, isKnowledgeSkill, skillRankCost } from './skills.js';
 
 // Бесплатные ранги навыков от расы (спека 2026-10-01-race-free-skill-ranks.md). У расы в справочнике
 // поле skillBonus: { fixed: [навыки] } | { choose: N, from: [навыки] | 'non_career' } | null.
@@ -55,8 +55,23 @@ export function raceChoiceOptions(race, { careerSkills = [], specSkills = [] } =
     return ALL_SKILLS.map(s => ({ name: s.name, blocked: career.has(s.name) ? 'career' : spec.has(s.name) ? 'spec' : null }));
 }
 
+// Флажки скидки от расы (спека 2026-10-26-skill-discount-flags.md). У расы в справочнике поле
+// skillDiscounts: { career: N, spec: N, cheap: 'knowledge' } | null. Запасы флажков — целые 0…8, иначе
+// обычные 3 и 2; cheap: 'knowledge' — все навыки Знаний со скидкой без флажка
+const USUAL_FLAGS = { career: 3, spec: 2 };
+const flagCount = (n, usual) => (Number.isInteger(n) && n >= 0 && n <= 8 ? n : usual);
+
+export function discountRules(race) {
+    const d = race?.skillDiscounts;
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return { ...USUAL_FLAGS, cheapKnowledge: false };
+    return { career: flagCount(d.career, USUAL_FLAGS.career), spec: flagCount(d.spec, USUAL_FLAGS.spec), cheapKnowledge: d.cheap === 'knowledge' };
+}
+
+export const isRaceCheap = (name, race) => discountRules(race).cheapKnowledge && isKnowledgeSkill(name);
+
 // Цена первого ранга — как в buySkillRank (character-generator.js)
-export const firstRankCost = (name, selectedCareerSkills) => (selectedCareerSkills.includes(name) ? 5 : 10);
+export const firstRankCost = (name, selectedCareerSkills, race = null) =>
+    skillRankCost(1, selectedCareerSkills.includes(name) || isRaceCheap(name, race));
 
 // Навык можно снять с выбора, пока поверх бесплатного ранга ничего не куплено
 export const canDropRaceSkill = (s, name) => !((s.skillRanks[name] || 0) > 1);
@@ -64,14 +79,14 @@ export const canDropRaceSkill = (s, name) => !((s.skillRanks[name] || 0) > 1);
 // Навыки становятся расовыми: без рангов — ранг 1; с купленными рангами — ранг остаётся, а цена
 // первого ранга возвращается (не больше потраченного). История «Отменить» очищается: отмена
 // сняла бы бесплатный ранг. Возвращает новые значения полей состояния, исходное не меняется
-export function grantRaceSkills(s, names) {
+export function grantRaceSkills(s, names, race = null) {
     const granted = known(names);
     const skillRanks = { ...s.skillRanks };
     let spent = s.xpData.spent;
     const entries = [];
     for (const name of granted) {
         if (!(skillRanks[name] > 0)) { skillRanks[name] = 1; continue; }
-        const refund = Math.min(firstRankCost(name, s.selectedCareerSkills), Math.max(0, spent));
+        const refund = Math.min(firstRankCost(name, s.selectedCareerSkills, race), Math.max(0, spent));
         if (refund > 0) { spent -= refund; entries.unshift(`+${refund} Расовый ранг: ${name}`); }
     }
     return {
@@ -88,7 +103,7 @@ export function grantRaceSkills(s, names) {
 // Дальше результат — как сохранение версии 6: ранги второй раз не начисляются. Остальное — как есть
 export function withRaceRanks(result, race) {
     if (!(result.fromVersion < 6)) return result;
-    return { ...result, save: { ...result.save, ...grantRaceSkills(result.save, raceBonus(race).fixed) }, fromVersion: 6 };
+    return { ...result, save: { ...result.save, ...grantRaceSkills(result.save, raceBonus(race).fixed, race) }, fromVersion: 6 };
 }
 
 // Новый выбор игрока. Снятый навык теряет бесплатный ранг (если поверх куплены ранги — отказ);
@@ -107,5 +122,5 @@ export function applyRaceChoice(s, race, next, context) {
     if (locked.length) return { ok: false, reason: 'locked', locked };
     const skillRanks = { ...s.skillRanks };
     for (const name of removed) if (!fixed.includes(name)) delete skillRanks[name];
-    return { ok: true, patch: { ...grantRaceSkills({ ...s, skillRanks }, added), xpHistory: [], raceSkills: picked } };
+    return { ok: true, patch: { ...grantRaceSkills({ ...s, skillRanks }, added, race), xpHistory: [], raceSkills: picked } };
 }

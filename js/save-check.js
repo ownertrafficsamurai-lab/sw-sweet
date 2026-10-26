@@ -9,7 +9,7 @@ import { STAT_ORDER } from './stat-info.js';
 import { migrateInventory, normalizeInventory } from './inventory.js';
 import { logEntryText, FORCE_RATING_MAX } from './hud-math.js';
 
-export const SESSION_VERSION = 7;
+export const SESSION_VERSION = 8;
 
 const isObject = v => typeof v === 'object' && v !== null && !Array.isArray(v);
 
@@ -41,7 +41,9 @@ export function migrateSession(s) {
     // Версия 6: выбранные расовые навыки. Бесплатные ранги старым сохранениям начисляет
     // loadSession — для этого нужен справочник рас
     if (!Array.isArray(s.raceSkills)) s.raceSkills = [];
-    // Версия 7: журнал XP — чистый текст (и в снимках «Отменить»); полей Судьбы нет
+    // Версия 7: журнал XP — чистый текст (и в снимках «Отменить»); полей Судьбы нет. Версия 8:
+    // флажки скидки специализации и расы — разницу XP старому цереанину возвращает upgradeSave
+    // (skill-discount.js), ему нужен справочник
     if (v < 7) {
         if (Array.isArray(s.xpLog)) s.xpLog = plainLog(s.xpLog);
         if (Array.isArray(s.xpHistory)) {
@@ -76,7 +78,8 @@ const STAT_MAX = 7;
 const RANK_MAX = 5;
 const LOG_MAX = 5;
 const HISTORY_MAX = 10;
-const CAREER_SKILLS_MAX = 3;
+// Навыки со скидкой: запасы карьеры и специализации у расы — каждый не больше 8 (race-skills.js discountRules)
+const CAREER_SKILLS_MAX = 16;
 const CRITS_MAX = 4;
 // Границы размера (подпроект 4б): персонаж лежит в общей базе. Длины — в знаках, как maxlength
 // полей ввода; те же числа стоят у полей и кнопок добавления

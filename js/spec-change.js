@@ -32,14 +32,6 @@ export function resetForSpecChange(s, nodes) {
     };
 }
 
-// Три навыка со скидкой (selectedCareerSkills) выбираются из карьерных: при смене карьеры
-// остаются только те, что есть и у новой, — иначе скидку получал бы некарьерный навык, а место
-// из трёх было бы занято навыком без галочки на листе
-export function keptCareerSkills(selected, careerSkills) {
-    const allowed = new Set(careerSkills || []);
-    return selected.filter(name => allowed.has(name));
-}
-
 // Текст подтверждения. kind: 'spec' — замена основной, 'career' — смена карьеры (вместе с
 // основной), 'spec2' — замена второй, 'spec2-remove' — удаление второй
 export function specChangeMessage({ kind, careerName, specName, oldSpecName, count, xp }) {

@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { showAlert, showConfirm, showToast } from './ui-utils.js';
 import { updateAvatarUI } from './avatar.js';
 import { updateSpecsAndUI, updateForceTabs, updateSpec2Tab, updateMorality, updateGeneratorUI } from './character-generator.js';
-import { withRaceRanks } from './race-skills.js';
+import { upgradeSave } from './skill-discount.js';
 import { initTalentTree } from './talent-tree.js';
 import { renderObligations } from './obligations.js';
 import { renderInventory } from './inventory-equipment.js';
@@ -127,11 +127,11 @@ function applySave(s) {
 }
 
 // Результат checkSave (ok: true) → лист. Сохранение до версии 6: фиксированные расовые навыки
-// получают ранг 1 или возврат цены первого ранга — один раз (race-skills.js withRaceRanks;
-// вызывающий сразу пишет персонажа в базу). Возвращает true, если ранги начислены. Пока лист
-// заполняется, правки не сохраняются
+// получают ранг 1 или возврат цены первого ранга; старый цереанин — разницу XP за Знания; флажки
+// скидки обрезаются до допустимых — skill-discount.js upgradeSave (вызывающий сразу пишет персонажа
+// в базу). Возвращает true, если сохранение изменилось. Пока лист заполняется, правки не сохраняются
 export function showSave(result) {
-    const ready = withRaceRanks(result, raceOf(result.save));
+    const ready = upgradeSave(result, raceOf(result.save), skillListsOf(result.save));
     state.isSaveReady = false;
     try {
         applySave(ready.save);
@@ -144,6 +144,13 @@ export function showSave(result) {
 
 // Раса сохранения из справочника; нет такой — null
 export const raceOf = save => state.db.races.find(r => r.id === save.raceVal) ?? null;
+
+// Карьерные навыки карьеры и бонусные навыки основной специализации сохранения — для флажков скидки
+export function skillListsOf(save) {
+    const career = state.db.careers.find(c => c.id === save.careerVal);
+    const spec = career?.specializations.find(s => s.id === save.specVal);
+    return { careerSkills: career?.careerSkills ?? [], specSkills: spec?.bonusSkills ?? [] };
+}
 
 export function startNewSession() {
     showConfirm("Начать новую сессию?\n\nРаны, Усталость и использованные таланты будут сброшены. Прокачка и XP сохранятся.", () => {
